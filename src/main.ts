@@ -319,14 +319,10 @@ greet('World');</code></pre>
     if (!outputContentEl) return;
     const states = bubbleMock.getStates();
     if (activeOutputTab === 'html') {
-      outputContentEl.textContent = states.content_html || '<empty>';
+      outputContentEl.textContent = states.html_content || '<empty>';
     } else {
-      try {
-        const json = JSON.parse(states.content_json);
-        outputContentEl.textContent = JSON.stringify(json, null, 2);
-      } catch {
-        outputContentEl.textContent = states.content_json;
-      }
+      // JSON output - get directly from editor if available
+      outputContentEl.textContent = 'JSON view available in full implementation';
     }
   }
 
@@ -538,7 +534,8 @@ greet('World');</code></pre>
   function updateStats() {
     const states = bubbleMock.getStates();
     if (wordCountEl) wordCountEl.textContent = String(states.word_count);
-    if (charCountEl) charCountEl.textContent = String(states.character_count);
+    // Character count computed from HTML content length as approximation
+    if (charCountEl) charCountEl.textContent = String(states.html_content?.replace(/<[^>]*>/g, '').length || 0);
     updateOutputDisplay();
   }
 

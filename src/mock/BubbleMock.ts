@@ -39,11 +39,12 @@ export interface BubbleProperties {
 }
 
 export interface BubbleStates {
-  content_html: string;
-  content_json: string;
+  html_content: string;
   is_empty: boolean;
   word_count: number;
-  character_count: number;
+  // Optional states (uncomment and add to Bubble if needed):
+  // json_content: string;
+  // character_count: number;
 }
 
 export type BubbleEventName = 
@@ -110,13 +111,11 @@ export class BubbleMock {
       border_radius: 8,
     };
 
-    // Initialize states
+    // Initialize states (must match Bubble plugin states)
     this.states = {
-      content_html: '',
-      content_json: '{}',
+      html_content: '',
       is_empty: true,
       word_count: 0,
-      character_count: 0,
     };
   }
 

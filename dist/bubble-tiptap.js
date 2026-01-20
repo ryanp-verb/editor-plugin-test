@@ -33765,7 +33765,7 @@ class kS {
   syncStatesToBubble() {
     if (!this.editor) return;
     const e = this.editor.getStats();
-    this.bubble.publishState("content_html", this.editor.getHTML()), this.bubble.publishState("content_json", JSON.stringify(this.editor.getJSON())), this.bubble.publishState("is_empty", e.isEmpty), this.bubble.publishState("word_count", e.wordCount), this.bubble.publishState("character_count", e.characterCount);
+    this.bubble.publishState("html_content", this.editor.getHTML()), this.bubble.publishState("is_empty", e.isEmpty), this.bubble.publishState("word_count", e.wordCount);
   }
   handlePropertyChanges(e) {
     var r, i, o;
@@ -34863,11 +34863,9 @@ class SS {
       font_size: 16,
       border_radius: 8
     }, this.states = {
-      content_html: "",
-      content_json: "{}",
+      html_content: "",
       is_empty: !0,
-      word_count: 0,
-      character_count: 0
+      word_count: 0
     };
   }
   // --- Property Management ---
@@ -35117,15 +35115,7 @@ greet('World');</code></pre>
   function R() {
     if (!w) return;
     const T = me.getStates();
-    if (f === "html")
-      w.textContent = T.content_html || "<empty>";
-    else
-      try {
-        const Y = JSON.parse(T.content_json);
-        w.textContent = JSON.stringify(Y, null, 2);
-      } catch {
-        w.textContent = T.content_json;
-      }
+    f === "html" ? w.textContent = T.html_content || "<empty>" : w.textContent = "JSON view available in full implementation";
   }
   const P = document.getElementById("event-log");
   function V(T) {
@@ -35281,8 +35271,9 @@ greet('World');</code></pre>
     }
   }, 100);
   function ie() {
+    var Y;
     const T = me.getStates();
-    e && (e.textContent = String(T.word_count)), t && (t.textContent = String(T.character_count)), R();
+    e && (e.textContent = String(T.word_count)), t && (t.textContent = String(((Y = T.html_content) == null ? void 0 : Y.replace(/<[^>]*>/g, "").length) || 0)), R();
   }
   setInterval(ie, 200), ie(), console.log("🚀 TipTap Editor Demo initialized"), console.log("📝 Click the sidebar toggle in the toolbar to expand tools"), console.log("🔍 Access bubble mock via: window.bubbleMock"), window.bubbleMock = me, window.bubbleElement = p;
 }

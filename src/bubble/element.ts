@@ -155,11 +155,14 @@ export class BubbleElement {
     const stats = this.editor.getStats();
     
     // Bubble uses individual publishState calls, not batch
-    this.bubble.publishState('content_html', this.editor.getHTML());
-    this.bubble.publishState('content_json', JSON.stringify(this.editor.getJSON()));
+    // State names must match what's defined in Bubble plugin
+    this.bubble.publishState('html_content', this.editor.getHTML());
     this.bubble.publishState('is_empty', stats.isEmpty);
     this.bubble.publishState('word_count', stats.wordCount);
-    this.bubble.publishState('character_count', stats.characterCount);
+    
+    // Only publish these if defined in Bubble:
+    // this.bubble.publishState('json_content', JSON.stringify(this.editor.getJSON()));
+    // this.bubble.publishState('character_count', stats.characterCount);
   }
 
   private handlePropertyChanges(changes: Partial<BubbleProperties>): void {
