@@ -8,7 +8,6 @@ import './styles/design-tokens.css';
 import './styles/editor.css';
 import './styles/sidebar.css';
 import { BubbleElement } from './bubble/element';
-import { Sidebar } from './editor/Sidebar';
 import { bubbleMock, EventLogEntry } from './mock/BubbleMock';
 
 // Initialize when DOM is ready
@@ -21,7 +20,6 @@ function initializeDemo() {
   const editorMount = document.getElementById('editor-mount');
   const wordCountEl = document.getElementById('word-count');
   const charCountEl = document.getElementById('char-count');
-  const appEl = document.querySelector('.app');
   
   // Modal elements
   const modalOverlay = document.getElementById('modal-settings');
@@ -34,33 +32,9 @@ function initializeDemo() {
   }
 
   // --- Sidebar Toggle ---
-  let sidebarExpanded = false;
-  let sidebar: Sidebar | null = null;
-  const sidebarContainer = document.getElementById('tools-sidebar');
-  
-  function toggleSidebar() {
-    sidebarExpanded = !sidebarExpanded;
-    appEl?.classList.toggle('expanded', sidebarExpanded);
-    bubbleElement.setSidebarExpanded(sidebarExpanded);
-    
-    // Create sidebar on first expand
-    if (sidebarExpanded && !sidebar && sidebarContainer) {
-      const editor = bubbleElement.getEditor();
-      if (editor) {
-        // Clear old HTML content
-        sidebarContainer.innerHTML = '';
-        
-        // Create new sidebar component
-        sidebar = new Sidebar({
-          editor,
-          container: sidebarContainer,
-          onCollapse: () => toggleSidebar(),
-        });
-      }
-    }
-    
-    updateToolButtonStates();
-  }
+  // Sidebar is now managed internally by BubbleElement
+  // The demo's external sidebar container is no longer used
+  void 0; // Placeholder to avoid empty block
 
   // --- Collapsible Sections (for new sidebar) ---
   document.addEventListener('click', (e) => {
@@ -104,9 +78,8 @@ function initializeDemo() {
   });
 
   bubbleElement.initialize();
-
-  // Connect sidebar toggle from toolbar
-  bubbleElement.onToggleSidebar(toggleSidebar);
+  
+  // Sidebar toggle is now handled internally by BubbleElement
 
   // Track active output tab
   let activeOutputTab: 'html' | 'json' = 'html';

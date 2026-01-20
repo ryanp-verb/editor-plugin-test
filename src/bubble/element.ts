@@ -1,5 +1,6 @@
 import { ContentEditor } from '../editor/Editor';
 import { Toolbar } from '../editor/Toolbar';
+import { Sidebar } from '../editor/Sidebar';
 import { BubbleMock, BubbleProperties } from '../mock/BubbleMock';
 import { EventBridge } from './events';
 import { ActionHandler } from './actions';
@@ -24,12 +25,13 @@ export class BubbleElement {
   private bubble: BubbleMock;
   private editor: ContentEditor | null = null;
   private toolbar: Toolbar | null = null;
+  private sidebar: Sidebar | null = null;
+  private sidebarExpanded = false;
   private eventBridge: EventBridge;
   private actionHandler: ActionHandler | null = null;
   private editorWrapper: HTMLElement | null = null;
   private unsubscribeProps: (() => void) | null = null;
   private unsubscribeSystemTheme: (() => void) | null = null;
-  private onToggleSidebarCallback: (() => void) | null = null;
 
   constructor(config: BubbleElementConfig) {
     this.container = config.container;
@@ -69,12 +71,20 @@ export class BubbleElement {
     this.toolbar = new Toolbar({
       editor: this.editor,
       container: this.editorWrapper,
-      onToggleSidebar: () => this.onToggleSidebarCallback?.(),
+      onToggleSidebar: () => this.toggleSidebar(),
     });
 
     if (!props.toolbar_visible) {
       this.toolbar.hide();
     }
+
+    // Initialize sidebar (hidden by default)
+    this.sidebar = new Sidebar({
+      editor: this.editor,
+      container: this.editorWrapper,
+      onCollapse: () => this.toggleSidebar(),
+    });
+    this.sidebar.hide();
 
     // Setup action handler
     this.actionHandler = new ActionHandler(this.editor, this.bubble);
@@ -232,17 +242,29 @@ export class BubbleElement {
   }
 
   /**
-   * Set callback for sidebar toggle
+   * Toggle sidebar visibility
    */
-  onToggleSidebar(callback: () => void): void {
-    this.onToggleSidebarCallback = callback;
+  toggleSidebar(): void {
+    this.sidebarExpanded = !this.sidebarExpanded;
+    
+    if (this.sidebarExpanded) {
+      this.sidebar?.show();
+      this.toolbar?.hide();
+    } else {
+      this.sidebar?.hide();
+      this.toolbar?.show();
+    }
+    
+    this.toolbar?.setSidebarExpanded(this.sidebarExpanded);
   }
 
   /**
-   * Update the toolbar's sidebar button state
+   * Set sidebar expanded state
    */
   setSidebarExpanded(expanded: boolean): void {
-    this.toolbar?.setSidebarExpanded(expanded);
+    if (this.sidebarExpanded !== expanded) {
+      this.toggleSidebar();
+    }
   }
 
   /**
@@ -254,6 +276,7 @@ export class BubbleElement {
     this.actionHandler?.destroy();
     this.eventBridge.destroy();
     this.toolbar?.destroy();
+    this.sidebar?.destroy();
     this.editor?.destroy();
     
     if (this.editorWrapper) {
