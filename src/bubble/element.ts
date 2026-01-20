@@ -45,9 +45,18 @@ export class BubbleElement {
   initialize(): void {
     const props = this.bubble.getProperties();
     
-    // Create wrapper structure
+    // Make container a flex layout for editor + sidebar
+    this.container.style.display = 'flex';
+    this.container.style.flexDirection = 'row';
+    this.container.style.height = '100%';
+    this.container.style.overflow = 'hidden';
+    
+    // Create editor wrapper (will flex to fill available space)
     this.editorWrapper = document.createElement('div');
     this.editorWrapper.className = 'bubble-editor-wrapper';
+    this.editorWrapper.style.flex = '1';
+    this.editorWrapper.style.minWidth = '0'; // Allow flex shrinking
+    this.editorWrapper.style.overflow = 'hidden';
     this.container.appendChild(this.editorWrapper);
 
     // Create content area
@@ -78,10 +87,10 @@ export class BubbleElement {
       this.toolbar.hide();
     }
 
-    // Initialize sidebar (hidden by default)
+    // Initialize sidebar (appended to main container, not editor wrapper)
     this.sidebar = new Sidebar({
       editor: this.editor,
-      container: this.editorWrapper,
+      container: this.container, // Sidebar sits next to editor, not inside
       onCollapse: () => this.toggleSidebar(),
     });
     this.sidebar.hide();

@@ -13,10 +13,8 @@
    Sidebar Container
    ============================================ */
 .bp-sidebar {
-  position: absolute;
-  top: 0;
-  right: 0;
   width: 280px;
+  min-width: 280px;
   height: 100%;
   background: var(--sidebar-bg, #f5f5f2);
   font-family: var(--font-family-primary, 'bp Sans', system-ui, sans-serif);
@@ -26,8 +24,13 @@
   flex-direction: column;
   box-sizing: border-box;
   border-left: 1px solid var(--editor-border, #e0e0d8);
-  z-index: 100;
-  box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+
+/* Hidden state */
+.bp-sidebar[style*="display: none"] + .bubble-editor-wrapper,
+.bp-sidebar:not([style]) ~ .bubble-editor-wrapper {
+  /* Editor takes full width when sidebar hidden */
 }
 
 .bp-sidebar-scroll {

@@ -34704,7 +34704,7 @@ class wS {
    */
   initialize() {
     const e = this.bubble.getProperties();
-    this.editorWrapper = document.createElement("div"), this.editorWrapper.className = "bubble-editor-wrapper", this.container.appendChild(this.editorWrapper);
+    this.container.style.display = "flex", this.container.style.flexDirection = "row", this.container.style.height = "100%", this.container.style.overflow = "hidden", this.editorWrapper = document.createElement("div"), this.editorWrapper.className = "bubble-editor-wrapper", this.editorWrapper.style.flex = "1", this.editorWrapper.style.minWidth = "0", this.editorWrapper.style.overflow = "hidden", this.container.appendChild(this.editorWrapper);
     const t = document.createElement("div");
     t.className = "editor-content", this.editorWrapper.appendChild(t), this.editor = new lS({
       element: t,
@@ -34721,7 +34721,8 @@ class wS {
       onToggleSidebar: () => this.toggleSidebar()
     }), e.toolbar_visible || this.toolbar.hide(), this.sidebar = new yS({
       editor: this.editor,
-      container: this.editorWrapper,
+      container: this.container,
+      // Sidebar sits next to editor, not inside
       onCollapse: () => this.toggleSidebar()
     }), this.sidebar.hide(), this.actionHandler = new kS(this.editor, this.bubble), this.unsubscribeProps = this.bubble.onPropertyChange((r) => {
       this.handlePropertyChanges(r);
