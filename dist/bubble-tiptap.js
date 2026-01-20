@@ -33765,13 +33765,7 @@ class kS {
   syncStatesToBubble() {
     if (!this.editor) return;
     const e = this.editor.getStats();
-    this.bubble.publishStates({
-      content_html: this.editor.getHTML(),
-      content_json: JSON.stringify(this.editor.getJSON()),
-      is_empty: e.isEmpty,
-      word_count: e.wordCount,
-      character_count: e.characterCount
-    });
+    this.bubble.publishState("content_html", this.editor.getHTML()), this.bubble.publishState("content_json", JSON.stringify(this.editor.getJSON())), this.bubble.publishState("is_empty", e.isEmpty), this.bubble.publishState("word_count", e.wordCount), this.bubble.publishState("character_count", e.characterCount);
   }
   handlePropertyChanges(e) {
     var r, i, o;

@@ -154,13 +154,12 @@ export class BubbleElement {
 
     const stats = this.editor.getStats();
     
-    this.bubble.publishStates({
-      content_html: this.editor.getHTML(),
-      content_json: JSON.stringify(this.editor.getJSON()),
-      is_empty: stats.isEmpty,
-      word_count: stats.wordCount,
-      character_count: stats.characterCount,
-    });
+    // Bubble uses individual publishState calls, not batch
+    this.bubble.publishState('content_html', this.editor.getHTML());
+    this.bubble.publishState('content_json', JSON.stringify(this.editor.getJSON()));
+    this.bubble.publishState('is_empty', stats.isEmpty);
+    this.bubble.publishState('word_count', stats.wordCount);
+    this.bubble.publishState('character_count', stats.characterCount);
   }
 
   private handlePropertyChanges(changes: Partial<BubbleProperties>): void {
