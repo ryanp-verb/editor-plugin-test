@@ -48,8 +48,8 @@ export interface BubbleStates {
 
 export type BubbleEventName = 
   | 'content_changed'
-  | 'editor_focus'
-  | 'editor_blur'
+  | 'editor_focused'
+  | 'editor_blurred'
   | 'image_uploaded';
 
 export type BubbleActionName = 

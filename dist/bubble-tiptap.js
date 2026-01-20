@@ -33757,10 +33757,10 @@ class kS {
     });
   }
   handleEditorFocus() {
-    this.eventBridge.trigger("editor_focus");
+    this.eventBridge.trigger("editor_focused");
   }
   handleEditorBlur() {
-    this.eventBridge.trigger("editor_blur");
+    this.eventBridge.trigger("editor_blurred");
   }
   syncStatesToBubble() {
     if (!this.editor) return;

@@ -142,11 +142,11 @@ export class BubbleElement {
   }
 
   private handleEditorFocus(): void {
-    this.eventBridge.trigger('editor_focus');
+    this.eventBridge.trigger('editor_focused');
   }
 
   private handleEditorBlur(): void {
-    this.eventBridge.trigger('editor_blur');
+    this.eventBridge.trigger('editor_blurred');
   }
 
   private syncStatesToBubble(): void {
