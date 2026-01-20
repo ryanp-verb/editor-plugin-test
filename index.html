@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TipTap Editor - Bubble Plugin Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* BP Brand Colors */
+      --brand-primary: #007f00;
+      --brand-light-1: #8edf00;
+      --brand-light-2: #ccff00;
+      --brand-dark-1: #004f00;
+      
+      /* Neutrals */
+      --color-bg: #f5f5f2;
+      --color-surface: #ffffff;
+      --color-surface-elevated: #f5f5f2;
+      --color-border: #c9cbbe;
+      --color-border-subtle: #e1e3d6;
+      --color-text: #121000;
+      --color-text-muted: #494736;
+      --color-accent: var(--brand-primary);
+      --color-accent-hover: var(--brand-dark-1);
+      --color-success: #22c55e;
+      --color-warning: #f59e0b;
+      
+      /* Spacing */
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --font-sans: 'bp Sans', 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Light theme is default */
+    body.theme-dark {
+      --color-bg: #0f1117;
+      --color-surface: #1a1d27;
+      --color-surface-elevated: #242836;
+      --color-border: #2e3345;
+      --color-border-subtle: #252938;
+      --color-text: #e4e6ed;
+      --color-text-muted: #8b8fa3;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .app.expanded {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .app.expanded header {
+      grid-column: 1 / -1;
+    }
+
+    .app.expanded .main-content {
+      overflow-y: auto;
+      height: 100%;
+    }
+
+    .app.expanded .sidebar {
+      display: flex;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .app.expanded .editor-toolbar {
+      display: none;
+    }
+
+    header {
+      background: var(--color-surface);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-light-1));
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: white;
+    }
+
+    .logo h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .logo span {
+      color: var(--color-text-muted);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-stats {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding-right: 16px;
+      border-right: 1px solid var(--color-border);
+      margin-right: 4px;
+    }
+
+    .header-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+
+    .header-stat strong {
+      color: var(--color-text);
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .header-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: var(--color-surface-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .header-btn:hover {
+      background: var(--color-border);
+      color: var(--color-text);
+    }
+
+    .header-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--brand-light-1);
+      padding: 8px 14px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--brand-primary);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+      min-height: 0; /* Important for flexbox/grid children to respect overflow */
+    }
+
+    .editor-container {
+      background: var(--color-surface);
+      border-radius: var(--editor-container-radius, var(--radius-lg));
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    #editor-mount {
+      /* Editor wrapper handles its own sizing */
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      width: 90%;
+      max-width: 560px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      transform: scale(0.95) translateY(10px);
+      transition: transform 0.2s ease;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-overlay.open .modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .modal-close:hover {
+      background: var(--color-surface-elevated);
+      color: var(--color-text);
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .modal-section {
+      margin-bottom: 24px;
+    }
+
+    .modal-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .modal-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+      margin-bottom: 14px;
+    }
+
+    .control-group {
+      margin-bottom: 14px;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-label {
+      display: block;
+      font-size: 13px;
+      color: var(--color-text-muted);
+      margin-bottom: 6px;
+    }
+
+    .control-input {
+      width: 100%;
+      background: var(--color-surface-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--color-text);
+      font-family: var(--font-sans);
+      transition: border-color 0.15s;
+    }
+
+    .control-input:focus {
+      outline: none;
+      border-color: var(--color-accent);
+    }
+
+    .control-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .control-checkbox input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-accent);
+    }
+
+    .control-checkbox span {
+      font-size: 13px;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .color-input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .color-input {
+      width: 40px;
+      height: 36px;
+      padding: 2px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface-elevated);
+      cursor: pointer;
+    }
+
+    .color-input-full {
+      width: 100%;
+      height: 36px;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: var(--color-surface-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font-sans);
+    }
+
+    .action-btn:hover {
+      background: var(--color-border);
+      border-color: var(--color-border);
+    }
+
+    .action-btn.primary {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: white;
+    }
+
+    .action-btn.primary:hover {
+      background: var(--color-accent-hover);
+      border-color: var(--color-accent-hover);
+    }
+
+    .output-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .output-tab {
+      background: transparent;
+      border: none;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans);
+      transition: all 0.15s;
+    }
+
+    .output-tab:hover {
+      color: var(--color-text);
+    }
+
+    .output-tab.active {
+      background: var(--color-surface-elevated);
+      color: var(--color-text);
+    }
+
+    .output-content {
+      background: var(--color-bg);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-muted);
+      max-height: 120px;
+      overflow-y: auto;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .event-log {
+      background: var(--color-bg);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .event-item {
+      padding: 6px 0;
+      border-bottom: 1px solid var(--color-border-subtle);
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .event-item:last-child {
+      border-bottom: none;
+    }
+
+    .event-time {
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+    }
+
+    .event-name {
+      color: var(--color-accent);
+    }
+
+    .event-data {
+      color: var(--color-text-muted);
+      word-break: break-all;
+    }
+
+    .empty-state {
+      color: var(--color-text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .help-text {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    .color-hint {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      align-self: center;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      border-left: 1px solid var(--color-border-subtle, #c9cbbe);
+      box-sizing: border-box;
+      min-height: 0; /* Important for grid children to respect overflow */
+    }
+
+    .sidebar-section {
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .sidebar-section:last-child {
+      border-bottom: none;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .sidebar-header:hover {
+      background: var(--color-surface-elevated);
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+    }
+
+    .sidebar-chevron {
+      width: 16px;
+      height: 16px;
+      color: var(--color-text-muted);
+      transition: transform 0.2s ease;
+    }
+
+    .sidebar-section.collapsed .sidebar-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .sidebar-content {
+      padding: 0 20px 20px;
+      display: block;
+    }
+
+    .sidebar-section.collapsed .sidebar-content {
+      display: none;
+    }
+
+    /* Toggle button active state */
+    .header-btn.active {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: white;
+    }
+
+    .header-btn.active:hover {
+      background: var(--color-accent-hover);
+      border-color: var(--color-accent-hover);
+    }
+
+    /* Tool Buttons in Sidebar */
+    .tool-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .tool-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--color-surface-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text-muted);
+      font-size: 12px;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+    }
+
+    .tool-btn:hover {
+      background: var(--color-border);
+      color: var(--color-text);
+    }
+
+    .tool-btn.active {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: white;
+    }
+
+    .tool-btn.draggable {
+      cursor: grab;
+    }
+
+    .tool-btn.draggable:active {
+      cursor: grabbing;
+    }
+
+    .tool-btn.dragging {
+      opacity: 0.5;
+    }
+
+    .tool-btn svg {
+      flex-shrink: 0;
+    }
+
+    .tool-btn span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Drag indicator for draggable buttons */
+    .tool-btn.draggable::after {
+      content: '⋮⋮';
+      font-size: 8px;
+      opacity: 0.4;
+      margin-left: auto;
+      letter-spacing: -2px;
+    }
+
+    .tool-btn.draggable:hover::after {
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">Ti</div>
+        <div>
+          <h1>TipTap Editor</h1>
+          <span>Bubble.io Plugin Demo</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="header-stats">
+          <div class="header-stat">
+            <strong id="word-count">0</strong>
+            <span>words</span>
+          </div>
+          <div class="header-stat">
+            <strong id="char-count">0</strong>
+            <span>chars</span>
+          </div>
+        </div>
+        <button class="header-btn" id="btn-settings" title="Settings">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+        <div class="status-badge">
+          <div class="status-dot"></div>
+          Local Dev
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="editor-container">
+        <div id="editor-mount"></div>
+      </div>
+    </main>
+
+    <!-- Tools Sidebar (visible in expanded mode) - populated by Sidebar.ts -->
+    <aside class="sidebar" id="tools-sidebar"></aside>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="modal-settings">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Editor Settings</h2>
+        <button class="modal-close" id="btn-close-settings">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Properties -->
+        <div class="modal-section">
+          <div class="modal-section-title">Properties</div>
+          <div class="control-group">
+            <label class="control-label">Placeholder Text</label>
+            <input type="text" class="control-input" id="prop-placeholder" value="Start writing something amazing...">
+          </div>
+          <div class="control-row">
+            <div class="control-group">
+              <label class="control-checkbox">
+                <input type="checkbox" id="prop-editable" checked>
+                <span>Editable</span>
+              </label>
+            </div>
+            <div class="control-group">
+              <label class="control-checkbox">
+                <input type="checkbox" id="prop-toolbar" checked>
+                <span>Show Toolbar</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Theme -->
+        <div class="modal-section">
+          <div class="modal-section-title">Theme</div>
+          <div class="control-row">
+            <div class="control-group">
+              <label class="control-label">Preset</label>
+              <select class="control-input" id="theme-preset">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+                <option value="auto">Auto (System)</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Font Family</label>
+              <select class="control-input" id="theme-font">
+                <option value="'DM Sans', system-ui, sans-serif">DM Sans</option>
+                <option value="'Inter', system-ui, sans-serif">Inter</option>
+                <option value="'Roboto', system-ui, sans-serif">Roboto</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="system-ui, sans-serif">System UI</option>
+              </select>
+            </div>
+          </div>
+          <div class="control-row">
+            <div class="control-group">
+              <label class="control-label">Accent Color</label>
+              <div class="color-input-group">
+                <input type="color" class="color-input" id="theme-accent" value="#6366f1">
+                <input type="text" class="control-input" id="theme-accent-text" value="#6366f1" style="flex: 1;">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Background</label>
+              <input type="color" class="color-input color-input-full" id="theme-background" value="#1a1d27">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">Icon Colors</label>
+            <div class="color-input-group">
+              <input type="color" class="color-input" id="theme-icon-color" value="#8b8fa3">
+              <input type="color" class="color-input" id="theme-icon-active" value="#e4e6ed">
+              <span class="color-hint">Default / Active</span>
+            </div>
+          </div>
+          <div class="control-row">
+            <div class="control-group">
+              <label class="control-label">Font Size: <span id="font-size-value">16</span>px</label>
+              <input type="range" id="theme-font-size" min="12" max="24" value="16" style="width: 100%;">
+            </div>
+            <div class="control-group">
+              <label class="control-label">Border Radius: <span id="radius-value">14</span>px</label>
+              <input type="range" id="theme-radius" min="0" max="24" value="14" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-section">
+          <div class="modal-section-title">Actions</div>
+          <div class="action-buttons">
+            <button class="action-btn" id="action-focus">Focus Editor</button>
+            <button class="action-btn" id="action-clear">Clear Content</button>
+            <button class="action-btn" id="action-insert-image">Insert Image</button>
+            <button class="action-btn primary" id="action-set-content">Load Sample</button>
+          </div>
+        </div>
+
+        <!-- Email Export -->
+        <div class="modal-section">
+          <div class="modal-section-title">Email Export</div>
+          <div class="action-buttons">
+            <button class="action-btn" id="action-copy-email">Copy Email HTML</button>
+            <button class="action-btn primary" id="action-download-email">Download .html</button>
+          </div>
+          <p class="help-text">
+            Exports Outlook-safe HTML with responsive columns that stack on mobile.
+          </p>
+        </div>
+
+        <!-- Output -->
+        <div class="modal-section">
+          <div class="modal-section-title">Output Preview</div>
+          <div class="output-tabs">
+            <button class="output-tab active" data-tab="html">HTML</button>
+            <button class="output-tab" data-tab="json">JSON</button>
+          </div>
+          <div class="output-content" id="output-content">
+            <span class="empty-state">Editor content will appear here</span>
+          </div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="modal-section">
+          <div class="modal-section-title">Event Log</div>
+          <div class="event-log" id="event-log">
+            <div class="empty-state">Events will appear here</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

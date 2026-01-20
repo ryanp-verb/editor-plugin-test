@@ -1,0 +1,266 @@
+import { ContentEditor } from '../editor/Editor';
+import { Toolbar } from '../editor/Toolbar';
+import { BubbleMock, BubbleProperties } from '../mock/BubbleMock';
+import { EventBridge } from './events';
+import { ActionHandler } from './actions';
+import { applyTheme, watchSystemTheme, ThemeProperties } from '../utils/themeApplier';
+
+export interface BubbleElementConfig {
+  container: HTMLElement;
+  bubble: BubbleMock;
+}
+
+/**
+ * BubbleElement - The main integration layer between the TipTap editor and Bubble.io
+ * 
+ * This class:
+ * - Creates and manages the editor instance
+ * - Syncs Bubble properties to editor config
+ * - Publishes editor state back to Bubble
+ * - Routes events and actions between Bubble and the editor
+ */
+export class BubbleElement {
+  private container: HTMLElement;
+  private bubble: BubbleMock;
+  private editor: ContentEditor | null = null;
+  private toolbar: Toolbar | null = null;
+  private eventBridge: EventBridge;
+  private actionHandler: ActionHandler | null = null;
+  private editorWrapper: HTMLElement | null = null;
+  private unsubscribeProps: (() => void) | null = null;
+  private unsubscribeSystemTheme: (() => void) | null = null;
+  private onToggleSidebarCallback: (() => void) | null = null;
+
+  constructor(config: BubbleElementConfig) {
+    this.container = config.container;
+    this.bubble = config.bubble;
+    this.eventBridge = new EventBridge(this.bubble);
+  }
+
+  /**
+   * Initialize the editor element
+   */
+  initialize(): void {
+    const props = this.bubble.getProperties();
+    
+    // Create wrapper structure
+    this.editorWrapper = document.createElement('div');
+    this.editorWrapper.className = 'bubble-editor-wrapper';
+    this.container.appendChild(this.editorWrapper);
+
+    // Create content area
+    const contentArea = document.createElement('div');
+    contentArea.className = 'editor-content';
+    this.editorWrapper.appendChild(contentArea);
+
+    // Initialize editor
+    this.editor = new ContentEditor({
+      element: contentArea,
+      placeholder: props.placeholder,
+      content: props.initial_content || '',
+      editable: props.editable,
+      onUpdate: () => this.handleEditorUpdate(),
+      onFocus: () => this.handleEditorFocus(),
+      onBlur: () => this.handleEditorBlur(),
+      onCreate: () => this.handleEditorCreate(),
+    });
+
+    // Initialize toolbar
+    this.toolbar = new Toolbar({
+      editor: this.editor,
+      container: this.editorWrapper,
+      onToggleSidebar: () => this.onToggleSidebarCallback?.(),
+    });
+
+    if (!props.toolbar_visible) {
+      this.toolbar.hide();
+    }
+
+    // Setup action handler
+    this.actionHandler = new ActionHandler(this.editor, this.bubble);
+
+    // Listen for property changes
+    this.unsubscribeProps = this.bubble.onPropertyChange((changes) => {
+      this.handlePropertyChanges(changes);
+    });
+
+    // Apply initial styles
+    this.applyDimensionStyles(props);
+    
+    // Apply theme
+    this.applyThemeFromProps(props);
+    
+    // Watch for system theme changes if using auto mode
+    if (props.theme === 'auto') {
+      this.unsubscribeSystemTheme = watchSystemTheme(() => {
+        this.applyThemeFromProps(this.bubble.getProperties());
+      });
+    }
+  }
+  
+  private applyThemeFromProps(props: BubbleProperties): void {
+    if (!this.editorWrapper) return;
+    
+    const themeProps: Partial<ThemeProperties> = {
+      theme: props.theme,
+      // Brand colors (can be customized per-app)
+      brand_primary: props.brand_primary || props.accent_color,
+      brand_light_1: props.brand_light_1,
+      brand_light_2: props.brand_light_2,
+      brand_dark_1: props.brand_dark_1,
+      // Legacy accent (maps to brand_primary)
+      accent_color: props.accent_color,
+      background_color: props.background_color,
+      toolbar_background: props.toolbar_background,
+      text_color: props.text_color,
+      text_muted_color: props.text_muted_color,
+      border_color: props.border_color,
+      icon_color: props.icon_color,
+      icon_active_color: props.icon_active_color,
+      font_family: props.font_family,
+      font_size: props.font_size,
+      border_radius: props.border_radius,
+    };
+    
+    applyTheme(this.editorWrapper, themeProps);
+  }
+
+  private handleEditorCreate(): void {
+    // Publish initial state
+    this.syncStatesToBubble();
+  }
+
+  private handleEditorUpdate(): void {
+    // Sync states
+    this.syncStatesToBubble();
+    
+    // Trigger content_changed event (debounced)
+    this.eventBridge.triggerDebounced('content_changed', {
+      html: this.editor?.getHTML(),
+      isEmpty: this.editor?.isEmpty(),
+    });
+  }
+
+  private handleEditorFocus(): void {
+    this.eventBridge.trigger('editor_focus');
+  }
+
+  private handleEditorBlur(): void {
+    this.eventBridge.trigger('editor_blur');
+  }
+
+  private syncStatesToBubble(): void {
+    if (!this.editor) return;
+
+    const stats = this.editor.getStats();
+    
+    this.bubble.publishStates({
+      content_html: this.editor.getHTML(),
+      content_json: JSON.stringify(this.editor.getJSON()),
+      is_empty: stats.isEmpty,
+      word_count: stats.wordCount,
+      character_count: stats.characterCount,
+    });
+  }
+
+  private handlePropertyChanges(changes: Partial<BubbleProperties>): void {
+    if (!this.editor) return;
+
+    if ('editable' in changes && changes.editable !== undefined) {
+      this.editor.setEditable(changes.editable);
+    }
+
+    if ('toolbar_visible' in changes && changes.toolbar_visible !== undefined) {
+      if (changes.toolbar_visible) {
+        this.toolbar?.show();
+      } else {
+        this.toolbar?.hide();
+      }
+    }
+
+    if ('min_height' in changes || 'max_height' in changes) {
+      this.applyDimensionStyles(this.bubble.getProperties());
+    }
+
+    // Handle theme property changes
+    const themeProps = [
+      'theme', 'accent_color', 'background_color', 'toolbar_background',
+      'text_color', 'text_muted_color', 'border_color', 'icon_color',
+      'icon_active_color', 'font_family', 'font_size', 'border_radius'
+    ];
+    
+    if (themeProps.some(prop => prop in changes)) {
+      this.applyThemeFromProps(this.bubble.getProperties());
+      
+      // Update system theme watcher if theme mode changed
+      if ('theme' in changes) {
+        this.unsubscribeSystemTheme?.();
+        this.unsubscribeSystemTheme = null;
+        
+        if (changes.theme === 'auto') {
+          this.unsubscribeSystemTheme = watchSystemTheme(() => {
+            this.applyThemeFromProps(this.bubble.getProperties());
+          });
+        }
+      }
+    }
+  }
+
+  private applyDimensionStyles(props: BubbleProperties): void {
+    if (!this.editorWrapper) return;
+    
+    this.editorWrapper.style.minHeight = `${props.min_height}px`;
+    if (props.max_height > 0) {
+      this.editorWrapper.style.maxHeight = `${props.max_height}px`;
+    }
+  }
+
+  /**
+   * Get the editor instance (for external access if needed)
+   */
+  getEditor(): ContentEditor | null {
+    return this.editor;
+  }
+
+  /**
+   * Get the toolbar instance
+   */
+  getToolbar(): Toolbar | null {
+    return this.toolbar;
+  }
+
+  /**
+   * Set callback for sidebar toggle
+   */
+  onToggleSidebar(callback: () => void): void {
+    this.onToggleSidebarCallback = callback;
+  }
+
+  /**
+   * Update the toolbar's sidebar button state
+   */
+  setSidebarExpanded(expanded: boolean): void {
+    this.toolbar?.setSidebarExpanded(expanded);
+  }
+
+  /**
+   * Destroy the element and clean up
+   */
+  destroy(): void {
+    this.unsubscribeProps?.();
+    this.unsubscribeSystemTheme?.();
+    this.actionHandler?.destroy();
+    this.eventBridge.destroy();
+    this.toolbar?.destroy();
+    this.editor?.destroy();
+    
+    if (this.editorWrapper) {
+      this.editorWrapper.remove();
+      this.editorWrapper = null;
+    }
+
+    this.editor = null;
+    this.toolbar = null;
+    this.actionHandler = null;
+  }
+}

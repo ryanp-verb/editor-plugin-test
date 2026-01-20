@@ -1,0 +1,805 @@
+/* ============================================
+   TipTap Editor Styles for Bubble.io Plugin
+   ============================================ */
+
+/* CSS Variables for Theming */
+:root {
+  /* Colors - These are defaults, overridden by theme applier */
+  --editor-bg: #1a1d27;
+  --editor-bg-elevated: #242836;
+  --editor-border: #2e3345;
+  --editor-border-subtle: #252938;
+  --editor-text: #e4e6ed;
+  --editor-text-muted: #8b8fa3;
+  --editor-accent: #6366f1;
+  --editor-accent-hover: #818cf8;
+  --editor-accent-muted: rgba(99, 102, 241, 0.4);
+  --editor-selection: rgba(99, 102, 241, 0.25);
+  
+  /* Toolbar */
+  --toolbar-bg: #1e2230;
+  --toolbar-btn-hover: #2e3345;
+  --toolbar-btn-active: #3d4259;
+  --toolbar-separator: #2e3345;
+  --toolbar-icon-color: #8b8fa3;
+  --toolbar-icon-active: #e4e6ed;
+  
+  /* Code */
+  --code-bg: #0f1117;
+  --code-border: #252938;
+  
+  /* Spacing */
+  --editor-padding: 24px;
+  --toolbar-padding: 8px 12px;
+  
+  /* Borders */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  
+  /* Typography */
+  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ============================================
+   Editor Wrapper
+   ============================================ */
+.bubble-editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  background: var(--editor-bg);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Focus ring overlay */
+.bubble-editor-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  pointer-events: none;
+  z-index: 100;
+  transition: box-shadow 0.15s ease;
+}
+
+/* ============================================
+   Toolbar Styles
+   ============================================ */
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--toolbar-padding);
+  background: var(--toolbar-bg);
+  border-bottom: 1px solid var(--editor-border);
+  flex-wrap: wrap;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 24px;
+  background: var(--toolbar-separator);
+  margin: 0 6px;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--toolbar-icon-color, var(--editor-text-muted));
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toolbar-btn:hover {
+  background: var(--toolbar-btn-hover, #8EDF00);
+  color: var(--toolbar-btn-hover-icon, #007F00);
+}
+
+.toolbar-btn:active {
+  transform: scale(0.95);
+}
+
+.toolbar-btn.active {
+  background: var(--toolbar-btn-active, #004F00);
+  color: var(--toolbar-btn-active-icon, #CCFF00);
+}
+
+.toolbar-btn.active:hover {
+  background: var(--toolbar-btn-active, #004F00);
+  color: var(--toolbar-btn-active-icon, #CCFF00);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toolbar-btn:disabled:hover {
+  background: transparent;
+  color: var(--editor-text-muted);
+}
+
+.toolbar-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Draggable buttons */
+.toolbar-btn.draggable {
+  cursor: grab;
+  position: relative;
+}
+
+.toolbar-btn.draggable::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.3;
+  border-radius: 1px;
+}
+
+.toolbar-btn.draggable:hover::after {
+  opacity: 0.6;
+}
+
+.toolbar-btn.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+/* Drop indicator */
+.editor-drop-indicator {
+  position: absolute;
+  height: 3px;
+  background: var(--editor-accent);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 100;
+  display: none;
+  box-shadow: 0 0 8px var(--editor-accent);
+}
+
+.editor-drop-indicator::before,
+.editor-drop-indicator::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: var(--editor-accent);
+  border-radius: 50%;
+}
+
+.editor-drop-indicator::before {
+  left: -4px;
+}
+
+.editor-drop-indicator::after {
+  right: -4px;
+}
+
+/* Editor drag-over state */
+.editor-content .tiptap.drag-over {
+  background: color-mix(in srgb, var(--editor-accent) 5%, transparent);
+}
+
+/* ============================================
+   Editor Content Area
+   ============================================ */
+.editor-content {
+  overflow-y: auto;
+}
+
+.editor-content .tiptap {
+  padding: var(--editor-padding);
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: var(--editor-font-size, 16px);
+  line-height: 1.7;
+  color: var(--editor-text);
+}
+
+.editor-content .tiptap:focus {
+  outline: none;
+}
+
+/* Selection */
+.editor-content .tiptap ::selection {
+  background: var(--editor-selection);
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+.editor-content .tiptap > * + * {
+  margin-top: 0.75em;
+}
+
+/* Headings */
+.editor-content .tiptap h1,
+.editor-content .tiptap h2,
+.editor-content .tiptap h3 {
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--editor-text);
+}
+
+.editor-content .tiptap h1 {
+  font-size: 2em;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.editor-content .tiptap h2 {
+  font-size: 1.5em;
+  margin-top: 1.25em;
+  margin-bottom: 0.4em;
+}
+
+.editor-content .tiptap h3 {
+  font-size: 1.25em;
+  margin-top: 1em;
+  margin-bottom: 0.3em;
+}
+
+/* First heading shouldn't have top margin */
+.editor-content .tiptap > h1:first-child,
+.editor-content .tiptap > h2:first-child,
+.editor-content .tiptap > h3:first-child {
+  margin-top: 0;
+}
+
+/* Paragraphs */
+.editor-content .tiptap p {
+  margin: 0;
+}
+
+/* Bold, Italic, etc */
+.editor-content .tiptap strong {
+  font-weight: 600;
+}
+
+.editor-content .tiptap em {
+  font-style: italic;
+}
+
+.editor-content .tiptap s {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Inline Code */
+.editor-content .tiptap code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  color: var(--editor-accent);
+}
+
+/* ============================================
+   Links
+   ============================================ */
+.editor-content .tiptap a,
+.editor-content .tiptap .editor-link {
+  color: var(--editor-accent);
+  text-decoration: underline;
+  text-decoration-color: var(--editor-accent-muted);
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+
+.editor-content .tiptap a:hover,
+.editor-content .tiptap .editor-link:hover {
+  color: var(--editor-accent-hover);
+  text-decoration-color: var(--editor-accent-hover);
+}
+
+/* ============================================
+   Lists
+   ============================================ */
+.editor-content .tiptap ul,
+.editor-content .tiptap ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.editor-content .tiptap li {
+  margin: 0.25em 0;
+}
+
+.editor-content .tiptap li p {
+  margin: 0;
+}
+
+/* Bullet list markers */
+.editor-content .tiptap ul {
+  list-style-type: disc;
+}
+
+.editor-content .tiptap ul ul {
+  list-style-type: circle;
+}
+
+.editor-content .tiptap ul ul ul {
+  list-style-type: square;
+}
+
+/* Numbered list */
+.editor-content .tiptap ol {
+  list-style-type: decimal;
+}
+
+/* Task List */
+.editor-content .tiptap ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.editor-content .tiptap ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.editor-content .tiptap ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.editor-content .tiptap ul[data-type="taskList"] li > label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--editor-accent);
+  cursor: pointer;
+}
+
+.editor-content .tiptap ul[data-type="taskList"] li > div {
+  flex: 1;
+}
+
+.editor-content .tiptap ul[data-type="taskList"] li[data-checked="true"] > div {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* ============================================
+   Blockquote
+   ============================================ */
+.editor-content .tiptap blockquote {
+  border-left: 3px solid var(--editor-accent);
+  padding-left: 1em;
+  margin: 1em 0;
+  color: var(--editor-text-muted);
+  font-style: italic;
+}
+
+.editor-content .tiptap blockquote p {
+  margin: 0;
+}
+
+/* ============================================
+   Code Block
+   ============================================ */
+.editor-content .tiptap pre {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin: 1em 0;
+  overflow-x: auto;
+}
+
+.editor-content .tiptap pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: var(--editor-text);
+}
+
+/* Syntax Highlighting (lowlight/highlight.js) */
+.editor-content .tiptap pre .hljs-comment,
+.editor-content .tiptap pre .hljs-quote {
+  color: #6b7280;
+}
+
+.editor-content .tiptap pre .hljs-keyword,
+.editor-content .tiptap pre .hljs-selector-tag,
+.editor-content .tiptap pre .hljs-built_in {
+  color: #c084fc;
+}
+
+.editor-content .tiptap pre .hljs-string,
+.editor-content .tiptap pre .hljs-attribute,
+.editor-content .tiptap pre .hljs-addition {
+  color: #86efac;
+}
+
+.editor-content .tiptap pre .hljs-number,
+.editor-content .tiptap pre .hljs-literal {
+  color: #fbbf24;
+}
+
+.editor-content .tiptap pre .hljs-function,
+.editor-content .tiptap pre .hljs-title {
+  color: #60a5fa;
+}
+
+.editor-content .tiptap pre .hljs-variable,
+.editor-content .tiptap pre .hljs-params {
+  color: #f472b6;
+}
+
+/* ============================================
+   Div Block
+   ============================================ */
+.editor-content .tiptap .editor-div-block {
+  /* Minimal default styling - let content styles show through */
+  padding: 16px;
+  margin: 1em 0;
+  position: relative;
+  /* Subtle outline only - doesn't override inline border styles */
+  outline: 1px dashed transparent;
+  outline-offset: -1px;
+  transition: outline-color 0.15s ease;
+}
+
+/* Label hidden by default */
+.editor-content .tiptap .editor-div-block::before {
+  content: 'div';
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: transparent;
+  background: var(--editor-bg);
+  padding: 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color 0.15s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Show subtle outline on hover */
+.editor-content .tiptap .editor-div-block:hover {
+  outline-color: color-mix(in srgb, var(--editor-accent) 40%, transparent);
+}
+
+.editor-content .tiptap .editor-div-block:hover::before {
+  color: var(--editor-text-muted);
+}
+
+/* Selected div block - use outline to not conflict with content borders */
+.editor-content .tiptap .editor-div-block.ProseMirror-selectednode {
+  outline: 2px solid var(--brand-primary, var(--editor-accent));
+  outline-offset: 2px;
+}
+
+.editor-content .tiptap .editor-div-block.ProseMirror-selectednode::before {
+  color: var(--brand-primary, var(--editor-accent));
+  font-weight: 600;
+}
+
+/* ============================================
+   Column Layout
+   ============================================ */
+.editor-content .tiptap .editor-column-layout {
+  display: flex;
+  gap: 16px;
+  margin: 1em 0;
+  padding: 8px;
+  position: relative;
+  /* Subtle outline only - doesn't override inline border styles */
+  outline: 1px dashed transparent;
+  outline-offset: -1px;
+  transition: outline-color 0.15s ease;
+}
+
+/* Label hidden by default */
+.editor-content .tiptap .editor-column-layout::before {
+  content: 'columns';
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: transparent;
+  background: var(--editor-bg);
+  padding: 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color 0.15s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Show subtle outline on hover */
+.editor-content .tiptap .editor-column-layout:hover {
+  outline-color: color-mix(in srgb, var(--editor-accent) 40%, transparent);
+}
+
+.editor-content .tiptap .editor-column-layout:hover::before {
+  color: var(--editor-text-muted);
+}
+
+/* Individual columns - minimal UI */
+.editor-content .tiptap .editor-column {
+  flex: 1 1 0%;
+  min-width: 0;
+  position: relative;
+  transition: flex 0.05s ease-out;
+  display: flex;
+  /* Very subtle column separator */
+  outline: 1px dashed transparent;
+  outline-offset: -1px;
+}
+
+/* Column widths from CSS variable - allows BlockStyle to control other inline styles */
+.editor-content .tiptap .editor-column[data-width] {
+  flex: 0 0 var(--column-width, auto);
+  width: var(--column-width, auto);
+}
+
+.editor-content .tiptap .editor-column .column-content {
+  flex: 1;
+  min-width: 0;
+  /* Minimal default padding - user styles will override via inline styles on parent */
+  padding: 8px;
+}
+
+/* Show column boundary on hover */
+.editor-content .tiptap .editor-column:hover {
+  outline-color: color-mix(in srgb, var(--editor-border) 60%, transparent);
+}
+
+/* Focused column */
+.editor-content .tiptap .editor-column:focus-within {
+  outline-color: color-mix(in srgb, var(--editor-accent) 50%, transparent);
+}
+
+/* Column resize handle - subtle grip between columns */
+.editor-content .tiptap .editor-column .column-resize-handle {
+  flex: 0 0 6px;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: transparent;
+  margin: 4px 0;
+  border-radius: 3px;
+  transition: all 0.15s ease;
+  opacity: 0.3;
+}
+
+/* Show resize handle on column hover */
+.editor-content .tiptap .editor-column:hover .column-resize-handle {
+  opacity: 1;
+  background: var(--editor-border);
+}
+
+.editor-content .tiptap .editor-column .column-resize-handle:hover {
+  background: var(--editor-accent);
+  width: 8px;
+  flex: 0 0 8px;
+  opacity: 1;
+}
+
+.editor-content .tiptap .editor-column .column-resize-handle:active {
+  background: var(--editor-accent);
+  box-shadow: 0 0 6px var(--editor-accent);
+}
+
+/* Hide resize handle on last column */
+.editor-content .tiptap .editor-column:last-child .column-resize-handle {
+  display: none;
+}
+
+/* Body state during resize */
+body.column-resizing {
+  cursor: col-resize !important;
+  user-select: none;
+}
+
+body.column-resizing * {
+  cursor: col-resize !important;
+}
+
+/* Column placeholder */
+.editor-content .tiptap .editor-column .column-content > p.is-editor-empty:first-child::before {
+  content: 'Type here...';
+  color: var(--editor-text-muted);
+  opacity: 0.5;
+}
+
+/* Selected column layout - outline only, no background override */
+.editor-content .tiptap .editor-column-layout.ProseMirror-selectednode {
+  outline: 2px solid var(--brand-primary, var(--editor-accent));
+  outline-offset: 3px;
+}
+
+.editor-content .tiptap .editor-column-layout.ProseMirror-selectednode::before {
+  color: var(--brand-primary, var(--editor-accent));
+  font-weight: 600;
+}
+
+/* Selected individual column - outline only */
+.editor-content .tiptap .editor-column.ProseMirror-selectednode {
+  outline: 2px solid var(--brand-primary, var(--editor-accent));
+  outline-offset: 3px;
+}
+
+/* Responsive columns */
+@media (max-width: 640px) {
+  .editor-content .tiptap .editor-column-layout {
+    flex-direction: column;
+  }
+  
+  .editor-content .tiptap .editor-column {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   Horizontal Rule
+   ============================================ */
+.editor-content .tiptap hr {
+  border: none;
+  border-top: 2px solid var(--editor-border);
+  margin: 2em 0;
+}
+
+/* ============================================
+   Images
+   ============================================ */
+.editor-content .tiptap img,
+.editor-content .tiptap .editor-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: 1em 0;
+  display: block;
+}
+
+.editor-content .tiptap img.ProseMirror-selectednode {
+  outline: 3px solid var(--editor-accent);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Tables
+   ============================================ */
+.editor-content .tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--editor-border);
+}
+
+.editor-content .tiptap th,
+.editor-content .tiptap td {
+  border: 1px solid var(--editor-border);
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+  position: relative;
+}
+
+.editor-content .tiptap th {
+  background: var(--editor-bg-elevated);
+  font-weight: 600;
+}
+
+.editor-content .tiptap td {
+  background: var(--editor-bg);
+}
+
+/* Selected cell */
+.editor-content .tiptap .selectedCell {
+  background: var(--editor-selection) !important;
+}
+
+/* Column resize handle */
+.editor-content .tiptap .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--editor-accent);
+  cursor: col-resize;
+  z-index: 10;
+}
+
+/* ============================================
+   Placeholder
+   ============================================ */
+.editor-content .tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--editor-text-muted);
+  pointer-events: none;
+  height: 0;
+  opacity: 0.6;
+}
+
+/* ============================================
+   Focus States
+   ============================================ */
+.bubble-editor-wrapper:hover::after {
+  box-shadow: inset 0 0 0 1px var(--editor-accent-muted, rgba(99, 102, 241, 0.4));
+}
+
+.bubble-editor-wrapper:focus-within::after {
+  box-shadow: inset 0 0 0 2px var(--editor-accent-muted, rgba(99, 102, 241, 0.4));
+}
+
+/* ============================================
+   Read-only State
+   ============================================ */
+.editor-content .tiptap[contenteditable="false"] {
+  cursor: default;
+}
+
+.editor-content .tiptap[contenteditable="false"] a {
+  cursor: pointer;
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+@media (max-width: 640px) {
+  .editor-toolbar {
+    padding: 6px 8px;
+  }
+  
+  .toolbar-btn {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .toolbar-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .editor-content .tiptap {
+    padding: 16px;
+    font-size: 15px;
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "display": "TipTap Rich Text Editor",
+  "icon": "ion-compose",
+  "category": ["input forms", "visual elements"],
+  "fields": {
+    "AAA": {
+      "display": "Initial content",
+      "type": "text",
+      "default_val": ""
+    },
+    "AAB": {
+      "display": "Placeholder",
+      "type": "text",
+      "default_val": "Start writing..."
+    },
+    "AAC": {
+      "display": "Editable",
+      "type": "checkbox",
+      "default_val": true
+    },
+    "AAD": {
+      "display": "Show toolbar",
+      "type": "checkbox",
+      "default_val": true
+    },
+    "AAE": {
+      "display": "Min height (px)",
+      "type": "number",
+      "default_val": 200
+    },
+    "AAF": {
+      "display": "Max height (px)",
+      "type": "number",
+      "default_val": 0
+    },
+    "AAG": {
+      "display": "Theme",
+      "type": "dropdown",
+      "default_val": "dark",
+      "options": ["dark", "light", "auto"]
+    },
+    "AAH": {
+      "display": "Accent color",
+      "type": "color",
+      "default_val": "#6366f1"
+    },
+    "AAI": {
+      "display": "Background color",
+      "type": "color",
+      "default_val": "#1a1d27"
+    },
+    "AAJ": {
+      "display": "Toolbar background",
+      "type": "color",
+      "default_val": "#1e2230"
+    },
+    "AAK": {
+      "display": "Text color",
+      "type": "color",
+      "default_val": "#e4e6ed"
+    },
+    "AAL": {
+      "display": "Text muted color",
+      "type": "color",
+      "default_val": "#8b8fa3"
+    },
+    "AAM": {
+      "display": "Border color",
+      "type": "color",
+      "default_val": "#2e3345"
+    },
+    "AAQ": {
+      "display": "Icon color",
+      "type": "color",
+      "default_val": "#8b8fa3"
+    },
+    "AAR": {
+      "display": "Icon active color",
+      "type": "color",
+      "default_val": "#e4e6ed"
+    },
+    "AAN": {
+      "display": "Font family",
+      "type": "text",
+      "default_val": "'DM Sans', system-ui, sans-serif"
+    },
+    "AAO": {
+      "display": "Font size (px)",
+      "type": "number",
+      "default_val": 16
+    },
+    "AAP": {
+      "display": "Border radius (px)",
+      "type": "number",
+      "default_val": 14
+    }
+  },
+  "states": {
+    "AAW": {
+      "display": "Content (HTML)",
+      "type": "text"
+    },
+    "AAX": {
+      "display": "Content (JSON)",
+      "type": "text"
+    },
+    "AAY": {
+      "display": "Is empty",
+      "type": "boolean"
+    },
+    "AAZ": {
+      "display": "Word count",
+      "type": "number"
+    },
+    "ABA": {
+      "display": "Character count",
+      "type": "number"
+    }
+  },
+  "events": {
+    "ABB": {
+      "display": "Content changed"
+    },
+    "ABC": {
+      "display": "Editor focused"
+    },
+    "ABD": {
+      "display": "Editor blurred"
+    }
+  },
+  "actions": {
+    "ABE": {
+      "display": "Set content",
+      "fields": {
+        "ABF": {
+          "display": "Content (HTML)",
+          "type": "text"
+        }
+      }
+    },
+    "ABG": {
+      "display": "Clear content",
+      "fields": {}
+    },
+    "ABH": {
+      "display": "Focus editor",
+      "fields": {}
+    },
+    "ABI": {
+      "display": "Insert image",
+      "fields": {
+        "ABJ": {
+          "display": "Image URL",
+          "type": "text"
+        },
+        "ABK": {
+          "display": "Alt text",
+          "type": "text"
+        }
+      }
+    }
+  }
+}

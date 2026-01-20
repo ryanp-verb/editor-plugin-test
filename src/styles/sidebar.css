@@ -1,0 +1,819 @@
+/**
+ * BP Brand Sidebar Styles
+ * 
+ * Matches Figma design for formatting panel with:
+ * - Section headers and collapsible sections
+ * - Button rows for headings, text size, formatting
+ * - Color palettes with swatches
+ * - Border/corner visual controls
+ * - Padding controls
+ */
+
+/* ============================================
+   Sidebar Container
+   ============================================ */
+.bp-sidebar {
+  width: 100%;
+  height: 100%;
+  background: var(--sidebar-bg, #f5f5f2);
+  font-family: var(--font-family-primary, 'bp Sans', system-ui, sans-serif);
+  font-size: 13px;
+  color: var(--editor-text, #121000);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.bp-sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  min-height: 0; /* Critical for flex children to respect overflow */
+}
+
+/* Scrollbar styling for Chrome, Safari */
+.bp-sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bp-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bp-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: var(--neutral-warm-grey-3, #c9cbbe);
+  border-radius: 3px;
+}
+
+.bp-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-warm-grey-4, #7a7a6c);
+}
+
+/* ============================================
+   Sidebar Header
+   ============================================ */
+.bp-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--brand-primary, #007f00);
+  color: white;
+  flex-shrink: 0;
+}
+
+.bp-sidebar-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.bp-sidebar-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bp-sidebar-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.bp-sidebar-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================
+   Sections
+   ============================================ */
+.bp-sidebar-section {
+  padding: 16px;
+  border-bottom: 1px solid var(--sidebar-border, #c9cbbe);
+  box-sizing: border-box;
+}
+
+.bp-sidebar-section:last-child {
+  border-bottom: none;
+}
+
+.bp-sidebar-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sidebar-section-title, #494736);
+  margin: 0 0 12px 0;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ============================================
+   Control Groups
+   ============================================ */
+.bp-control-group {
+  margin-bottom: 16px;
+}
+
+.bp-control-group:last-child {
+  margin-bottom: 0;
+}
+
+.bp-control-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--editor-text-muted, #494736);
+  margin-bottom: 8px;
+}
+
+/* ============================================
+   Container Target (for block styling)
+   ============================================ */
+.bp-container-target {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  background: var(--neutral-warm-grey-2, #e1e3d6);
+  border-radius: var(--radius-sm, 4px);
+  font-size: 12px;
+}
+
+.bp-target-label {
+  color: var(--editor-text-muted, #494736);
+  font-weight: 500;
+}
+
+.bp-target-name {
+  flex: 1;
+  color: var(--brand-primary, #007f00);
+  font-weight: 600;
+}
+
+/* ============================================
+   Button Rows
+   ============================================ */
+.bp-btn-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.bp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--control-btn-min-width, 36px);
+  height: var(--control-btn-height, 36px);
+  padding: 0 12px;
+  background: var(--control-btn-bg, #e1e3d6);
+  border: none;
+  border-radius: var(--control-btn-radius, 8px);
+  color: var(--control-btn-text, #494736);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bp-btn:hover {
+  background: var(--brand-light-1, #8EDF00);
+  color: var(--brand-primary, #007F00);
+}
+
+/* Draggable buttons */
+.bp-btn.draggable {
+  cursor: grab;
+}
+
+.bp-btn.draggable:active {
+  cursor: grabbing;
+}
+
+.bp-btn.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.bp-btn.active {
+  background: var(--brand-dark-1, #004F00);
+  color: var(--brand-light-2, #CCFF00);
+}
+
+.bp-btn.active:hover {
+  background: var(--brand-dark-1, #004F00);
+  color: var(--brand-light-2, #CCFF00);
+}
+
+/* Icon buttons */
+.bp-btn-icon {
+  min-width: 36px;
+  width: 36px;
+  padding: 0;
+}
+
+.bp-btn-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Wide button (full width) */
+.bp-btn-wide {
+  flex: 1;
+  min-width: 60px;
+}
+
+/* Small button */
+.bp-btn-sm {
+  height: 28px;
+  min-width: 28px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+/* Extra small button */
+.bp-btn-xs {
+  height: 22px;
+  min-width: 22px;
+  padding: 0 4px;
+  font-size: 10px;
+}
+
+.bp-btn-xs svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Link-style button */
+.bp-btn-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--brand-light-1, #8edf00);
+  color: var(--neutral-warm-grey-6, #121000);
+  border-radius: 14px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.bp-btn-link svg {
+  width: 12px;
+  height: 12px;
+}
+
+.bp-btn-link.active {
+  background: var(--brand-light-2, #ccff00);
+}
+
+/* ============================================
+   Color Palette
+   ============================================ */
+.bp-color-palette {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bp-color-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.bp-color-swatch {
+  width: var(--swatch-size, 24px);
+  height: var(--swatch-size, 24px);
+  min-width: var(--swatch-size, 24px);
+  border: 2px solid transparent;
+  border-radius: var(--swatch-radius, 4px);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bp-color-swatch:hover {
+  transform: scale(1.1);
+  z-index: 1;
+}
+
+.bp-color-swatch.active {
+  border-color: var(--brand-primary, #007f00);
+  box-shadow: 0 0 0 2px var(--brand-light-1, #8edf00);
+}
+
+/* White swatch with visible border */
+.bp-swatch-white {
+  background: #ffffff;
+  border-color: var(--editor-border, #c9cbbe);
+}
+
+.bp-swatch-white.active {
+  border-color: var(--brand-primary, #007f00);
+}
+
+/* Transparent/no-color swatch */
+.bp-swatch-transparent {
+  background: linear-gradient(45deg, #fff 45%, #ddd 45%, #ddd 55%, #fff 55%);
+  background-size: 6px 6px;
+  border-color: var(--editor-border, #c9cbbe);
+}
+
+.bp-swatch-transparent svg {
+  color: #999;
+}
+
+/* ============================================
+   Border Control Visual
+   ============================================ */
+.bp-borders-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.bp-border-control,
+.bp-radius-control {
+  position: relative;
+}
+
+/* ============================================
+   Border Control - Figma Design
+   ============================================ */
+.bp-border-visual {
+  position: relative;
+  width: 148px;
+  height: 104px;
+}
+
+/* Border side buttons - each has its own background box */
+.bp-border-side {
+  position: absolute;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  background: var(--control-bg, #d9dbd0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+/* The visual bar inside each side */
+.bp-border-bar {
+  background: var(--border-inactive, #7a7a6c);
+  border-radius: 3px;
+  transition: background 0.15s ease;
+}
+
+/* Left border - vertical pill, full height */
+.bp-border-left {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 28px;
+  border-radius: var(--control-radius, 8px);
+  padding: 12px 0;
+}
+
+.bp-border-left .bp-border-bar {
+  width: 6px;
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* Right border - vertical pill, full height */
+.bp-border-right {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  border-radius: var(--control-radius, 8px);
+  padding: 12px 0;
+}
+
+.bp-border-right .bp-border-bar {
+  width: 6px;
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* Top border - horizontal pill, nestled between left/right */
+.bp-border-top {
+  top: 0;
+  left: 34px; /* 28px side width + 6px gap */
+  right: 34px;
+  height: 28px;
+  border-radius: var(--control-radius, 8px);
+  padding: 0 12px;
+}
+
+.bp-border-top .bp-border-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+}
+
+/* Bottom border - horizontal pill, nestled between left/right */
+.bp-border-bottom {
+  bottom: 0;
+  left: 34px;
+  right: 34px;
+  height: 28px;
+  border-radius: var(--control-radius, 8px);
+  padding: 0 12px;
+}
+
+.bp-border-bottom .bp-border-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+}
+
+/* ---- Side States (when ALL is NOT active) ---- */
+
+/* Side hover state */
+.bp-border-side:hover {
+  background: var(--brand-light-1, #8edf00);
+}
+
+.bp-border-side:hover .bp-border-bar {
+  background: var(--brand-primary, #007f00);
+}
+
+/* Side active/selected state (ALL not active) - dark green background */
+.bp-border-side.active {
+  background: var(--brand-dark-1, #004f00);
+}
+
+.bp-border-side.active .bp-border-bar {
+  background: var(--brand-light-2, #ccff00);
+}
+
+/* Active + hover */
+.bp-border-side.active:hover {
+  background: var(--brand-light-1, #8edf00);
+}
+
+.bp-border-side.active:hover .bp-border-bar {
+  background: var(--brand-primary, #007f00);
+}
+
+/* ---- Side States (when ALL IS active/linked) ---- */
+
+/* When ALL is linked, sides have default bg but green inner bar */
+.bp-border-visual.all-linked .bp-border-side {
+  background: var(--control-bg, #e1e3d6);
+}
+
+.bp-border-visual.all-linked .bp-border-side .bp-border-bar {
+  background: var(--brand-primary, #007f00);
+}
+
+/* When ALL linked + side hovered */
+.bp-border-visual.all-linked .bp-border-side:hover {
+  background: var(--brand-light-1, #8edf00);
+}
+
+.bp-border-visual.all-linked .bp-border-side:hover .bp-border-bar {
+  background: var(--brand-primary, #007f00);
+}
+
+/* Center ALL button - horizontal layout, icon left of text */
+.bp-border-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 64px;
+  height: 32px;
+  background: var(--control-bg, #d9dbd0);
+  border: none;
+  border-radius: 10px;
+  color: var(--border-inactive, #7a7a6c);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.bp-border-center span {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.bp-border-center svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ALL button states */
+.bp-border-center:hover {
+  background: var(--brand-light-1, #8edf00);
+  color: var(--brand-primary, #007f00);
+}
+
+.bp-border-center.active {
+  background: var(--brand-dark-1, #004f00);
+  color: white;
+}
+
+.bp-border-center.active:hover {
+  background: var(--brand-light-1, #8edf00);
+  color: var(--brand-primary, #007f00);
+}
+
+
+/* ============================================
+   Radius Control Visual
+   ============================================ */
+.bp-radius-visual {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--editor-border, #c9cbbe);
+  border-radius: 4px;
+}
+
+.bp-radius-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: 3px solid var(--border-control-side-inactive, #c9cbbe);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.bp-radius-corner:hover,
+.bp-radius-corner.active {
+  border-color: var(--brand-light-1, #8edf00);
+}
+
+.bp-radius-tl {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+  border-top-left-radius: 12px;
+}
+
+.bp-radius-tr {
+  top: -2px;
+  right: -2px;
+  border-left: none;
+  border-bottom: none;
+  border-top-right-radius: 12px;
+}
+
+.bp-radius-br {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+  border-bottom-right-radius: 12px;
+}
+
+.bp-radius-bl {
+  bottom: -2px;
+  left: -2px;
+  border-right: none;
+  border-top: none;
+  border-bottom-left-radius: 12px;
+}
+
+/* ============================================
+   Border Inputs
+   ============================================ */
+.bp-border-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.bp-input-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Radius ALL link button */
+.bp-btn-link-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: var(--brand-light-1, #8edf00);
+  border: none;
+  border-radius: 20px;
+  color: var(--brand-primary, #007f00);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bp-btn-link-all:hover {
+  background: var(--brand-light-2, #ccff00);
+}
+
+.bp-btn-link-all.active {
+  background: var(--brand-dark-1, #004f00);
+  color: white;
+}
+
+.bp-btn-link-all.active:hover {
+  background: var(--brand-light-1, #8edf00);
+  color: var(--brand-primary, #007f00);
+}
+
+.bp-btn-link-all svg {
+  width: 14px;
+  height: 14px;
+}
+
+.bp-input {
+  height: var(--input-height, 36px);
+  background: var(--input-bg, #ffffff);
+  border: 1px solid var(--input-border, #c9cbbe);
+  border-radius: var(--input-radius, 4px);
+  padding: var(--input-padding, 8px 12px);
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--input-text, #121000);
+  transition: border-color 0.15s ease;
+}
+
+.bp-input:focus {
+  outline: none;
+  border-color: var(--input-border-focus, #007f00);
+}
+
+.bp-input-sm {
+  width: 60px;
+  height: 28px;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.bp-input-unit {
+  font-size: 11px;
+  color: var(--editor-text-muted, #494736);
+}
+
+/* ============================================
+   Padding Control
+   ============================================ */
+.bp-padding-control {
+  position: relative;
+}
+
+.bp-padding-visual {
+  position: relative;
+  width: 100%;
+  max-width: 200px;
+  height: 120px;
+  border: 2px dashed var(--editor-border, #c9cbbe);
+  border-radius: 8px;
+  margin: 0 auto;
+}
+
+.bp-padding-input {
+  position: absolute;
+  width: var(--padding-input-width, 48px);
+  height: 28px;
+  padding: 4px;
+  text-align: center;
+  background: var(--brand-light-1, #8edf00);
+  border: none;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--neutral-warm-grey-6, #121000);
+}
+
+.bp-padding-input:focus {
+  outline: 2px solid var(--brand-primary, #007f00);
+  outline-offset: 1px;
+}
+
+.bp-padding-top {
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bp-padding-right {
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+}
+
+.bp-padding-bottom {
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bp-padding-left {
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+}
+
+.bp-padding-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--brand-light-1, #8edf00);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--neutral-warm-grey-6, #121000);
+  transition: all 0.15s ease;
+}
+
+.bp-padding-center svg {
+  width: 14px;
+  height: 14px;
+}
+
+.bp-padding-center.active {
+  background: var(--brand-light-2, #ccff00);
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+@media (max-width: 1200px) {
+  .bp-sidebar {
+    width: 260px;
+    min-width: 260px;
+  }
+  
+  .bp-color-swatch {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+  }
+}
+
+/* ============================================
+   Dark Theme Overrides
+   ============================================ */
+[data-theme="dark"] .bp-sidebar {
+  background: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+}
+
+[data-theme="dark"] .bp-sidebar-section {
+  border-color: var(--sidebar-border);
+}
+
+[data-theme="dark"] .bp-border-visual,
+[data-theme="dark"] .bp-radius-visual,
+[data-theme="dark"] .bp-padding-visual {
+  border-color: var(--editor-border);
+}
+
+[data-theme="dark"] .bp-swatch-white {
+  border-color: var(--editor-border);
+}
+
+[data-theme="dark"] .bp-swatch-transparent {
+  background: linear-gradient(45deg, #2e3345 45%, #1a1d27 45%, #1a1d27 55%, #2e3345 55%);
+  border-color: var(--editor-border);
+}

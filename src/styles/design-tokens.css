@@ -1,0 +1,248 @@
+/**
+ * Design Tokens - BP Brand Theme
+ * 
+ * Converted from Figma design tokens export.
+ * These CSS variables can be overridden by Bubble plugin properties.
+ */
+
+:root {
+  /* ============================================
+     Brand Colors
+     ============================================ */
+  --brand-primary: #007f00;         /* Main brand accent - green */
+  --brand-primary-hover: #006600;
+  --brand-light-1: #8edf00;         /* Lime green */
+  --brand-light-2: #ccff00;         /* Yellow-green */
+  --brand-dark-1: #004f00;          /* Dark green */
+
+  /* ============================================
+     Neutral Colors
+     ============================================ */
+  --neutral-white: #ffffff;
+  --neutral-warm-grey-1: #f5f5f2;   /* Lightest - backgrounds */
+  --neutral-warm-grey-2: #e1e3d6;   /* Button default backgrounds */
+  --neutral-warm-grey-3: #c9cbbe;   /* Borders, dividers */
+  --neutral-warm-grey-4: #7a7a6c;   /* Disabled text */
+  --neutral-warm-grey-5: #494736;   /* Default icons and labels */
+  --neutral-warm-grey-6: #121000;   /* Body copy text, hovered button labels */
+
+  /* ============================================
+     Semantic Color Palette (for color pickers)
+     Row 1: Base colors
+     ============================================ */
+  --palette-row1-1: #121000;        /* Black/dark */
+  --palette-row1-2: #004f00;        /* Dark green */
+  --palette-row1-3: #007f00;        /* Primary green */
+  --palette-row1-4: #8edf00;        /* Lime */
+  --palette-row1-5: #ccff00;        /* Yellow-green */
+  --palette-row1-6: #ffd700;        /* Gold */
+  --palette-row1-7: #ff9500;        /* Orange */
+  --palette-row1-8: #800080;        /* Purple */
+  --palette-row1-9: #0066cc;        /* Blue */
+  --palette-row1-10: #ff6b9d;       /* Pink */
+  --palette-row1-11: #ff4444;       /* Red */
+  --palette-row1-12: #88cc44;       /* Light green */
+
+  /* Row 2: Lighter variants */
+  --palette-row2-1: #494736;        /* Dark grey */
+  --palette-row2-2: #006600;        /* Forest green */
+  --palette-row2-3: #33cc33;        /* Bright green */
+  --palette-row2-4: #b3ff00;        /* Lime light */
+  --palette-row2-5: #e6ff66;        /* Yellow light */
+  --palette-row2-6: #ffe066;        /* Gold light */
+  --palette-row2-7: #ffb366;        /* Orange light */
+  --palette-row2-8: #cc66cc;        /* Purple light */
+  --palette-row2-9: #66aaff;        /* Blue light */
+  --palette-row2-10: #ffb3cc;       /* Pink light */
+  --palette-row2-11: #ff8888;       /* Red light */
+  --palette-row2-12: #c4e896;       /* Pale green */
+
+  /* Row 3: Muted/pastel variants */
+  --palette-row3-1: #7a7a6c;        /* Medium grey */
+  --palette-row3-2: #339933;        /* Mid green */
+  --palette-row3-3: #66dd66;        /* Soft green */
+  --palette-row3-4: #d4ff66;        /* Soft lime */
+  --palette-row3-5: #ffff99;        /* Soft yellow */
+  --palette-row3-6: #996633;        /* Brown */
+  --palette-row3-7: #cc6600;        /* Dark orange */
+  --palette-row3-8: #663366;        /* Dark purple */
+  --palette-row3-9: #003366;        /* Navy */
+  --palette-row3-10: #999999;       /* Grey */
+  --palette-row3-11: #cccccc;       /* Light grey */
+  --palette-row3-12: #e1e3d6;       /* Warm grey */
+
+  /* Special: Transparent/none */
+  --palette-transparent: transparent;
+
+  /* ============================================
+     Typography
+     ============================================ */
+  --font-family-primary: 'bp Sans', 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  /* Font sizes */
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+
+  /* Font weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
+
+  /* Letter spacing */
+  --letter-spacing-tight: -0.07em;  /* -7% from tokens */
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.08em;
+
+  /* ============================================
+     Spacing / Radius
+     ============================================ */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-input: 15px;             /* For control inputs/buttons */
+  --radius-full: 9999px;            /* Pill shape */
+
+  /* Border widths */
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 4px;
+  --border-width-input: 4px;        /* From tokens */
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* ============================================
+     Component-specific tokens
+     ============================================ */
+  
+  /* Sidebar panel */
+  --sidebar-bg: var(--neutral-warm-grey-1);
+  --sidebar-border: var(--neutral-warm-grey-3);
+  --sidebar-section-title: var(--neutral-warm-grey-5);
+  --sidebar-width: 280px;
+
+  /* Control buttons (H1, H2, P, S, M, L, etc.) */
+  --control-btn-bg: var(--neutral-warm-grey-2);
+  --control-btn-bg-hover: var(--neutral-warm-grey-3);
+  --control-btn-bg-active: var(--brand-primary);
+  --control-btn-text: var(--neutral-warm-grey-5);
+  --control-btn-text-hover: var(--neutral-warm-grey-6);
+  --control-btn-text-active: var(--neutral-white);
+  --control-btn-radius: var(--radius-sm);
+  --control-btn-height: 36px;
+  --control-btn-min-width: 36px;
+
+  /* Color swatch buttons */
+  --swatch-size: 24px;
+  --swatch-gap: 6px;
+  --swatch-radius: 4px;
+  --swatch-border: 2px solid transparent;
+  --swatch-border-active: 2px solid var(--brand-primary);
+
+  /* Border control visual */
+  --border-control-size: 80px;
+  --border-control-side-width: 8px;
+  --border-control-side-inactive: var(--neutral-warm-grey-3);
+  --border-control-side-active: var(--brand-light-1);
+
+  /* Input fields */
+  --input-bg: var(--neutral-white);
+  --input-border: var(--neutral-warm-grey-3);
+  --input-border-focus: var(--brand-primary);
+  --input-text: var(--neutral-warm-grey-6);
+  --input-radius: var(--radius-sm);
+  --input-height: 36px;
+  --input-padding: 8px 12px;
+
+  /* Padding control */
+  --padding-input-width: 48px;
+}
+
+/* ============================================
+   Light Theme (default for this design)
+   ============================================ */
+[data-theme="light"],
+.theme-light {
+  --editor-bg: var(--neutral-white);
+  --editor-bg-elevated: var(--neutral-warm-grey-1);
+  --editor-text: var(--neutral-warm-grey-6);
+  --editor-text-muted: var(--neutral-warm-grey-5);
+  --editor-border: var(--neutral-warm-grey-3);
+  --editor-border-subtle: var(--neutral-warm-grey-2);
+  --editor-accent: var(--brand-primary);
+  --editor-accent-hover: var(--brand-dark-1);
+  --editor-accent-muted: rgba(0, 127, 0, 0.2);
+  --editor-selection: rgba(0, 127, 0, 0.15);
+  
+  --toolbar-bg: var(--neutral-warm-grey-1);
+  --toolbar-btn-hover: var(--brand-light-1);
+  --toolbar-btn-hover-icon: var(--brand-primary);
+  --toolbar-btn-active: var(--brand-dark-1);
+  --toolbar-btn-active-icon: var(--brand-light-2);
+  --toolbar-separator: var(--neutral-warm-grey-3);
+  --toolbar-icon-color: var(--neutral-warm-grey-5);
+  --toolbar-icon-active: var(--neutral-white);
+}
+
+/* ============================================
+   Dark Theme Override
+   ============================================ */
+[data-theme="dark"],
+.theme-dark {
+  --editor-bg: #1a1d27;
+  --editor-bg-elevated: #242836;
+  --editor-text: #e4e6ed;
+  --editor-text-muted: #8b8fa3;
+  --editor-border: #2e3345;
+  --editor-border-subtle: #252938;
+  --editor-accent: var(--brand-light-1);
+  --editor-accent-hover: var(--brand-light-2);
+  --editor-accent-muted: rgba(142, 223, 0, 0.3);
+  --editor-selection: rgba(142, 223, 0, 0.2);
+  
+  --toolbar-bg: #1e2230;
+  --toolbar-btn-hover: var(--brand-light-1);
+  --toolbar-btn-hover-icon: var(--brand-primary);
+  --toolbar-btn-active: var(--brand-dark-1);
+  --toolbar-btn-active-icon: var(--brand-light-2);
+  --toolbar-separator: #2e3345;
+  --toolbar-icon-color: #8b8fa3;
+  --toolbar-icon-active: #121000;
+
+  /* Sidebar adjustments for dark */
+  --sidebar-bg: #1e2230;
+  --sidebar-border: #2e3345;
+  --sidebar-section-title: #8b8fa3;
+  
+  /* Control buttons for dark */
+  --control-btn-bg: #2e3345;
+  --control-btn-bg-hover: #3d4259;
+  --control-btn-text: #8b8fa3;
+  --control-btn-text-hover: #e4e6ed;
+  
+  /* Inputs for dark */
+  --input-bg: #242836;
+  --input-border: #2e3345;
+  --input-text: #e4e6ed;
+}
