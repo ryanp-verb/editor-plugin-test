@@ -391,35 +391,49 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
           
           // Check if we already have a container selected via NodeSelection
           const isNodeSelection = selection instanceof NodeSelection;
-          let currentContainerType: string | null = null;
-          let startDepth = selection.$from.depth;
           
           if (isNodeSelection) {
             const selectedNode = selection.node;
             if (containerTypes.includes(selectedNode.type.name)) {
-              currentContainerType = selectedNode.type.name;
-              // We need to find the PARENT of this container
-              // Get the position and resolve it to find parent depth
+              // Already have a container selected - find its PARENT container
               const resolvedPos = state.doc.resolve(selection.from);
-              startDepth = resolvedPos.depth;
+              let depth = resolvedPos.depth - 1; // Start above current selection
+              
+              while (depth > 0) {
+                const node = resolvedPos.node(depth);
+                if (containerTypes.includes(node.type.name)) {
+                  const pos = resolvedPos.before(depth);
+                  const nodeSelection = NodeSelection.create(state.doc, pos);
+                  
+                  if (dispatch) {
+                    tr.setSelection(nodeSelection);
+                    dispatch(tr);
+                  }
+                  return true;
+                }
+                depth--;
+              }
+              return false; // No parent container found
             }
           }
           
-          // Traverse up to find the next container (skipping current if already on one)
-          let depth = startDepth;
-          let foundCurrent = false;
+          // Text cursor - find nearest container, then skip to its PARENT
+          // (since the nearest one is already targeted by cursor position)
+          let depth = selection.$from.depth;
+          let foundFirst = false;
           
           while (depth > 0) {
             const node = selection.$from.node(depth);
             
-            // Skip the currently selected container
-            if (currentContainerType && node.type.name === currentContainerType && !foundCurrent) {
-              foundCurrent = true;
-              depth--;
-              continue;
-            }
-            
             if (containerTypes.includes(node.type.name)) {
+              if (!foundFirst) {
+                // Skip the first container (cursor is already inside it)
+                foundFirst = true;
+                depth--;
+                continue;
+              }
+              
+              // Select this parent container
               const pos = selection.$from.before(depth);
               const nodeSelection = NodeSelection.create(state.doc, pos);
               

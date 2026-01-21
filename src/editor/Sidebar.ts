@@ -855,13 +855,31 @@ export class Sidebar {
     let containerName = 'None';
     let containerNode = null;
     
-    // Check if we have a NodeSelection (whole block selected)
-    const isNodeSelection = 'node' in selection && (selection as any).node;
+    // Check selection type - NodeSelection means a whole block is selected
+    // TextSelection/other means cursor is in text
+    const isNodeSelection = selection.constructor.name === 'NodeSelection' && 
+                            'node' in selection && 
+                            (selection as any).node;
     
-    // FIRST: If we have a NodeSelection on a container, use it directly
-    // This is the explicitly selected block
     if (isNodeSelection && containerTypes.includes((selection as any).node.type.name)) {
+      // Explicitly selected container block
       containerNode = (selection as any).node;
+    } else {
+      // Text cursor - traverse up to find nearest container
+      let depth = selection.$from.depth;
+      
+      while (depth > 0) {
+        const node = selection.$from.node(depth);
+        if (containerTypes.includes(node.type.name)) {
+          containerNode = node;
+          break;
+        }
+        depth--;
+      }
+    }
+    
+    // Set the display name
+    if (containerNode) {
       switch (containerNode.type.name) {
         case 'columnLayout':
           containerName = 'Column Layout';
@@ -872,32 +890,6 @@ export class Sidebar {
         case 'divBlock':
           containerName = 'Div Block';
           break;
-      }
-    }
-    
-    // SECOND: If no NodeSelection on container, traverse up from cursor
-    // to find the nearest container (text cursor inside a block)
-    if (!containerNode) {
-      let depth = selection.$from.depth;
-      
-      while (depth > 0) {
-        const node = selection.$from.node(depth);
-        if (containerTypes.includes(node.type.name)) {
-          containerNode = node;
-          switch (node.type.name) {
-            case 'columnLayout':
-              containerName = 'Column Layout';
-              break;
-            case 'column':
-              containerName = 'Column';
-              break;
-            case 'divBlock':
-              containerName = 'Div Block';
-              break;
-          }
-          break;
-        }
-        depth--;
       }
     }
     

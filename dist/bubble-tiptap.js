@@ -32334,24 +32334,35 @@ const Uw = Te.create({
         return r && r(t), !0;
       },
       selectParentContainer: () => ({ state: n, tr: e, dispatch: t }) => {
-        const { selection: r } = n, i = this.options.containerTypes, o = r instanceof z;
-        let s = null, a = r.$from.depth;
-        if (o) {
-          const d = r.node;
-          i.includes(d.type.name) && (s = d.type.name, a = n.doc.resolve(r.from).depth);
+        const { selection: r } = n, i = this.options.containerTypes;
+        if (r instanceof z) {
+          const l = r.node;
+          if (i.includes(l.type.name)) {
+            const c = n.doc.resolve(r.from);
+            let d = c.depth - 1;
+            for (; d > 0; ) {
+              const u = c.node(d);
+              if (i.includes(u.type.name)) {
+                const h = c.before(d), p = z.create(n.doc, h);
+                return t && (e.setSelection(p), t(e)), !0;
+              }
+              d--;
+            }
+            return !1;
+          }
         }
-        let l = a, c = !1;
-        for (; l > 0; ) {
-          const d = r.$from.node(l);
-          if (s && d.type.name === s && !c) {
-            c = !0, l--;
-            continue;
+        let s = r.$from.depth, a = !1;
+        for (; s > 0; ) {
+          const l = r.$from.node(s);
+          if (i.includes(l.type.name)) {
+            if (!a) {
+              a = !0, s--;
+              continue;
+            }
+            const c = r.$from.before(s), d = z.create(n.doc, c);
+            return t && (e.setSelection(d), t(e)), !0;
           }
-          if (i.includes(d.type.name)) {
-            const u = r.$from.before(l), h = z.create(n.doc, u);
-            return t && (e.setSelection(h), t(e)), !0;
-          }
-          l--;
+          s--;
         }
         return !1;
       }
@@ -34249,8 +34260,21 @@ class yS {
   updateContainerTargetLabel() {
     const e = this.editor.getTipTapEditor(), { selection: t } = e.state, r = ["columnLayout", "column", "divBlock"];
     let i = "None", o = null;
-    if ("node" in t && t.node && r.includes(t.node.type.name))
-      switch (o = t.node, o.type.name) {
+    if (t.constructor.name === "NodeSelection" && "node" in t && t.node && r.includes(t.node.type.name))
+      o = t.node;
+    else {
+      let l = t.$from.depth;
+      for (; l > 0; ) {
+        const c = t.$from.node(l);
+        if (r.includes(c.type.name)) {
+          o = c;
+          break;
+        }
+        l--;
+      }
+    }
+    if (o)
+      switch (o.type.name) {
         case "columnLayout":
           i = "Column Layout";
           break;
@@ -34261,27 +34285,6 @@ class yS {
           i = "Div Block";
           break;
       }
-    if (!o) {
-      let l = t.$from.depth;
-      for (; l > 0; ) {
-        const c = t.$from.node(l);
-        if (r.includes(c.type.name)) {
-          switch (o = c, c.type.name) {
-            case "columnLayout":
-              i = "Column Layout";
-              break;
-            case "column":
-              i = "Column";
-              break;
-            case "divBlock":
-              i = "Div Block";
-              break;
-          }
-          break;
-        }
-        l--;
-      }
-    }
     const a = this.element.querySelector(".bp-target-name");
     a && (a.textContent = i), this.syncStylesFromContainer(o);
   }
