@@ -34130,44 +34130,56 @@ class yS {
     }
   }
   handleBorderSideClick(e) {
-    var a;
+    var l;
     const t = e.dataset.side, r = this.element.querySelector(".bp-border-all"), i = this.element.querySelector(".bp-border-visual"), o = this.element.querySelectorAll(".bp-border-side:not(.bp-border-all)"), s = parseInt(
-      ((a = this.element.querySelector('[data-input="borderWidth"]')) == null ? void 0 : a.value) || "2",
+      ((l = this.element.querySelector('[data-input="borderWidth"]')) == null ? void 0 : l.value) || "2",
       10
-    ) || 2;
+    ), a = s > 0 ? s : 2;
     if (t === "all") {
-      const l = Array.from(o).some((c) => c.classList.contains("active"));
-      if (this.borderAllLinked ? (this.borderAllLinked = !1, o.forEach((c) => c.classList.remove("active")), this.blockStyle.borderTop = 0, this.blockStyle.borderRight = 0, this.blockStyle.borderBottom = 0, this.blockStyle.borderLeft = 0) : l ? (this.borderAllLinked = !0, o.forEach((c) => c.classList.add("active")), this.blockStyle.borderTop = s, this.blockStyle.borderRight = s, this.blockStyle.borderBottom = s, this.blockStyle.borderLeft = s) : (this.borderAllLinked = !0, o.forEach((c) => c.classList.add("active")), this.blockStyle.borderTop = s, this.blockStyle.borderRight = s, this.blockStyle.borderBottom = s, this.blockStyle.borderLeft = s), e.classList.toggle("active", this.borderAllLinked), i == null || i.classList.toggle("all-linked", this.borderAllLinked), r) {
-        const c = this.borderAllLinked ? this.icons.link : this.icons.linkBroken, d = r.querySelector("svg");
-        if (d) {
-          const u = document.createElement("div");
-          u.innerHTML = c, d.replaceWith(u.firstChild);
+      const c = Array.from(o).some((d) => d.classList.contains("active"));
+      if (this.borderAllLinked)
+        this.borderAllLinked = !1, o.forEach((d) => d.classList.remove("active")), this.blockStyle.borderTop = 0, this.blockStyle.borderRight = 0, this.blockStyle.borderBottom = 0, this.blockStyle.borderLeft = 0;
+      else if (c)
+        this.borderAllLinked = !0, o.forEach((d) => d.classList.add("active")), this.blockStyle.borderTop = a, this.blockStyle.borderRight = a, this.blockStyle.borderBottom = a, this.blockStyle.borderLeft = a;
+      else {
+        this.borderAllLinked = !0, o.forEach((u) => u.classList.add("active")), this.blockStyle.borderTop = a, this.blockStyle.borderRight = a, this.blockStyle.borderBottom = a, this.blockStyle.borderLeft = a;
+        const d = this.element.querySelector('[data-input="borderWidth"]');
+        d && (d.value = String(a)), this.updateBorderWidthButtons(a);
+      }
+      if (e.classList.toggle("active", this.borderAllLinked), i == null || i.classList.toggle("all-linked", this.borderAllLinked), r) {
+        const d = this.borderAllLinked ? this.icons.link : this.icons.linkBroken, u = r.querySelector("svg");
+        if (u) {
+          const h = document.createElement("div");
+          h.innerHTML = d, u.replaceWith(h.firstChild);
         }
       }
     } else {
-      const l = {
+      const c = {
         top: "borderTop",
         right: "borderRight",
         bottom: "borderBottom",
         left: "borderLeft"
       };
-      if (t && l[t])
+      if (t && c[t])
         if (this.borderAllLinked) {
           if (this.borderAllLinked = !1, r == null || r.classList.remove("active"), i == null || i.classList.remove("all-linked"), r) {
-            const c = this.icons.linkBroken, d = r.querySelector("svg");
-            if (d) {
-              const u = document.createElement("div");
-              u.innerHTML = c, d.replaceWith(u.firstChild);
+            const d = this.icons.linkBroken, u = r.querySelector("svg");
+            if (u) {
+              const h = document.createElement("div");
+              h.innerHTML = d, u.replaceWith(h.firstChild);
             }
           }
-          e.classList.remove("active"), this.blockStyle[l[t]] = 0, o.forEach((c) => {
-            const d = c.dataset.side;
-            d && d !== t && l[d] && (c.classList.add("active"), this.blockStyle[l[d]] = s);
+          e.classList.remove("active"), this.blockStyle[c[t]] = 0, o.forEach((d) => {
+            const u = d.dataset.side;
+            u && u !== t && c[u] && (d.classList.add("active"), this.blockStyle[c[u]] = a);
           });
         } else {
           e.classList.toggle("active");
-          const c = e.classList.contains("active");
-          this.blockStyle[l[t]] = c ? s : 0;
+          const d = e.classList.contains("active");
+          if (this.blockStyle[c[t]] = d ? a : 0, d) {
+            const u = this.element.querySelector('[data-input="borderWidth"]');
+            u && parseInt(u.value, 10) === 0 && (u.value = String(a), this.updateBorderWidthButtons(a));
+          }
         }
     }
     this.updateBorderVisual(), this.applyBlockStyles();

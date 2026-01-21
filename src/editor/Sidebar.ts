@@ -589,9 +589,11 @@ export class Sidebar {
     const borderVisual = this.element.querySelector('.bp-border-visual');
     const sides = this.element.querySelectorAll('.bp-border-side:not(.bp-border-all)');
     
-    const currentWidth = parseInt(
+    // Get current width from input, but use minimum of 2 when turning ON borders
+    const inputWidth = parseInt(
       (this.element.querySelector('[data-input="borderWidth"]') as HTMLInputElement)?.value || '2'
-    , 10) || 2;
+    , 10);
+    const widthToApply = inputWidth > 0 ? inputWidth : 2; // Default to 2px if 0
     
     if (side === 'all') {
       // Check current state
@@ -609,19 +611,23 @@ export class Sidebar {
         // ALL is OFF and no sides selected - turn ON all sides and link
         this.borderAllLinked = true;
         sides.forEach(s => s.classList.add('active'));
-        this.blockStyle.borderTop = currentWidth;
-        this.blockStyle.borderRight = currentWidth;
-        this.blockStyle.borderBottom = currentWidth;
-        this.blockStyle.borderLeft = currentWidth;
+        this.blockStyle.borderTop = widthToApply;
+        this.blockStyle.borderRight = widthToApply;
+        this.blockStyle.borderBottom = widthToApply;
+        this.blockStyle.borderLeft = widthToApply;
+        // Update input to reflect applied width
+        const widthInput = this.element.querySelector('[data-input="borderWidth"]') as HTMLInputElement;
+        if (widthInput) widthInput.value = String(widthToApply);
+        this.updateBorderWidthButtons(widthToApply);
       } else {
         // ALL is OFF but some sides selected - just link them (activate ALL mode)
         this.borderAllLinked = true;
         // Keep current selection, sync all to match
         sides.forEach(s => s.classList.add('active'));
-        this.blockStyle.borderTop = currentWidth;
-        this.blockStyle.borderRight = currentWidth;
-        this.blockStyle.borderBottom = currentWidth;
-        this.blockStyle.borderLeft = currentWidth;
+        this.blockStyle.borderTop = widthToApply;
+        this.blockStyle.borderRight = widthToApply;
+        this.blockStyle.borderBottom = widthToApply;
+        this.blockStyle.borderLeft = widthToApply;
       }
       
       // Update ALL button state
@@ -677,14 +683,22 @@ export class Sidebar {
             const otherSide = (s as HTMLElement).dataset.side;
             if (otherSide && otherSide !== side && sideMap[otherSide]) {
               s.classList.add('active');
-              this.blockStyle[sideMap[otherSide]] = currentWidth;
+              this.blockStyle[sideMap[otherSide]] = widthToApply;
             }
           });
         } else {
           // Individual side control - just toggle this side
           element.classList.toggle('active');
           const isActive = element.classList.contains('active');
-          this.blockStyle[sideMap[side]] = isActive ? currentWidth : 0;
+          this.blockStyle[sideMap[side]] = isActive ? widthToApply : 0;
+          // Update input to reflect applied width when turning on
+          if (isActive) {
+            const widthInput = this.element.querySelector('[data-input="borderWidth"]') as HTMLInputElement;
+            if (widthInput && parseInt(widthInput.value, 10) === 0) {
+              widthInput.value = String(widthToApply);
+              this.updateBorderWidthButtons(widthToApply);
+            }
+          }
         }
       }
     }
