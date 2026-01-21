@@ -32301,30 +32301,37 @@ const Uw = Te.create({
       ),
       setParentContainerStyle: (n) => ({ state: e, tr: t, dispatch: r }) => {
         const { selection: i } = e, o = this.options.containerTypes;
-        let s = null, a = null;
+        let s = null, a = null, l = !1;
         if (i instanceof z) {
-          const c = i.node;
-          o.includes(c.type.name) && (s = i.from, a = c, console.log("[BlockStyle] Using NodeSelection:", c.type.name));
+          const d = i.node;
+          o.includes(d.type.name) && (s = i.from, a = d, l = !0, console.log("[BlockStyle] Using NodeSelection:", d.type.name));
         }
         if (s === null) {
-          let c = i.$from.depth;
-          for (; c > 0; ) {
-            const d = i.$from.node(c);
-            if (o.includes(d.type.name)) {
-              s = i.$from.before(c), a = d, console.log("[BlockStyle] Found via traversal:", d.type.name, "at depth", c);
+          let d = i.$from.depth;
+          for (; d > 0; ) {
+            const u = i.$from.node(d);
+            if (o.includes(u.type.name)) {
+              s = i.$from.before(d), a = u, console.log("[BlockStyle] Found via traversal:", u.type.name, "at depth", d);
               break;
             }
-            c--;
+            d--;
           }
         }
         if (s === null || !a)
           return console.warn("No parent container (columnLayout, column, or divBlock) found"), !1;
         console.log("[BlockStyle] Applying styles to", a.type.name, "at pos", s), console.log("[BlockStyle] New attributes:", n), console.log("[BlockStyle] Existing attrs:", a.attrs);
-        const l = {
+        const c = {
           ...a.attrs,
           ...n
         };
-        return console.log("[BlockStyle] Merged attrs:", l), t.setNodeMarkup(s, void 0, l), r && r(t), !0;
+        if (console.log("[BlockStyle] Merged attrs:", c), t.setNodeMarkup(s, void 0, c), l || s !== null)
+          try {
+            const d = z.create(t.doc, s);
+            t.setSelection(d);
+          } catch (d) {
+            console.warn("[BlockStyle] Could not restore selection:", d);
+          }
+        return r && r(t), !0;
       },
       selectParentContainer: () => ({ state: n, tr: e, dispatch: t }) => {
         const { selection: r } = n, i = this.options.containerTypes;

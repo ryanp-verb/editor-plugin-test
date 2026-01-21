@@ -316,6 +316,7 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
           
           let containerPos: number | null = null;
           let containerNode = null;
+          let wasNodeSelection = false;
           
           // FIRST: Check if we have an explicitly selected container node (NodeSelection)
           // This takes priority over traversal
@@ -324,6 +325,7 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
             if (containerTypes.includes(selectedNode.type.name)) {
               containerPos = selection.from;
               containerNode = selectedNode;
+              wasNodeSelection = true;
               console.log('[BlockStyle] Using NodeSelection:', selectedNode.type.name);
             }
           }
@@ -363,6 +365,17 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
           
           // Set the node markup with merged attributes
           tr.setNodeMarkup(containerPos, undefined, mergedAttrs);
+          
+          // IMPORTANT: Restore the NodeSelection after modifying the node
+          // This keeps the container selected for further edits
+          if (wasNodeSelection || containerPos !== null) {
+            try {
+              const newSelection = NodeSelection.create(tr.doc, containerPos);
+              tr.setSelection(newSelection);
+            } catch (e) {
+              console.warn('[BlockStyle] Could not restore selection:', e);
+            }
+          }
           
           if (dispatch) {
             dispatch(tr);
