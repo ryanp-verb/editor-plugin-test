@@ -32302,34 +32302,30 @@ const Uw = Te.create({
       setParentContainerStyle: (n) => ({ state: e, tr: t, dispatch: r }) => {
         const { selection: i } = e, o = this.options.containerTypes;
         let s = null, a = null, l = !1;
-        if (i instanceof z) {
-          const d = i.node;
-          o.includes(d.type.name) && (s = i.from, a = d, l = !0, console.log("[BlockStyle] Using NodeSelection:", d.type.name));
-        }
-        if (s === null) {
-          let d = i.$from.depth;
-          for (; d > 0; ) {
-            const u = i.$from.node(d);
-            if (o.includes(u.type.name)) {
-              s = i.$from.before(d), a = u, console.log("[BlockStyle] Found via traversal:", u.type.name, "at depth", d);
+        if ("node" in i && i.node && i.from + i.node.nodeSize === i.to && o.includes(i.node.type.name) && (s = i.from, a = i.node, l = !0, console.log("[BlockStyle] Using NodeSelection:", a.type.name)), s === null) {
+          let h = i.$from.depth;
+          for (; h > 0; ) {
+            const p = i.$from.node(h);
+            if (o.includes(p.type.name)) {
+              s = i.$from.before(h), a = p, console.log("[BlockStyle] Found via traversal:", p.type.name, "at depth", h);
               break;
             }
-            d--;
+            h--;
           }
         }
         if (s === null || !a)
           return console.warn("No parent container (columnLayout, column, or divBlock) found"), !1;
-        console.log("[BlockStyle] Applying styles to", a.type.name, "at pos", s), console.log("[BlockStyle] New attributes:", n), console.log("[BlockStyle] Existing attrs:", a.attrs);
-        const c = {
+        console.log("[BlockStyle] Applying styles to", a.type.name, "at pos", s);
+        const u = {
           ...a.attrs,
           ...n
         };
-        if (console.log("[BlockStyle] Merged attrs:", c), t.setNodeMarkup(s, void 0, c), l || s !== null)
+        if (t.setNodeMarkup(s, void 0, u), l)
           try {
-            const d = z.create(t.doc, s);
-            t.setSelection(d);
-          } catch (d) {
-            console.warn("[BlockStyle] Could not restore selection:", d);
+            const h = z.create(t.doc, s);
+            t.setSelection(h);
+          } catch (h) {
+            console.warn("[BlockStyle] Could not restore selection:", h);
           }
         return r && r(t), !0;
       },

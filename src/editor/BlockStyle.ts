@@ -318,19 +318,21 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
           let containerNode = null;
           let wasNodeSelection = false;
           
-          // FIRST: Check if we have an explicitly selected container node (NodeSelection)
-          // This takes priority over traversal
-          if (selection instanceof NodeSelection) {
-            const selectedNode = selection.node;
-            if (containerTypes.includes(selectedNode.type.name)) {
-              containerPos = selection.from;
-              containerNode = selectedNode;
-              wasNodeSelection = true;
-              console.log('[BlockStyle] Using NodeSelection:', selectedNode.type.name);
-            }
+          // Check if it's a true NodeSelection (whole node selected)
+          // by checking for .node property AND that selection spans the whole node
+          const hasNode = 'node' in selection && (selection as any).node;
+          const isWholeNodeSelected = hasNode && 
+            selection.from + (selection as any).node.nodeSize === selection.to;
+          
+          // FIRST: If we have a whole-node selection on a container, use it
+          if (isWholeNodeSelected && containerTypes.includes((selection as any).node.type.name)) {
+            containerPos = selection.from;
+            containerNode = (selection as any).node;
+            wasNodeSelection = true;
+            console.log('[BlockStyle] Using NodeSelection:', containerNode.type.name);
           }
           
-          // SECOND: If no container selected, traverse up to find the nearest one
+          // SECOND: Otherwise traverse up to find the nearest container
           if (containerPos === null) {
             let depth = selection.$from.depth;
             
@@ -352,8 +354,6 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
           }
           
           console.log('[BlockStyle] Applying styles to', containerNode.type.name, 'at pos', containerPos);
-          console.log('[BlockStyle] New attributes:', attributes);
-          console.log('[BlockStyle] Existing attrs:', containerNode.attrs);
           
           // Merge existing attrs with new attributes, preserving non-style attrs like 'width'
           const mergedAttrs = {
@@ -361,14 +361,12 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
             ...attributes,
           };
           
-          console.log('[BlockStyle] Merged attrs:', mergedAttrs);
-          
           // Set the node markup with merged attributes
           tr.setNodeMarkup(containerPos, undefined, mergedAttrs);
           
-          // IMPORTANT: Restore the NodeSelection after modifying the node
-          // This keeps the container selected for further edits
-          if (wasNodeSelection || containerPos !== null) {
+          // ONLY restore NodeSelection if we started with one
+          // Don't create NodeSelection when user had text cursor
+          if (wasNodeSelection) {
             try {
               const newSelection = NodeSelection.create(tr.doc, containerPos);
               tr.setSelection(newSelection);
