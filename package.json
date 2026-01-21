@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && git add -A && git commit -m 'Build update' && git push && npm run purge-cache",
+    "purge-cache": "curl -s https://purge.jsdelivr.net/gh/ryanp-verb/editor-plugin-test@main/dist/bubble-tiptap.iife.js && curl -s https://purge.jsdelivr.net/gh/ryanp-verb/editor-plugin-test@main/dist/bubble-tiptap.css && echo '\n✅ Cache purged!'"
   },
   "dependencies": {
     "@tiptap/core": "^2.1.13",
