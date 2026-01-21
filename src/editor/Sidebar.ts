@@ -109,7 +109,14 @@ export class Sidebar {
   private createHeader(): string {
     return `
       <div class="bp-sidebar-header">
-        <span class="bp-sidebar-header-title">Format</span>
+        <div class="bp-header-controls">
+          <button class="bp-btn bp-btn-icon" data-action="undo" title="Undo (Ctrl+Z)">
+            ${this.icons.undo}
+          </button>
+          <button class="bp-btn bp-btn-icon" data-action="redo" title="Redo (Ctrl+Y)">
+            ${this.icons.redo}
+          </button>
+        </div>
         <button class="bp-sidebar-close" data-action="collapse" title="Switch to compact toolbar">
           ${this.icons.collapse}
         </button>
@@ -184,6 +191,12 @@ export class Sidebar {
           </button>
           <button class="bp-btn bp-btn-icon" data-action="orderedList" title="Numbered List">
             ${this.icons.orderedList}
+          </button>
+          <button class="bp-btn bp-btn-icon" data-action="taskList" title="Task List">
+            ${this.icons.taskList}
+          </button>
+          <button class="bp-btn bp-btn-icon" data-action="code" title="Inline Code">
+            ${this.icons.code}
           </button>
           <button class="bp-btn bp-btn-icon" data-action="link" title="Insert Link">
             ${this.icons.link}
@@ -460,6 +473,12 @@ export class Sidebar {
       case 'collapse':
         this.onCollapse?.();
         return;
+      case 'undo':
+        this.editor.undo();
+        break;
+      case 'redo':
+        this.editor.redo();
+        break;
       case 'heading':
         const level = parseInt(btn.dataset.level || '1', 10) as 1 | 2 | 3 | 4 | 5 | 6;
         this.editor.setHeading(level as 1 | 2 | 3);
@@ -490,6 +509,12 @@ export class Sidebar {
         break;
       case 'orderedList':
         this.editor.toggleOrderedList();
+        break;
+      case 'taskList':
+        this.editor.toggleTaskList();
+        break;
+      case 'code':
+        this.editor.toggleCode();
         break;
       case 'link':
       case 'insertLink':
@@ -1408,6 +1433,12 @@ export class Sidebar {
   }
 
   private updateButtonStates(): void {
+    // Update undo/redo disabled states
+    const undoBtn = this.element.querySelector('[data-action="undo"]') as HTMLButtonElement;
+    const redoBtn = this.element.querySelector('[data-action="redo"]') as HTMLButtonElement;
+    if (undoBtn) undoBtn.disabled = !this.editor.canUndo();
+    if (redoBtn) redoBtn.disabled = !this.editor.canRedo();
+    
     // Update heading buttons
     for (let i = 1; i <= 6; i++) {
       const btn = this.element.querySelector(`[data-action="heading"][data-level="${i}"]`);
@@ -1423,9 +1454,11 @@ export class Sidebar {
       bold: 'bold',
       italic: 'italic',
       strike: 'strike',
+      code: 'code',
       blockquote: 'blockquote',
       bulletList: 'bulletList',
       orderedList: 'orderedList',
+      taskList: 'taskList',
       link: 'link',
     };
     
@@ -1454,6 +1487,10 @@ export class Sidebar {
   // SVG Icons
   private icons = {
     collapse: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>`,
+    undo: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>`,
+    redo: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>`,
+    code: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+    taskList: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="6" height="6" rx="1"/><path d="m3 17 2 2 4-4"/><line x1="13" y1="6" x2="21" y2="6"/><line x1="13" y1="12" x2="21" y2="12"/><line x1="13" y1="18" x2="21" y2="18"/></svg>`,
     alignLeft: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>`,
     alignCenter: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>`,
     alignRight: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>`,
