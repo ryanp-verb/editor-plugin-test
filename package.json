@@ -1,6 +1,6 @@
 {
   "name": "bubble-tiptap-plugin",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "TipTap/ProseMirror content editor plugin for Bubble.io",
   "type": "module",
   "scripts": {

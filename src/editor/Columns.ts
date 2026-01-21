@@ -1,5 +1,6 @@
 import { Node, mergeAttributes, Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { buildBlockStyleString, BlockStyleAttributes } from './BlockStyle';
 
 /**
  * Column Layout Extension
@@ -88,52 +89,16 @@ export const Column = Node.create({
   },
 
   renderHTML({ node, HTMLAttributes }) {
-    // Build combined style string
-    const styles: string[] = [];
     const attrs = node.attrs;
     
-    // Width (CSS variable for flex)
-    if (attrs.width) {
-      styles.push(`--column-width: ${attrs.width}`);
-    }
+    // Build style from block style attributes
+    const blockStyle = buildBlockStyleString(attrs as BlockStyleAttributes);
     
-    // Background
-    if (attrs.backgroundColor && attrs.backgroundColor !== 'transparent') {
-      styles.push(`background-color: ${attrs.backgroundColor}`);
-    }
+    // Add column-specific width as CSS variable
+    const widthStyle = attrs.width ? `--column-width: ${attrs.width}` : '';
+    const combinedStyle = [widthStyle, blockStyle].filter(Boolean).join('; ');
     
-    // Borders
-    const bt = attrs.borderTopWidth ?? 0;
-    const br = attrs.borderRightWidth ?? 0;
-    const bb = attrs.borderBottomWidth ?? 0;
-    const bl = attrs.borderLeftWidth ?? 0;
-    if (bt || br || bb || bl) {
-      styles.push(`border-style: solid`);
-      styles.push(`border-width: ${bt}px ${br}px ${bb}px ${bl}px`);
-      if (attrs.borderColor) {
-        styles.push(`border-color: ${attrs.borderColor}`);
-      }
-    }
-    
-    // Border radius
-    const rtl = attrs.borderTopLeftRadius ?? 0;
-    const rtr = attrs.borderTopRightRadius ?? 0;
-    const rbr = attrs.borderBottomRightRadius ?? 0;
-    const rbl = attrs.borderBottomLeftRadius ?? 0;
-    if (rtl || rtr || rbr || rbl) {
-      styles.push(`border-radius: ${rtl}px ${rtr}px ${rbr}px ${rbl}px`);
-    }
-    
-    // Padding
-    const pt = attrs.paddingTop ?? 0;
-    const pr = attrs.paddingRight ?? 0;
-    const pb = attrs.paddingBottom ?? 0;
-    const pl = attrs.paddingLeft ?? 0;
-    if (pt || pr || pb || pl) {
-      styles.push(`padding: ${pt}px ${pr}px ${pb}px ${pl}px`);
-    }
-    
-    const styleAttr = styles.length > 0 ? { style: styles.join('; ') } : {};
+    const styleAttr = combinedStyle ? { style: combinedStyle } : {};
     const dataWidthAttr = attrs.width ? { 'data-width': attrs.width } : {};
     
     // Create column with resize handle
@@ -210,47 +175,9 @@ export const ColumnLayout = Node.create<ColumnLayoutOptions>({
   },
 
   renderHTML({ node, HTMLAttributes }) {
-    // Build combined style string
-    const styles: string[] = [];
     const attrs = node.attrs;
-    
-    // Background
-    if (attrs.backgroundColor && attrs.backgroundColor !== 'transparent') {
-      styles.push(`background-color: ${attrs.backgroundColor}`);
-    }
-    
-    // Borders
-    const bt = attrs.borderTopWidth ?? 0;
-    const br = attrs.borderRightWidth ?? 0;
-    const bb = attrs.borderBottomWidth ?? 0;
-    const bl = attrs.borderLeftWidth ?? 0;
-    if (bt || br || bb || bl) {
-      styles.push(`border-style: solid`);
-      styles.push(`border-width: ${bt}px ${br}px ${bb}px ${bl}px`);
-      if (attrs.borderColor) {
-        styles.push(`border-color: ${attrs.borderColor}`);
-      }
-    }
-    
-    // Border radius
-    const rtl = attrs.borderTopLeftRadius ?? 0;
-    const rtr = attrs.borderTopRightRadius ?? 0;
-    const rbr = attrs.borderBottomRightRadius ?? 0;
-    const rbl = attrs.borderBottomLeftRadius ?? 0;
-    if (rtl || rtr || rbr || rbl) {
-      styles.push(`border-radius: ${rtl}px ${rtr}px ${rbr}px ${rbl}px`);
-    }
-    
-    // Padding
-    const pt = attrs.paddingTop ?? 0;
-    const pr = attrs.paddingRight ?? 0;
-    const pb = attrs.paddingBottom ?? 0;
-    const pl = attrs.paddingLeft ?? 0;
-    if (pt || pr || pb || pl) {
-      styles.push(`padding: ${pt}px ${pr}px ${pb}px ${pl}px`);
-    }
-    
-    const styleAttr = styles.length > 0 ? { style: styles.join('; ') } : {};
+    const blockStyle = buildBlockStyleString(attrs as BlockStyleAttributes);
+    const styleAttr = blockStyle ? { style: blockStyle } : {};
     
     return [
       'div',

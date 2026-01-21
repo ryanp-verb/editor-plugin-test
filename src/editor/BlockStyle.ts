@@ -76,13 +76,17 @@ declare module '@tiptap/core' {
   }
 }
 
-function parseStyleValue(value: string | undefined, _unit: string = 'px'): number | undefined {
+function parseStyleValue(value: string | undefined): number | undefined {
   if (!value) return undefined;
   const num = parseFloat(value);
   return isNaN(num) ? undefined : num;
 }
 
-function buildBorderStyle(attrs: BlockStyleAttributes): string {
+/**
+ * Build a CSS style string from block style attributes.
+ * Shared utility used by Column, ColumnLayout, DivBlock, and BlockStyle extension.
+ */
+export function buildBlockStyleString(attrs: BlockStyleAttributes): string {
   const parts: string[] = [];
   
   // Background
@@ -219,7 +223,7 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
           blockStyleCSS: {
             default: null,
             renderHTML: attributes => {
-              const style = buildBorderStyle(attributes);
+              const style = buildBlockStyleString(attributes);
               if (!style) return {};
               return { style };
             },
@@ -329,7 +333,6 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
             containerPos = selection.from;
             containerNode = (selection as any).node;
             wasNodeSelection = true;
-            console.log('[BlockStyle] Using NodeSelection:', containerNode.type.name);
           }
           
           // SECOND: Otherwise traverse up to find the nearest container
@@ -341,7 +344,6 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
               if (containerTypes.includes(node.type.name)) {
                 containerPos = selection.$from.before(depth);
                 containerNode = node;
-                console.log('[BlockStyle] Found via traversal:', node.type.name, 'at depth', depth);
                 break;
               }
               depth--;
@@ -349,11 +351,8 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
           }
           
           if (containerPos === null || !containerNode) {
-            console.warn('No parent container (columnLayout, column, or divBlock) found');
             return false;
           }
-          
-          console.log('[BlockStyle] Applying styles to', containerNode.type.name, 'at pos', containerPos);
           
           // Merge existing attrs with new attributes, preserving non-style attrs like 'width'
           const mergedAttrs = {
