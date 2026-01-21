@@ -856,35 +856,11 @@ export class Sidebar {
     let containerNode = null;
     
     // Check if we have a NodeSelection (whole block selected)
-    const isNodeSelection = 'node' in selection && selection.node;
+    const isNodeSelection = 'node' in selection && (selection as any).node;
     
-    // ALWAYS traverse up from cursor to find the nearest container
-    // This ensures we get the immediate parent when cursor is in text
-    let depth = selection.$from.depth;
-    
-    while (depth > 0) {
-      const node = selection.$from.node(depth);
-      if (containerTypes.includes(node.type.name)) {
-        containerNode = node;
-        switch (node.type.name) {
-          case 'columnLayout':
-            containerName = 'Column Layout';
-            break;
-          case 'column':
-            containerName = 'Column';
-            break;
-          case 'divBlock':
-            containerName = 'Div Block';
-            break;
-        }
-        break;
-      }
-      depth--;
-    }
-    
-    // ONLY use NodeSelection if we didn't find anything via traversal
-    // (e.g., when a container at root level is selected)
-    if (!containerNode && isNodeSelection && containerTypes.includes((selection as any).node.type.name)) {
+    // FIRST: If we have a NodeSelection on a container, use it directly
+    // This is the explicitly selected block
+    if (isNodeSelection && containerTypes.includes((selection as any).node.type.name)) {
       containerNode = (selection as any).node;
       switch (containerNode.type.name) {
         case 'columnLayout':
@@ -896,6 +872,32 @@ export class Sidebar {
         case 'divBlock':
           containerName = 'Div Block';
           break;
+      }
+    }
+    
+    // SECOND: If no NodeSelection on container, traverse up from cursor
+    // to find the nearest container (text cursor inside a block)
+    if (!containerNode) {
+      let depth = selection.$from.depth;
+      
+      while (depth > 0) {
+        const node = selection.$from.node(depth);
+        if (containerTypes.includes(node.type.name)) {
+          containerNode = node;
+          switch (node.type.name) {
+            case 'columnLayout':
+              containerName = 'Column Layout';
+              break;
+            case 'column':
+              containerName = 'Column';
+              break;
+            case 'divBlock':
+              containerName = 'Div Block';
+              break;
+          }
+          break;
+        }
+        depth--;
       }
     }
     

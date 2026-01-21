@@ -389,15 +389,39 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
           const { selection } = state;
           const containerTypes = this.options.containerTypes;
           
-          // Traverse up to find nearest container
-          let depth = selection.$from.depth;
+          // Check if we already have a container selected via NodeSelection
+          const isNodeSelection = selection instanceof NodeSelection;
+          let currentContainerType: string | null = null;
+          let startDepth = selection.$from.depth;
+          
+          if (isNodeSelection) {
+            const selectedNode = selection.node;
+            if (containerTypes.includes(selectedNode.type.name)) {
+              currentContainerType = selectedNode.type.name;
+              // We need to find the PARENT of this container
+              // Get the position and resolve it to find parent depth
+              const resolvedPos = state.doc.resolve(selection.from);
+              startDepth = resolvedPos.depth;
+            }
+          }
+          
+          // Traverse up to find the next container (skipping current if already on one)
+          let depth = startDepth;
+          let foundCurrent = false;
           
           while (depth > 0) {
             const node = selection.$from.node(depth);
+            
+            // Skip the currently selected container
+            if (currentContainerType && node.type.name === currentContainerType && !foundCurrent) {
+              foundCurrent = true;
+              depth--;
+              continue;
+            }
+            
             if (containerTypes.includes(node.type.name)) {
               const pos = selection.$from.before(depth);
-              const resolvedPos = state.doc.resolve(pos);
-              const nodeSelection = NodeSelection.create(state.doc, resolvedPos.pos);
+              const nodeSelection = NodeSelection.create(state.doc, pos);
               
               if (dispatch) {
                 tr.setSelection(nodeSelection);
