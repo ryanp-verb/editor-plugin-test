@@ -483,11 +483,11 @@
   font-size: 9px;
   font-family: var(--font-mono);
   color: transparent;
-  background: var(--editor-bg);
+  background: transparent;
   padding: 0 4px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  transition: color 0.15s ease;
+  transition: color 0.15s ease, background 0.15s ease;
   pointer-events: none;
   z-index: 1;
 }
@@ -499,6 +499,7 @@
 
 .editor-content .tiptap .editor-div-block:hover::before {
   color: var(--editor-text-muted);
+  background: var(--editor-bg);
 }
 
 /* Selected div block - use outline to not conflict with content borders */
@@ -509,6 +510,7 @@
 
 .editor-content .tiptap .editor-div-block.ProseMirror-selectednode::before {
   color: var(--brand-primary, var(--editor-accent));
+  background: var(--editor-bg);
   font-weight: 600;
 }
 
@@ -536,11 +538,11 @@
   font-size: 9px;
   font-family: var(--font-mono);
   color: transparent;
-  background: var(--editor-bg);
+  background: transparent;
   padding: 0 4px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  transition: color 0.15s ease;
+  transition: color 0.15s ease, background 0.15s ease;
   pointer-events: none;
   z-index: 1;
 }
@@ -552,6 +554,7 @@
 
 .editor-content .tiptap .editor-column-layout:hover::before {
   color: var(--editor-text-muted);
+  background: var(--editor-bg);
 }
 
 /* Individual columns - minimal UI */
@@ -654,6 +657,7 @@ body.column-resizing * {
 
 .editor-content .tiptap .editor-column-layout.ProseMirror-selectednode::before {
   color: var(--brand-primary, var(--editor-accent));
+  background: var(--editor-bg);
   font-weight: 600;
 }
 
