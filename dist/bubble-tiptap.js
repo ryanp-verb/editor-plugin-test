@@ -34240,7 +34240,27 @@ class yS {
   updateContainerTargetLabel() {
     const e = this.editor.getTipTapEditor(), { selection: t } = e.state, r = ["columnLayout", "column", "divBlock"];
     let i = "None", o = null;
-    if ("node" in t && t.node && r.includes(t.node.type.name))
+    const s = "node" in t && t.node;
+    let a = t.$from.depth;
+    for (; a > 0; ) {
+      const c = t.$from.node(a);
+      if (r.includes(c.type.name)) {
+        switch (o = c, c.type.name) {
+          case "columnLayout":
+            i = "Column Layout";
+            break;
+          case "column":
+            i = "Column";
+            break;
+          case "divBlock":
+            i = "Div Block";
+            break;
+        }
+        break;
+      }
+      a--;
+    }
+    if (!o && s && r.includes(t.node.type.name))
       switch (o = t.node, o.type.name) {
         case "columnLayout":
           i = "Column Layout";
@@ -34252,29 +34272,8 @@ class yS {
           i = "Div Block";
           break;
       }
-    if (!o) {
-      let l = t.$from.depth;
-      for (; l > 0; ) {
-        const c = t.$from.node(l);
-        if (r.includes(c.type.name)) {
-          switch (o = c, c.type.name) {
-            case "columnLayout":
-              i = "Column Layout";
-              break;
-            case "column":
-              i = "Column";
-              break;
-            case "divBlock":
-              i = "Div Block";
-              break;
-          }
-          break;
-        }
-        l--;
-      }
-    }
-    const a = this.element.querySelector(".bp-target-name");
-    a && (a.textContent = i), this.syncStylesFromContainer(o);
+    const l = this.element.querySelector(".bp-target-name");
+    l && (l.textContent = i), this.syncStylesFromContainer(o);
   }
   syncStylesFromContainer(e) {
     if (!e)
