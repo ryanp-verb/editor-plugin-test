@@ -413,7 +413,8 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
                 }
                 depth--;
               }
-              return false; // No parent container found
+              // No parent container found - stay on current selection
+              return true;
             }
           }
           

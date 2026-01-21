@@ -855,17 +855,17 @@ export class Sidebar {
     let containerName = 'None';
     let containerNode = null;
     
-    // Check selection type - NodeSelection means a whole block is selected
-    // TextSelection/other means cursor is in text
-    const isNodeSelection = selection.constructor.name === 'NodeSelection' && 
-                            'node' in selection && 
-                            (selection as any).node;
+    // Check if it's a NodeSelection by checking for .node property
+    // and that the selection range equals the node size (whole node selected)
+    const hasNode = 'node' in selection && (selection as any).node;
+    const isWholeNodeSelected = hasNode && 
+      selection.from + (selection as any).node.nodeSize === selection.to;
     
-    if (isNodeSelection && containerTypes.includes((selection as any).node.type.name)) {
+    if (isWholeNodeSelected && containerTypes.includes((selection as any).node.type.name)) {
       // Explicitly selected container block
       containerNode = (selection as any).node;
     } else {
-      // Text cursor - traverse up to find nearest container
+      // Text cursor or partial selection - traverse up to find nearest container
       let depth = selection.$from.depth;
       
       while (depth > 0) {
@@ -1418,11 +1418,23 @@ export class Sidebar {
 
   private setupUpdateListener(): void {
     const tipTap = this.editor.getTipTapEditor();
-    tipTap.on('transaction', () => this.updateButtonStates());
+    
+    // Update on both transaction and selection changes
+    tipTap.on('transaction', () => {
+      this.updateButtonStates();
+      this.updateContainerTargetLabel();
+    });
+    
     tipTap.on('selectionUpdate', () => {
       this.updateButtonStates();
       this.updateContainerTargetLabel();
     });
+    
+    // Also listen for focus to ensure updates when clicking back into editor
+    tipTap.on('focus', () => {
+      this.updateContainerTargetLabel();
+    });
+    
     // Initial update
     this.updateContainerTargetLabel();
   }

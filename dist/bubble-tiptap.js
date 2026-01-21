@@ -32348,7 +32348,7 @@ const Uw = Te.create({
               }
               d--;
             }
-            return !1;
+            return !0;
           }
         }
         let s = r.$from.depth, a = !1;
@@ -34260,17 +34260,17 @@ class yS {
   updateContainerTargetLabel() {
     const e = this.editor.getTipTapEditor(), { selection: t } = e.state, r = ["columnLayout", "column", "divBlock"];
     let i = "None", o = null;
-    if (t.constructor.name === "NodeSelection" && "node" in t && t.node && r.includes(t.node.type.name))
+    if ("node" in t && t.node && t.from + t.node.nodeSize === t.to && r.includes(t.node.type.name))
       o = t.node;
     else {
-      let l = t.$from.depth;
-      for (; l > 0; ) {
-        const c = t.$from.node(l);
-        if (r.includes(c.type.name)) {
-          o = c;
+      let c = t.$from.depth;
+      for (; c > 0; ) {
+        const d = t.$from.node(c);
+        if (r.includes(d.type.name)) {
+          o = d;
           break;
         }
-        l--;
+        c--;
       }
     }
     if (o)
@@ -34285,8 +34285,8 @@ class yS {
           i = "Div Block";
           break;
       }
-    const a = this.element.querySelector(".bp-target-name");
-    a && (a.textContent = i), this.syncStylesFromContainer(o);
+    const l = this.element.querySelector(".bp-target-name");
+    l && (l.textContent = i), this.syncStylesFromContainer(o);
   }
   syncStylesFromContainer(e) {
     if (!e)
@@ -34606,8 +34606,12 @@ class yS {
   }
   setupUpdateListener() {
     const e = this.editor.getTipTapEditor();
-    e.on("transaction", () => this.updateButtonStates()), e.on("selectionUpdate", () => {
+    e.on("transaction", () => {
       this.updateButtonStates(), this.updateContainerTargetLabel();
+    }), e.on("selectionUpdate", () => {
+      this.updateButtonStates(), this.updateContainerTargetLabel();
+    }), e.on("focus", () => {
+      this.updateContainerTargetLabel();
     }), this.updateContainerTargetLabel();
   }
   updateButtonStates() {
