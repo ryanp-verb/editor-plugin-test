@@ -26,7 +26,6 @@
   box-sizing: border-box;
   border-left: 1px solid var(--editor-border, #e0e0d8);
   flex-shrink: 0;
-  overflow: hidden;
 }
 
 /* Hidden state */
@@ -36,11 +35,12 @@
 }
 
 .bp-sidebar-scroll {
-  flex: 1;
+  flex: 1 1 0;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
   min-height: 0; /* Critical for flex children to respect overflow */
+  max-height: 100%;
 }
 
 /* Scrollbar styling for Chrome, Safari */
