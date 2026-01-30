@@ -26,15 +26,33 @@ function(instance, context) {
         return;
     }
     
+    // Debug: Log all available properties from Bubble
+    console.log('🫧 Bubble instance.data:', JSON.stringify(instance.data, null, 2));
+    
     // Create a bridge to Bubble's real API
     const bubbleApi = {
         getProperties: () => ({
+            // Core properties
             initial_content: instance.data.initial_content || '',
             placeholder: instance.data.placeholder || 'Start writing...',
             editable: instance.data.editable !== false,
             toolbar_visible: instance.data.toolbar_visible !== false,
             min_height: instance.data.min_height || 200,
             max_height: instance.data.max_height || 0,
+            // Theme properties
+            theme: instance.data.theme || 'light',
+            accent_color: instance.data.accent_color || '#513EDF',
+            background_color: instance.data.background_color || '#ffffff',
+            text_color: instance.data.text_color || '#121000',
+            // Additional theme customization (optional)
+            toolbar_background: instance.data.toolbar_background,
+            text_muted_color: instance.data.text_muted_color,
+            border_color: instance.data.border_color,
+            icon_color: instance.data.icon_color,
+            icon_active_color: instance.data.icon_active_color,
+            font_family: instance.data.font_family,
+            font_size: instance.data.font_size,
+            border_radius: instance.data.border_radius,
         }),
         getProperty: (key) => bubbleApi.getProperties()[key],
         setProperty: () => {}, // Properties are read-only from element
