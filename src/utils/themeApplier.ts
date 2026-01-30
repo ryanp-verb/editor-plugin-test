@@ -191,19 +191,7 @@ export function getDerivedColors(accentColor: string): {
 export function applyTheme(element: HTMLElement, properties: Partial<ThemeProperties>): void {
   const effectiveTheme = getEffectiveTheme(properties.theme || 'light');
   const preset = getThemePreset(effectiveTheme);
-  
-  // Debug: Log incoming properties
-  console.log('🎨 applyTheme - input properties:', {
-    theme: properties.theme,
-    accent_color: properties.accent_color,
-    background_color: properties.background_color,
-    text_color: properties.text_color,
-  });
-  console.log('🎨 applyTheme - preset for', effectiveTheme, ':', {
-    background_color: preset.background_color,
-    text_color: preset.text_color,
-  });
-  
+
   // Merge preset with custom properties (custom overrides preset)
   const theme: ThemeProperties = {
     theme: properties.theme || 'light',
@@ -229,12 +217,6 @@ export function applyTheme(element: HTMLElement, properties: Partial<ThemeProper
     // Color palette
     color_palette: properties.color_palette,
   };
-  
-  console.log('🎨 applyTheme - merged theme:', {
-    background_color: theme.background_color,
-    text_color: theme.text_color,
-    accent_color: theme.accent_color,
-  });
   
   // Get derived colors from brand primary
   const derived = getDerivedColors(theme.brand_primary);
@@ -328,21 +310,6 @@ export function applyTheme(element: HTMLElement, properties: Partial<ThemeProper
   
   // Set data attribute for potential CSS selectors
   element.dataset.theme = effectiveTheme;
-  
-  // Debug: Verify CSS custom properties were set
-  console.log('🎨 CSS vars set on element:', {
-    '--editor-bg': element.style.getPropertyValue('--editor-bg'),
-    '--editor-text': element.style.getPropertyValue('--editor-text'),
-    '--editor-accent': element.style.getPropertyValue('--editor-accent'),
-    'element.className': element.className,
-  });
-  
-  // Also check computed style
-  const computed = window.getComputedStyle(element);
-  console.log('🎨 Computed styles:', {
-    background: computed.background.substring(0, 50),
-    '--editor-bg (computed)': computed.getPropertyValue('--editor-bg'),
-  });
 }
 
 /**

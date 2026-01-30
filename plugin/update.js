@@ -6,14 +6,16 @@
  */
 
 function(instance, properties, context) {
-    // Debug: Log properties received from Bubble
-    console.log('🫧 Bubble update - properties:', JSON.stringify(properties, null, 2));
-    
+    // Bubble may send placeholder as .placeholder; ensure we have a string
+    var placeholderValue = (properties.placeholder != null && properties.placeholder !== '')
+        ? String(properties.placeholder)
+        : 'Start writing...';
+
     // Map Bubble properties to our internal format with defaults
     const allProperties = {
         // Core properties
         initial_content: properties.initial_content || '',
-        placeholder: properties.placeholder || 'Start writing...',
+        placeholder: placeholderValue,
         editable: properties.editable !== false,
         toolbar_visible: properties.toolbar_visible !== false,
         min_height: properties.min_height || 200,
@@ -30,20 +32,17 @@ function(instance, properties, context) {
     
     // Wait for initialization before sending changes
     if (!instance.data._initialized) {
-        console.log('🫧 Editor not initialized yet, storing properties');
         return;
     }
-    
+
     const callback = instance.data._propertyChangeCallback;
-    
     if (!callback) {
-        console.log('🫧 No property change callback registered');
         return;
     }
     
-    // Always send all theme-relevant properties to ensure they're applied
-    // Bubble sends all properties on each update, so we pass them all through
+    // Always send all theme-relevant and content-relevant properties
     const changes = {
+        placeholder: allProperties.placeholder,
         editable: allProperties.editable,
         toolbar_visible: allProperties.toolbar_visible,
         min_height: allProperties.min_height,
@@ -52,9 +51,7 @@ function(instance, properties, context) {
         background_color: allProperties.background_color,
         text_color: allProperties.text_color,
     };
-    
-    console.log('🫧 Sending to editor:', JSON.stringify(changes, null, 2));
-    
+
     // Notify the element of property changes
     callback(changes);
 }

@@ -24,6 +24,8 @@ const lowlight = createLowlight(common);
 
 export interface ExtensionOptions {
   placeholder?: string;
+  /** Dynamic placeholder getter (used when provided so Bubble can update placeholder) */
+  getPlaceholder?: () => string;
   characterLimit?: number;
 }
 
@@ -71,7 +73,9 @@ export function createExtensions(options: ExtensionOptions = {}) {
       },
     }),
     Placeholder.configure({
-      placeholder: options.placeholder || 'Start writing...',
+      placeholder: options.getPlaceholder
+        ? options.getPlaceholder
+        : (options.placeholder || 'Start writing...'),
     }),
     CharacterCount.configure({
       limit: options.characterLimit,

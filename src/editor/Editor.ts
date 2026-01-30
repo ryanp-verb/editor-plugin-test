@@ -4,7 +4,10 @@ import { convertToEmailHTML, downloadEmailHTML, copyEmailHTMLToClipboard, EmailE
 
 export interface EditorConfig {
   element: HTMLElement;
+  /** Static placeholder (used if getPlaceholder not provided) */
   placeholder?: string;
+  /** Dynamic placeholder getter (e.g. from Bubble properties) */
+  getPlaceholder?: () => string;
   content?: string | JSONContent;
   editable?: boolean;
   characterLimit?: number;
@@ -26,9 +29,10 @@ export class ContentEditor {
 
   constructor(config: EditorConfig) {
     this.config = config;
-    
+
     const extensionOptions: ExtensionOptions = {
       placeholder: config.placeholder,
+      getPlaceholder: config.getPlaceholder,
       characterLimit: config.characterLimit,
     };
 
@@ -85,6 +89,11 @@ export class ContentEditor {
       characterCount: storage?.characters() || 0,
       isEmpty: this.editor.isEmpty,
     };
+  }
+
+  /** Force placeholder to re-render (e.g. after Bubble property change) */
+  refreshPlaceholder(): void {
+    this.editor.view.dispatch(this.editor.state.tr);
   }
 
   // Editing State

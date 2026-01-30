@@ -79,17 +79,14 @@ function(instance, context) {
     instance.data._bubbleElement = bubbleElement;
     instance.data._bubbleApi = bubbleApi;
     instance.data._initialized = true;
-    
-    console.log('🫧 Editor initialized, checking for pending properties');
-    
+
     // If update.js already ran with properties, apply them now
     if (instance.data._currentProperties && Object.keys(instance.data._currentProperties).length > 0) {
-        console.log('🫧 Applying pending properties:', JSON.stringify(instance.data._currentProperties, null, 2));
-        
         const callback = instance.data._propertyChangeCallback;
         if (callback) {
             const props = instance.data._currentProperties;
             callback({
+                placeholder: props.placeholder,
                 editable: props.editable,
                 toolbar_visible: props.toolbar_visible,
                 min_height: props.min_height,

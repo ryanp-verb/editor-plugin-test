@@ -44,13 +44,13 @@ export class BubbleElement {
    */
   initialize(): void {
     const props = this.bubble.getProperties();
-    
+
     // Make container a flex layout for editor + sidebar
     this.container.style.display = 'flex';
     this.container.style.flexDirection = 'row';
     this.container.style.height = '100%';
     this.container.style.overflow = 'hidden';
-    
+
     // Create editor wrapper (will flex to fill available space)
     this.editorWrapper = document.createElement('div');
     this.editorWrapper.className = 'bubble-editor-wrapper';
@@ -64,10 +64,13 @@ export class BubbleElement {
     contentArea.className = 'editor-content';
     this.editorWrapper.appendChild(contentArea);
 
-    // Initialize editor
+    // Initialize editor (placeholder via getter so it always reads current value from Bubble)
     this.editor = new ContentEditor({
       element: contentArea,
-      placeholder: props.placeholder,
+      getPlaceholder: () => {
+        const p = this.bubble.getProperties();
+        return (p.placeholder && String(p.placeholder).trim()) || 'Start writing...';
+      },
       content: props.initial_content || '',
       editable: props.editable,
       onUpdate: () => this.handleEditorUpdate(),
@@ -103,6 +106,11 @@ export class BubbleElement {
       this.handlePropertyChanges(changes);
     });
 
+    // Deferred refresh so placeholder picks up values from Bubble's update (which may run same tick)
+    queueMicrotask(() => {
+      this.editor?.refreshPlaceholder();
+    });
+
     // Apply initial styles
     this.applyDimensionStyles(props);
     
@@ -119,23 +127,13 @@ export class BubbleElement {
   
   private applyThemeFromProps(props: BubbleProperties): void {
     if (!this.editorWrapper) return;
-    
-    // Debug: log what props we're receiving
-    console.log('🎨 applyThemeFromProps - props:', JSON.stringify({
-      theme: props.theme,
-      accent_color: props.accent_color,
-      background_color: props.background_color,
-      text_color: props.text_color,
-    }, null, 2));
-    
+
     const themeProps: Partial<ThemeProperties> = {
       theme: props.theme,
-      // Brand colors (can be customized per-app)
       brand_primary: props.brand_primary || props.accent_color,
       brand_light_1: props.brand_light_1,
       brand_light_2: props.brand_light_2,
       brand_dark_1: props.brand_dark_1,
-      // Legacy accent (maps to brand_primary)
       accent_color: props.accent_color,
       background_color: props.background_color,
       toolbar_background: props.toolbar_background,
@@ -148,10 +146,9 @@ export class BubbleElement {
       font_size: props.font_size,
       border_radius: props.border_radius,
     };
-    
-    console.log('🎨 Applying theme with:', JSON.stringify(themeProps, null, 2));
-    
-    applyTheme(this.editorWrapper, themeProps);
+
+    // Apply theme to container so both editor and sidebar inherit accent/brand variables
+    applyTheme(this.container, themeProps);
   }
 
   private handleEditorCreate(): void {
@@ -196,6 +193,10 @@ export class BubbleElement {
 
   private handlePropertyChanges(changes: Partial<BubbleProperties>): void {
     if (!this.editor) return;
+
+    if ('placeholder' in changes) {
+      this.editor.refreshPlaceholder();
+    }
 
     if ('editable' in changes && changes.editable !== undefined) {
       this.editor.setEditable(changes.editable);
