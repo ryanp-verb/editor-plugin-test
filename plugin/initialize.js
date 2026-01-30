@@ -2,13 +2,10 @@
  * Bubble.io Element Initialize Script
  * 
  * This runs when the element is first rendered on the page.
- * In production, this would load the bundled TipTap editor.
+ * Properties are NOT available here - they come via update.js
  */
 
 function(instance, context) {
-    // Import the bundled editor (path would be set in Bubble plugin settings)
-    // The bundle exposes BubbleTipTap on window when using IIFE format
-    
     const container = instance.canvas[0];
     
     // Create editor wrapper
@@ -18,7 +15,7 @@ function(instance, context) {
     editorMount.style.height = '100%';
     container.appendChild(editorMount);
     
-    // Initialize with Bubble's actual API
+    // Check if bundle is loaded
     const BubbleTipTap = window.BubbleTipTap;
     
     if (!BubbleTipTap) {
@@ -26,39 +23,16 @@ function(instance, context) {
         return;
     }
     
-    // Debug: Log all available properties from Bubble
-    console.log('🫧 Bubble instance.data:', JSON.stringify(instance.data, null, 2));
+    // Store current properties (will be populated by update.js)
+    instance.data._currentProperties = {};
     
-    // Create a bridge to Bubble's real API
+    // Create a bridge to Bubble's API
     const bubbleApi = {
-        getProperties: () => ({
-            // Core properties
-            initial_content: instance.data.initial_content || '',
-            placeholder: instance.data.placeholder || 'Start writing...',
-            editable: instance.data.editable !== false,
-            toolbar_visible: instance.data.toolbar_visible !== false,
-            min_height: instance.data.min_height || 200,
-            max_height: instance.data.max_height || 0,
-            // Theme properties
-            theme: instance.data.theme || 'light',
-            accent_color: instance.data.accent_color || '#513EDF',
-            background_color: instance.data.background_color || '#ffffff',
-            text_color: instance.data.text_color || '#121000',
-            // Additional theme customization (optional)
-            toolbar_background: instance.data.toolbar_background,
-            text_muted_color: instance.data.text_muted_color,
-            border_color: instance.data.border_color,
-            icon_color: instance.data.icon_color,
-            icon_active_color: instance.data.icon_active_color,
-            font_family: instance.data.font_family,
-            font_size: instance.data.font_size,
-            border_radius: instance.data.border_radius,
-        }),
-        getProperty: (key) => bubbleApi.getProperties()[key],
-        setProperty: () => {}, // Properties are read-only from element
+        getProperties: () => instance.data._currentProperties,
+        getProperty: (key) => instance.data._currentProperties[key],
+        setProperty: () => {},
         setProperties: () => {},
         onPropertyChange: (callback) => {
-            // Store callback for update.js to call
             instance.data._propertyChangeCallback = callback;
             return () => { instance.data._propertyChangeCallback = null; };
         },
@@ -86,9 +60,8 @@ function(instance, context) {
             instance.data._actionCallback = callback;
             return () => { instance.data._actionCallback = null; };
         },
-        runAction: () => {}, // Not used from initialize
-        
-        onEvent: () => () => {}, // Not used
+        runAction: () => {},
+        onEvent: () => () => {},
         getEventLog: () => [],
         clearEventLog: () => {},
         logState: () => {},
@@ -102,7 +75,29 @@ function(instance, context) {
     
     bubbleElement.initialize();
     
-    // Store reference for update.js and actions
+    // Store references for update.js and actions
     instance.data._bubbleElement = bubbleElement;
     instance.data._bubbleApi = bubbleApi;
+    instance.data._initialized = true;
+    
+    console.log('🫧 Editor initialized, checking for pending properties');
+    
+    // If update.js already ran with properties, apply them now
+    if (instance.data._currentProperties && Object.keys(instance.data._currentProperties).length > 0) {
+        console.log('🫧 Applying pending properties:', JSON.stringify(instance.data._currentProperties, null, 2));
+        
+        const callback = instance.data._propertyChangeCallback;
+        if (callback) {
+            const props = instance.data._currentProperties;
+            callback({
+                editable: props.editable,
+                toolbar_visible: props.toolbar_visible,
+                min_height: props.min_height,
+                theme: props.theme,
+                accent_color: props.accent_color,
+                background_color: props.background_color,
+                text_color: props.text_color,
+            });
+        }
+    }
 }

@@ -92,6 +92,44 @@ export const darkThemePreset: Partial<ThemeProperties> = {
 };
 
 /**
+ * Parse a color string (hex, rgb, or rgba) and return RGB components
+ */
+function parseColor(color: string): { r: number; g: number; b: number } | null {
+  if (!color) return null;
+  
+  // Handle hex format: #RGB, #RRGGBB
+  if (color.startsWith('#')) {
+    const hex = color.replace('#', '');
+    if (hex.length === 3) {
+      // Short hex: #RGB -> #RRGGBB
+      return {
+        r: parseInt(hex[0] + hex[0], 16),
+        g: parseInt(hex[1] + hex[1], 16),
+        b: parseInt(hex[2] + hex[2], 16),
+      };
+    } else if (hex.length >= 6) {
+      return {
+        r: parseInt(hex.substring(0, 2), 16),
+        g: parseInt(hex.substring(2, 4), 16),
+        b: parseInt(hex.substring(4, 6), 16),
+      };
+    }
+  }
+  
+  // Handle rgb/rgba format: rgb(r, g, b) or rgba(r, g, b, a)
+  const rgbMatch = color.match(/rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (rgbMatch) {
+    return {
+      r: parseInt(rgbMatch[1], 10),
+      g: parseInt(rgbMatch[2], 10),
+      b: parseInt(rgbMatch[3], 10),
+    };
+  }
+  
+  return null;
+}
+
+/**
  * Detect system color scheme preference
  */
 export function getSystemTheme(): 'light' | 'dark' {
@@ -126,11 +164,13 @@ export function getDerivedColors(accentColor: string): {
   accentMuted: string;
   selection: string;
 } {
-  // Parse the hex color
-  const hex = accentColor.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
+  // Parse the color (supports hex, rgb, rgba)
+  const parsed = parseColor(accentColor);
+  
+  // Fallback to a default purple if parsing fails
+  const r = parsed?.r ?? 81;
+  const g = parsed?.g ?? 62;
+  const b = parsed?.b ?? 223;
   
   // Lighter version for hover
   const lighten = (val: number) => Math.min(255, val + 30);
@@ -273,13 +313,15 @@ export function applyTheme(element: HTMLElement, properties: Partial<ThemeProper
 }
 
 /**
- * Adjust brightness of a hex color
+ * Adjust brightness of any color format (hex, rgb, rgba)
  */
-function adjustBrightness(hexColor: string, amount: number): string {
-  const hex = hexColor.replace('#', '');
-  const r = Math.max(0, Math.min(255, parseInt(hex.substring(0, 2), 16) + amount));
-  const g = Math.max(0, Math.min(255, parseInt(hex.substring(2, 4), 16) + amount));
-  const b = Math.max(0, Math.min(255, parseInt(hex.substring(4, 6), 16) + amount));
+function adjustBrightness(color: string, amount: number): string {
+  const parsed = parseColor(color);
+  if (!parsed) return color; // Return as-is if can't parse
+  
+  const r = Math.max(0, Math.min(255, parsed.r + amount));
+  const g = Math.max(0, Math.min(255, parsed.g + amount));
+  const b = Math.max(0, Math.min(255, parsed.b + amount));
   
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }

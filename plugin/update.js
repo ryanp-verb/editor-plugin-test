@@ -2,88 +2,59 @@
  * Bubble.io Element Update Script
  * 
  * This runs whenever any of the element's properties change.
+ * This is where we get the actual property values from Bubble.
  */
 
 function(instance, properties, context) {
-    const bubbleElement = instance.data._bubbleElement;
-    const callback = instance.data._propertyChangeCallback;
+    // Debug: Log properties received from Bubble
+    console.log('🫧 Bubble update - properties:', JSON.stringify(properties, null, 2));
     
-    if (!bubbleElement) {
+    // Map Bubble properties to our internal format with defaults
+    const allProperties = {
+        // Core properties
+        initial_content: properties.initial_content || '',
+        placeholder: properties.placeholder || 'Start writing...',
+        editable: properties.editable !== false,
+        toolbar_visible: properties.toolbar_visible !== false,
+        min_height: properties.min_height || 200,
+        max_height: properties.max_height || 0,
+        // Theme properties
+        theme: properties.theme || 'light',
+        accent_color: properties.accent_color || '#513EDF',
+        background_color: properties.background_color || '#ffffff',
+        text_color: properties.text_color || '#121000',
+    };
+    
+    // Store current properties for getProperties() calls
+    instance.data._currentProperties = allProperties;
+    
+    // Wait for initialization before sending changes
+    if (!instance.data._initialized) {
+        console.log('🫧 Editor not initialized yet, storing properties');
         return;
     }
     
-    // Build changes object based on what properties changed
-    const changes = {};
+    const callback = instance.data._propertyChangeCallback;
     
-    // Core properties
-    if (properties.editable !== undefined) {
-        changes.editable = properties.editable;
+    if (!callback) {
+        console.log('🫧 No property change callback registered');
+        return;
     }
     
-    if (properties.toolbar_visible !== undefined) {
-        changes.toolbar_visible = properties.toolbar_visible;
-    }
+    // Always send all theme-relevant properties to ensure they're applied
+    // Bubble sends all properties on each update, so we pass them all through
+    const changes = {
+        editable: allProperties.editable,
+        toolbar_visible: allProperties.toolbar_visible,
+        min_height: allProperties.min_height,
+        theme: allProperties.theme,
+        accent_color: allProperties.accent_color,
+        background_color: allProperties.background_color,
+        text_color: allProperties.text_color,
+    };
     
-    if (properties.min_height !== undefined) {
-        changes.min_height = properties.min_height;
-    }
-    
-    if (properties.max_height !== undefined) {
-        changes.max_height = properties.max_height;
-    }
-    
-    // Theme properties
-    if (properties.theme !== undefined) {
-        changes.theme = properties.theme;
-    }
-    
-    if (properties.accent_color !== undefined) {
-        changes.accent_color = properties.accent_color;
-    }
-    
-    if (properties.background_color !== undefined) {
-        changes.background_color = properties.background_color;
-    }
-    
-    if (properties.text_color !== undefined) {
-        changes.text_color = properties.text_color;
-    }
-    
-    // Additional theme customization (optional)
-    if (properties.toolbar_background !== undefined) {
-        changes.toolbar_background = properties.toolbar_background;
-    }
-    
-    if (properties.text_muted_color !== undefined) {
-        changes.text_muted_color = properties.text_muted_color;
-    }
-    
-    if (properties.border_color !== undefined) {
-        changes.border_color = properties.border_color;
-    }
-    
-    if (properties.icon_color !== undefined) {
-        changes.icon_color = properties.icon_color;
-    }
-    
-    if (properties.icon_active_color !== undefined) {
-        changes.icon_active_color = properties.icon_active_color;
-    }
-    
-    if (properties.font_family !== undefined) {
-        changes.font_family = properties.font_family;
-    }
-    
-    if (properties.font_size !== undefined) {
-        changes.font_size = properties.font_size;
-    }
-    
-    if (properties.border_radius !== undefined) {
-        changes.border_radius = properties.border_radius;
-    }
+    console.log('🫧 Sending to editor:', JSON.stringify(changes, null, 2));
     
     // Notify the element of property changes
-    if (callback && Object.keys(changes).length > 0) {
-        callback(changes);
-    }
+    callback(changes);
 }
