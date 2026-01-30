@@ -120,6 +120,14 @@ export class BubbleElement {
   private applyThemeFromProps(props: BubbleProperties): void {
     if (!this.editorWrapper) return;
     
+    // Debug: log what props we're receiving
+    console.log('🎨 applyThemeFromProps - props:', JSON.stringify({
+      theme: props.theme,
+      accent_color: props.accent_color,
+      background_color: props.background_color,
+      text_color: props.text_color,
+    }, null, 2));
+    
     const themeProps: Partial<ThemeProperties> = {
       theme: props.theme,
       // Brand colors (can be customized per-app)
@@ -140,6 +148,8 @@ export class BubbleElement {
       font_size: props.font_size,
       border_radius: props.border_radius,
     };
+    
+    console.log('🎨 Applying theme with:', JSON.stringify(themeProps, null, 2));
     
     applyTheme(this.editorWrapper, themeProps);
   }

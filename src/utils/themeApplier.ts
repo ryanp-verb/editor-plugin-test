@@ -192,6 +192,18 @@ export function applyTheme(element: HTMLElement, properties: Partial<ThemeProper
   const effectiveTheme = getEffectiveTheme(properties.theme || 'light');
   const preset = getThemePreset(effectiveTheme);
   
+  // Debug: Log incoming properties
+  console.log('🎨 applyTheme - input properties:', {
+    theme: properties.theme,
+    accent_color: properties.accent_color,
+    background_color: properties.background_color,
+    text_color: properties.text_color,
+  });
+  console.log('🎨 applyTheme - preset for', effectiveTheme, ':', {
+    background_color: preset.background_color,
+    text_color: preset.text_color,
+  });
+  
   // Merge preset with custom properties (custom overrides preset)
   const theme: ThemeProperties = {
     theme: properties.theme || 'light',
@@ -217,6 +229,12 @@ export function applyTheme(element: HTMLElement, properties: Partial<ThemeProper
     // Color palette
     color_palette: properties.color_palette,
   };
+  
+  console.log('🎨 applyTheme - merged theme:', {
+    background_color: theme.background_color,
+    text_color: theme.text_color,
+    accent_color: theme.accent_color,
+  });
   
   // Get derived colors from brand primary
   const derived = getDerivedColors(theme.brand_primary);
