@@ -328,6 +328,21 @@ export function applyTheme(element: HTMLElement, properties: Partial<ThemeProper
   
   // Set data attribute for potential CSS selectors
   element.dataset.theme = effectiveTheme;
+  
+  // Debug: Verify CSS custom properties were set
+  console.log('🎨 CSS vars set on element:', {
+    '--editor-bg': element.style.getPropertyValue('--editor-bg'),
+    '--editor-text': element.style.getPropertyValue('--editor-text'),
+    '--editor-accent': element.style.getPropertyValue('--editor-accent'),
+    'element.className': element.className,
+  });
+  
+  // Also check computed style
+  const computed = window.getComputedStyle(element);
+  console.log('🎨 Computed styles:', {
+    background: computed.background.substring(0, 50),
+    '--editor-bg (computed)': computed.getPropertyValue('--editor-bg'),
+  });
 }
 
 /**
