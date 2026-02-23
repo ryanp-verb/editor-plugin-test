@@ -42,9 +42,7 @@ export interface BubbleStates {
   html_content: string;
   is_empty: boolean;
   word_count: number;
-  // Optional states (uncomment and add to Bubble if needed):
-  // json_content: string;
-  // character_count: number;
+  json_content: string;
 }
 
 export type BubbleEventName = 
@@ -116,6 +114,7 @@ export class BubbleMock {
       html_content: '',
       is_empty: true,
       word_count: 0,
+      json_content: '{}',
     };
   }
 

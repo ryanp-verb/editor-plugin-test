@@ -185,10 +185,7 @@ export class BubbleElement {
     this.bubble.publishState('html_content', this.editor.getHTML());
     this.bubble.publishState('is_empty', stats.isEmpty);
     this.bubble.publishState('word_count', stats.wordCount);
-    
-    // Only publish these if defined in Bubble:
-    // this.bubble.publishState('json_content', JSON.stringify(this.editor.getJSON()));
-    // this.bubble.publishState('character_count', stats.characterCount);
+    this.bubble.publishState('json_content', JSON.stringify(this.editor.getJSON()));
   }
 
   private handlePropertyChanges(changes: Partial<BubbleProperties>): void {

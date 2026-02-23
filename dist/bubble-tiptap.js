@@ -34761,7 +34761,7 @@ class C1 {
   syncStatesToBubble() {
     if (!this.editor) return;
     const e = this.editor.getStats();
-    this.bubble.publishState("html_content", this.editor.getHTML()), this.bubble.publishState("is_empty", e.isEmpty), this.bubble.publishState("word_count", e.wordCount);
+    this.bubble.publishState("html_content", this.editor.getHTML()), this.bubble.publishState("is_empty", e.isEmpty), this.bubble.publishState("word_count", e.wordCount), this.bubble.publishState("json_content", JSON.stringify(this.editor.getJSON()));
   }
   handlePropertyChanges(e) {
     var r, i, o;
@@ -34856,7 +34856,8 @@ class v1 {
     }, this.states = {
       html_content: "",
       is_empty: !0,
-      word_count: 0
+      word_count: 0,
+      json_content: "{}"
     };
   }
   // --- Property Management ---
