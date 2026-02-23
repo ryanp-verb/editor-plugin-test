@@ -232,10 +232,12 @@ export class BubbleElement {
       const inCooldown = now - this.lastInitialContentApplyAt < BubbleElement.INITIAL_CONTENT_APPLY_COOLDOWN_MS;
       const normalizedIncoming = this.sanitizeHtmlForStorage(html);
       const recentlyPublished = now - this.lastPublishAt < BubbleElement.POST_PUBLISH_GRACE_MS;
+      // When focused: only apply if we haven't published recently (avoids echo overwriting while typing).
+      // When unfocused: apply whenever content differs (can't be our echo; must be e.g. Revert).
       const isExternalChange =
         this.lastPublishedHtml !== null &&
         normalizedIncoming !== this.lastPublishedHtml &&
-        !recentlyPublished;
+        (editor.isFocused() ? !recentlyPublished : true);
       const isLoadWhileEmpty =
         editor.isEmpty() && !this.isEffectivelyEmptyHtml(html) && !inCooldown;
       const shouldApply =

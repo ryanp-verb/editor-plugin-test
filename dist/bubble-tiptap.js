@@ -34782,7 +34782,7 @@ const Wn = class Wn {
     var r, i, o;
     if (!this.editor) return;
     if ("initial_content" in e && e.initial_content !== void 0) {
-      const s = typeof e.initial_content == "string" ? e.initial_content : "", a = this.editor, l = Date.now(), c = l - this.lastInitialContentApplyAt < Wn.INITIAL_CONTENT_APPLY_COOLDOWN_MS, d = this.sanitizeHtmlForStorage(s), u = l - this.lastPublishAt < Wn.POST_PUBLISH_GRACE_MS, h = this.lastPublishedHtml !== null && d !== this.lastPublishedHtml && !u, f = a.isEmpty() && !this.isEffectivelyEmptyHtml(s) && !c;
+      const s = typeof e.initial_content == "string" ? e.initial_content : "", a = this.editor, l = Date.now(), c = l - this.lastInitialContentApplyAt < Wn.INITIAL_CONTENT_APPLY_COOLDOWN_MS, d = this.sanitizeHtmlForStorage(s), u = l - this.lastPublishAt < Wn.POST_PUBLISH_GRACE_MS, h = this.lastPublishedHtml !== null && d !== this.lastPublishedHtml && (a.isFocused() ? !u : !0), f = a.isEmpty() && !this.isEffectivelyEmptyHtml(s) && !c;
       a && !this.isEffectivelyEmptyHtml(s) && (f || h) && (this.lastInitialContentApplyAt = l, this.lastPublishedHtml = d, typeof requestAnimationFrame < "u" ? requestAnimationFrame(() => a.setContent(s)) : setTimeout(() => a.setContent(s), 0));
     }
     "placeholder" in e && this.editor.refreshPlaceholder(), "editable" in e && e.editable !== void 0 && this.editor.setEditable(e.editable), "toolbar_visible" in e && e.toolbar_visible !== void 0 && (e.toolbar_visible ? (r = this.toolbar) == null || r.show() : (i = this.toolbar) == null || i.hide()), ("min_height" in e || "max_height" in e) && this.applyDimensionStyles(this.bubble.getProperties()), [
