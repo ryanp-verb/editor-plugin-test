@@ -6,6 +6,12 @@
  */
 
 function(instance, properties, context) {
+    // Bubble may send initial_content from a dynamic expression (e.g. Thing's draft field).
+    // Accept either properties.initial_content (field name) or properties.AAA (element.json field id).
+    var initialContent = properties.initial_content != null ? properties.initial_content : (properties.AAA != null ? properties.AAA : '');
+    if (typeof initialContent !== 'string') initialContent = String(initialContent);
+    if (typeof console !== 'undefined' && console.log) console.log('[TipTap] initial_content length:', initialContent.length, 'preview:', initialContent.substring(0, 60) + (initialContent.length > 60 ? '...' : ''));
+
     // Bubble may send placeholder as .placeholder; ensure we have a string
     var placeholderValue = (properties.placeholder != null && properties.placeholder !== '')
         ? String(properties.placeholder)
@@ -14,7 +20,7 @@ function(instance, properties, context) {
     // Map Bubble properties to our internal format with defaults
     const allProperties = {
         // Core properties
-        initial_content: properties.initial_content || '',
+        initial_content: initialContent,
         placeholder: placeholderValue,
         editable: properties.editable !== false,
         toolbar_visible: properties.toolbar_visible !== false,
@@ -42,6 +48,7 @@ function(instance, properties, context) {
     
     // Always send all theme-relevant and content-relevant properties
     const changes = {
+        initial_content: allProperties.initial_content,
         placeholder: allProperties.placeholder,
         editable: allProperties.editable,
         toolbar_visible: allProperties.toolbar_visible,

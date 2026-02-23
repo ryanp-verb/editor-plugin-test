@@ -191,6 +191,20 @@ export class BubbleElement {
   private handlePropertyChanges(changes: Partial<BubbleProperties>): void {
     if (!this.editor) return;
 
+    // When initial_content is provided (e.g. bound to Thing's draft_html), set editor content.
+    // Defer so the editor view is mounted and ready (Bubble may call update before paint).
+    if ('initial_content' in changes && changes.initial_content !== undefined) {
+      const html = typeof changes.initial_content === 'string' ? changes.initial_content : '';
+      const editor = this.editor;
+      if (editor) {
+        if (typeof requestAnimationFrame !== 'undefined') {
+          requestAnimationFrame(() => editor.setContent(html || ''));
+        } else {
+          setTimeout(() => editor.setContent(html || ''), 0);
+        }
+      }
+    }
+
     if ('placeholder' in changes) {
       this.editor.refreshPlaceholder();
     }

@@ -86,6 +86,7 @@ function(instance, context) {
         if (callback) {
             const props = instance.data._currentProperties;
             callback({
+                initial_content: props.initial_content,
                 placeholder: props.placeholder,
                 editable: props.editable,
                 toolbar_visible: props.toolbar_visible,
