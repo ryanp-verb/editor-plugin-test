@@ -35,7 +35,11 @@ export class BubbleElement {
   private lastInitialContentApplyAt = 0;
   /** So we don't re-apply our own saved content; apply when incoming differs (e.g. Revert button) */
   private lastPublishedHtml: string | null = null;
+  /** After we publish, ignore incoming initial_content as "external" for this long (avoids echo overwrite). */
+  private lastPublishAt = 0;
   private static readonly INITIAL_CONTENT_APPLY_COOLDOWN_MS = 1500;
+  /** Don't apply "external" initial_content within this long after we last published. */
+  private static readonly POST_PUBLISH_GRACE_MS = 1500;
 
   constructor(config: BubbleElementConfig) {
     this.container = config.container;
@@ -204,6 +208,7 @@ export class BubbleElement {
     const rawHtml = this.editor.getHTML();
     const htmlForStorage = this.sanitizeHtmlForStorage(rawHtml);
     this.lastPublishedHtml = htmlForStorage;
+    this.lastPublishAt = Date.now();
 
     // Bubble uses individual publishState calls, not batch
     // State names must match what's defined in Bubble plugin
@@ -218,22 +223,23 @@ export class BubbleElement {
 
     // When initial_content is provided (e.g. bound to Thing's draft field), set editor when:
     // (1) Load: editor empty, content non-empty, not in cooldown.
-    // (2) External change: content differs from last published (e.g. Revert) AND editor not focused.
-    // We only apply external change when not focused so delayed workflow echoes (draft field
-    // updating after we published) don't overwrite the user while they're typing.
+    // (2) External change: content differs from last published (e.g. Revert) AND we haven't
+    //    published recently (post-publish grace). That way delayed workflow echoes never apply.
     if ('initial_content' in changes && changes.initial_content !== undefined) {
       const html = typeof changes.initial_content === 'string' ? changes.initial_content : '';
       const editor = this.editor;
       const now = Date.now();
       const inCooldown = now - this.lastInitialContentApplyAt < BubbleElement.INITIAL_CONTENT_APPLY_COOLDOWN_MS;
       const normalizedIncoming = this.sanitizeHtmlForStorage(html);
-      const isExternalChange = this.lastPublishedHtml !== null && normalizedIncoming !== this.lastPublishedHtml;
+      const recentlyPublished = now - this.lastPublishAt < BubbleElement.POST_PUBLISH_GRACE_MS;
+      const isExternalChange =
+        this.lastPublishedHtml !== null &&
+        normalizedIncoming !== this.lastPublishedHtml &&
+        !recentlyPublished;
       const isLoadWhileEmpty =
         editor.isEmpty() && !this.isEffectivelyEmptyHtml(html) && !inCooldown;
       const shouldApply =
-        editor &&
-        !this.isEffectivelyEmptyHtml(html) &&
-        (isLoadWhileEmpty || (isExternalChange && !editor.isFocused()));
+        editor && !this.isEffectivelyEmptyHtml(html) && (isLoadWhileEmpty || isExternalChange);
       if (shouldApply) {
         this.lastInitialContentApplyAt = now;
         this.lastPublishedHtml = normalizedIncoming;
