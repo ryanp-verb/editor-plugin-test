@@ -34857,8 +34857,8 @@ const ct = class ct {
 };
 K(ct, "INITIAL_CONTENT_APPLY_COOLDOWN_MS", 1500), /** Debounce: publish html_content at most this often while typing; always publish on blur. */
 K(ct, "PUBLISH_DEBOUNCE_MS", 1500), /** Cooldown after Set content (e.g. Revert) before "ready for revert" is true again; avoids double-apply. */
-K(ct, "READY_FOR_REVERT_COOLDOWN_MS", 400), /** State id in element.json for "Ready for revert" (bind button disabled when false). */
-K(ct, "STATE_READY_FOR_REVERT", "ABM");
+K(ct, "READY_FOR_REVERT_COOLDOWN_MS", 400), /** State key in Bubble for "Ready for revert" (bind button disabled when false). */
+K(ct, "STATE_READY_FOR_REVERT", "ready_for_revert");
 let zs = ct;
 class A1 {
   constructor() {
@@ -34899,7 +34899,7 @@ class A1 {
       is_empty: !0,
       word_count: 0,
       json_content: "{}",
-      ABM: !0
+      ready_for_revert: !0
     };
   }
   // --- Property Management ---

@@ -163,13 +163,16 @@ This generates:
 
 ### Deploying to Bubble
 
-1. In Bubble Plugin Editor, create a new element plugin
-2. Copy the contents of `plugin/element.json` to configure fields/states/events/actions
-3. Upload `dist/bubble-tiptap.iife.js` as a shared header
-4. Copy `plugin/initialize.js` to the Initialize function
-5. Copy `plugin/update.js` to the Update function
-6. Copy `plugin/preview.js` to the Preview function
-7. Add the CSS to the shared styles
+1. In Bubble Plugin Editor, create a new element plugin.
+2. **Element configuration:** Copy the contents of `plugin/element.json` into the element’s configuration (fields, states, events, actions). Do **not** paste `element.json` into the Element Code section.
+3. **Element Code** (if your setup uses it): Use a script and stylesheet that load the built bundle from your deployed URL, e.g.:
+   ```html
+   <script src="https://your-username.github.io/your-repo/dist/bubble-tiptap.iife.js"></script>
+   <link rel="stylesheet" href="https://your-username.github.io/your-repo/dist/bubble-tiptap.css">
+   ```
+4. Copy `plugin/initialize.js` to the Initialize function and `plugin/update.js` to the Update function.
+5. Copy `plugin/preview.js` to the Preview function (if needed).
+6. Add the CSS to the shared styles (or rely on the link in Element Code).
 
 ## Customization
 

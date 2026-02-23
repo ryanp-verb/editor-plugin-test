@@ -40,8 +40,8 @@ export class BubbleElement {
   /** Cooldown after Set content (e.g. Revert) before "ready for revert" is true again; avoids double-apply. */
   private static readonly READY_FOR_REVERT_COOLDOWN_MS = 400;
   private readyForRevertCooldownTimer: ReturnType<typeof setTimeout> | null = null;
-  /** State id in element.json for "Ready for revert" (bind button disabled when false). */
-  private static readonly STATE_READY_FOR_REVERT = 'ABM' as const;
+  /** State key in Bubble for "Ready for revert" (bind button disabled when false). */
+  private static readonly STATE_READY_FOR_REVERT = 'ready_for_revert';
 
   constructor(config: BubbleElementConfig) {
     this.container = config.container;

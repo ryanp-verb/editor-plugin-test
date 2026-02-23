@@ -116,7 +116,7 @@
       "display": "Character count",
       "type": "number"
     },
-    "ABM": {
+    "ready_for_revert": {
       "display": "Ready for revert",
       "type": "boolean"
     }
