@@ -177,14 +177,21 @@ export class BubbleElement {
     this.eventBridge.trigger('editor_blurred');
   }
 
+  /** Strip editor-only attributes from HTML so saved content is clean (e.g. no contenteditable on resize handles) */
+  private sanitizeHtmlForStorage(html: string): string {
+    return html.replace(/\s+contenteditable="false"/gi, '').replace(/\s+contenteditable='false'/gi, '');
+  }
+
   private syncStatesToBubble(): void {
     if (!this.editor) return;
 
     const stats = this.editor.getStats();
-    
+    const rawHtml = this.editor.getHTML();
+    const htmlForStorage = this.sanitizeHtmlForStorage(rawHtml);
+
     // Bubble uses individual publishState calls, not batch
     // State names must match what's defined in Bubble plugin
-    this.bubble.publishState('html_content', this.editor.getHTML());
+    this.bubble.publishState('html_content', htmlForStorage);
     this.bubble.publishState('is_empty', stats.isEmpty);
     this.bubble.publishState('word_count', stats.wordCount);
     this.bubble.publishState('json_content', JSON.stringify(this.editor.getJSON()));
@@ -193,12 +200,13 @@ export class BubbleElement {
   private handlePropertyChanges(changes: Partial<BubbleProperties>): void {
     if (!this.editor) return;
 
-    // When initial_content is provided (e.g. bound to Thing's draft_html), set editor content.
-    // Defer so the editor view is mounted and ready (Bubble may call update before paint).
+    // When initial_content is provided (e.g. bound to Thing's draft field), set editor content
+    // only when the editor is empty. Otherwise we'd overwrite the user's typing every time
+    // the workflow saves and Bubble sends the updated value back (causing janky reloads).
     if ('initial_content' in changes && changes.initial_content !== undefined) {
       const html = typeof changes.initial_content === 'string' ? changes.initial_content : '';
       const editor = this.editor;
-      if (editor) {
+      if (editor && editor.isEmpty()) {
         if (typeof requestAnimationFrame !== 'undefined') {
           requestAnimationFrame(() => editor.setContent(html || ''));
         } else {

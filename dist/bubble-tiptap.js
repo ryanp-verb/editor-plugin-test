@@ -34758,17 +34758,21 @@ class C1 {
   handleEditorBlur() {
     this.syncStatesToBubble(), this.eventBridge.trigger("editor_blurred");
   }
+  /** Strip editor-only attributes from HTML so saved content is clean (e.g. no contenteditable on resize handles) */
+  sanitizeHtmlForStorage(e) {
+    return e.replace(/\s+contenteditable="false"/gi, "").replace(/\s+contenteditable='false'/gi, "");
+  }
   syncStatesToBubble() {
     if (!this.editor) return;
-    const e = this.editor.getStats();
-    this.bubble.publishState("html_content", this.editor.getHTML()), this.bubble.publishState("is_empty", e.isEmpty), this.bubble.publishState("word_count", e.wordCount), this.bubble.publishState("json_content", JSON.stringify(this.editor.getJSON()));
+    const e = this.editor.getStats(), t = this.editor.getHTML(), r = this.sanitizeHtmlForStorage(t);
+    this.bubble.publishState("html_content", r), this.bubble.publishState("is_empty", e.isEmpty), this.bubble.publishState("word_count", e.wordCount), this.bubble.publishState("json_content", JSON.stringify(this.editor.getJSON()));
   }
   handlePropertyChanges(e) {
     var r, i, o;
     if (!this.editor) return;
     if ("initial_content" in e && e.initial_content !== void 0) {
       const s = typeof e.initial_content == "string" ? e.initial_content : "", a = this.editor;
-      a && (typeof requestAnimationFrame < "u" ? requestAnimationFrame(() => a.setContent(s || "")) : setTimeout(() => a.setContent(s || ""), 0));
+      a && a.isEmpty() && (typeof requestAnimationFrame < "u" ? requestAnimationFrame(() => a.setContent(s || "")) : setTimeout(() => a.setContent(s || ""), 0));
     }
     "placeholder" in e && this.editor.refreshPlaceholder(), "editable" in e && e.editable !== void 0 && this.editor.setEditable(e.editable), "toolbar_visible" in e && e.toolbar_visible !== void 0 && (e.toolbar_visible ? (r = this.toolbar) == null || r.show() : (i = this.toolbar) == null || i.hide()), ("min_height" in e || "max_height" in e) && this.applyDimensionStyles(this.bubble.getProperties()), [
       "theme",
