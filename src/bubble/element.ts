@@ -33,6 +33,8 @@ export class BubbleElement {
   private unsubscribeProps: (() => void) | null = null;
   private unsubscribeSystemTheme: (() => void) | null = null;
   private lastInitialContentApplyAt = 0;
+  /** So we don't re-apply our own saved content; apply when incoming differs (e.g. Revert button) */
+  private lastPublishedHtml: string | null = null;
   private static readonly INITIAL_CONTENT_APPLY_COOLDOWN_MS = 1500;
 
   constructor(config: BubbleElementConfig) {
@@ -67,19 +69,23 @@ export class BubbleElement {
     this.editorWrapper.appendChild(contentArea);
 
     // Initialize editor (placeholder via getter so it always reads current value from Bubble)
+    const initialContent = props.initial_content || '';
     this.editor = new ContentEditor({
       element: contentArea,
       getPlaceholder: () => {
         const p = this.bubble.getProperties();
         return (p.placeholder && String(p.placeholder).trim()) || 'Start writing...';
       },
-      content: props.initial_content || '',
+      content: initialContent,
       editable: props.editable,
       onUpdate: () => this.handleEditorUpdate(),
       onFocus: () => this.handleEditorFocus(),
       onBlur: () => this.handleEditorBlur(),
       onCreate: () => this.handleEditorCreate(),
     });
+    if (initialContent && !this.isEffectivelyEmptyHtml(initialContent)) {
+      this.lastPublishedHtml = this.sanitizeHtmlForStorage(initialContent);
+    }
 
     // Initialize toolbar
     this.toolbar = new Toolbar({
@@ -197,6 +203,7 @@ export class BubbleElement {
     const stats = this.editor.getStats();
     const rawHtml = this.editor.getHTML();
     const htmlForStorage = this.sanitizeHtmlForStorage(rawHtml);
+    this.lastPublishedHtml = htmlForStorage;
 
     // Bubble uses individual publishState calls, not batch
     // State names must match what's defined in Bubble plugin
@@ -209,22 +216,23 @@ export class BubbleElement {
   private handlePropertyChanges(changes: Partial<BubbleProperties>): void {
     if (!this.editor) return;
 
-    // When initial_content is provided (e.g. bound to Thing's draft field), set editor content
-    // only once on load: when editor is empty, content is non-empty, and we're not in cooldown.
-    // This avoids: (1) overwriting user's typing when workflow saves, (2) flashing from multiple
-    // Bubble updates, (3) wiping content by applying empty.
+    // When initial_content is provided (e.g. bound to Thing's draft field), set editor when:
+    // (1) Load: editor empty, content non-empty, not in cooldown.
+    // (2) External change: content differs from what we last published (e.g. Revert draft to saved).
+    // We do NOT apply when the value matches lastPublishedHtml (our own save echoing back).
     if ('initial_content' in changes && changes.initial_content !== undefined) {
       const html = typeof changes.initial_content === 'string' ? changes.initial_content : '';
       const editor = this.editor;
       const now = Date.now();
       const inCooldown = now - this.lastInitialContentApplyAt < BubbleElement.INITIAL_CONTENT_APPLY_COOLDOWN_MS;
-      const shouldApply =
-        editor &&
-        editor.isEmpty() &&
-        !this.isEffectivelyEmptyHtml(html) &&
-        !inCooldown;
+      const normalizedIncoming = this.sanitizeHtmlForStorage(html);
+      const isExternalChange = this.lastPublishedHtml !== null && normalizedIncoming !== this.lastPublishedHtml;
+      const isLoadWhileEmpty =
+        editor.isEmpty() && !this.isEffectivelyEmptyHtml(html) && !inCooldown;
+      const shouldApply = editor && !this.isEffectivelyEmptyHtml(html) && (isLoadWhileEmpty || isExternalChange);
       if (shouldApply) {
         this.lastInitialContentApplyAt = now;
+        this.lastPublishedHtml = normalizedIncoming;
         if (typeof requestAnimationFrame !== 'undefined') {
           requestAnimationFrame(() => editor!.setContent(html));
         } else {
