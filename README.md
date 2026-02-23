@@ -111,6 +111,24 @@ bubble-tiptap-plugin/
 | `word_count` | number | Word count |
 | `character_count` | number | Character count |
 
+### Autobinding (built-in "Field to modify")
+
+To use Bubble’s **Enable auto-binding on parent element’s thing** with **Field to modify** (e.g. a draft HTML field):
+
+1. **Plugin element (Bubble plugin editor)**  
+   - Under **General properties**, set **Modify fields with type** to **text** so “Field to modify” appears.  
+   - Expose a **text** state that will hold the editor HTML (e.g. **HTML content** / `html_content`). Bubble often uses the first text-type state for autobinding when the field to modify is text.
+
+2. **App (Bubble app editor)**  
+   - Put the editor in a **group** (or page) that has **Type of content** set to the type that has your draft field.  
+   - Enable **Enable auto-binding on parent element’s thing** and set **Field to modify** to that field (e.g. “HTML draft content”).  
+   - In **Data > Privacy**, allow “current user” (or the right role) to **edit** the type and the field being modified.
+
+3. **Behavior**  
+   - The plugin publishes the current HTML to the exposed state on every change and **on blur**.  
+   - Bubble reads that state and writes it to the chosen field when appropriate (often on blur).  
+   - If autobinding still doesn’t write, use a workflow: **When editor’s content_changed** (or **editor_blurred**) → **Make changes to thing** → set the draft field to **This element’s HTML content**.
+
 ### Events
 
 | Event | Description |

@@ -172,6 +172,8 @@ export class BubbleElement {
   }
 
   private handleEditorBlur(): void {
+    // Publish current content so Bubble's autobinding can write to the "Field to modify"
+    this.syncStatesToBubble();
     this.eventBridge.trigger('editor_blurred');
   }
 

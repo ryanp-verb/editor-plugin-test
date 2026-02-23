@@ -34756,7 +34756,7 @@ class C1 {
     this.eventBridge.trigger("editor_focused");
   }
   handleEditorBlur() {
-    this.eventBridge.trigger("editor_blurred");
+    this.syncStatesToBubble(), this.eventBridge.trigger("editor_blurred");
   }
   syncStatesToBubble() {
     if (!this.editor) return;
