@@ -110,6 +110,7 @@ bubble-tiptap-plugin/
 | `is_empty` | boolean | Whether the editor is empty |
 | `word_count` | number | Word count |
 | `character_count` | number | Character count |
+| **Ready for revert** | boolean | `true` when the editor can accept a **Set content** action (e.g. Revert). Becomes `false` for 400ms after each **Set content** run. Use to disable the Revert button: set the button’s **This element is disabled** to **TipTap’s Ready for revert is false** (or **not** Ready for revert) so the button is disabled during the cooldown and users don’t trigger Revert twice in a row. |
 
 ### Autobinding (built-in "Field to modify")
 

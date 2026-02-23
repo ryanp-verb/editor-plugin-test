@@ -115,6 +115,10 @@
     "ABA": {
       "display": "Character count",
       "type": "number"
+    },
+    "ABM": {
+      "display": "Ready for revert",
+      "type": "boolean"
     }
   },
   "events": {

@@ -37,6 +37,11 @@ export class BubbleElement {
   /** Debounce: publish html_content at most this often while typing; always publish on blur. */
   private static readonly PUBLISH_DEBOUNCE_MS = 1500;
   private publishDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Cooldown after Set content (e.g. Revert) before "ready for revert" is true again; avoids double-apply. */
+  private static readonly READY_FOR_REVERT_COOLDOWN_MS = 400;
+  private readyForRevertCooldownTimer: ReturnType<typeof setTimeout> | null = null;
+  /** State id in element.json for "Ready for revert" (bind button disabled when false). */
+  private static readonly STATE_READY_FOR_REVERT = 'ABM' as const;
 
   constructor(config: BubbleElementConfig) {
     this.container = config.container;
@@ -103,8 +108,10 @@ export class BubbleElement {
     });
     this.sidebar.hide();
 
-    // Setup action handler
-    this.actionHandler = new ActionHandler(this.editor, this.bubble);
+    // Setup action handler (onSetContent: cooldown "ready for revert" and sync reverted content immediately)
+    this.actionHandler = new ActionHandler(this.editor, this.bubble, {
+      onSetContent: () => this.handleSetContentFromAction(),
+    });
 
     // Listen for property changes
     this.unsubscribeProps = this.bubble.onPropertyChange((changes) => {
@@ -160,6 +167,7 @@ export class BubbleElement {
     // Do NOT sync state here. The editor is often still empty (initial_content from Bubble
     // hasn't arrived yet). Syncing would publish <p></p> and the workflow would overwrite
     // the draft field with empty. First sync happens on first edit or blur instead.
+    this.bubble.publishState(BubbleElement.STATE_READY_FOR_REVERT, true);
   }
 
   private handleEditorUpdate(): void {
@@ -197,6 +205,20 @@ export class BubbleElement {
       clearTimeout(this.publishDebounceTimer);
       this.publishDebounceTimer = null;
     }
+  }
+
+  /** Called when Set content action runs (e.g. Revert). Cooldown "ready for revert" and sync now. */
+  private handleSetContentFromAction(): void {
+    this.bubble.publishState(BubbleElement.STATE_READY_FOR_REVERT, false);
+    this.cancelScheduledSync();
+    this.syncStatesToBubble();
+    if (this.readyForRevertCooldownTimer !== null) {
+      clearTimeout(this.readyForRevertCooldownTimer);
+    }
+    this.readyForRevertCooldownTimer = setTimeout(() => {
+      this.readyForRevertCooldownTimer = null;
+      this.bubble.publishState(BubbleElement.STATE_READY_FOR_REVERT, true);
+    }, BubbleElement.READY_FOR_REVERT_COOLDOWN_MS);
   }
 
   /** Strip editor-only attributes from HTML so saved content is clean (e.g. no contenteditable on resize handles) */
@@ -347,6 +369,10 @@ export class BubbleElement {
    */
   destroy(): void {
     this.cancelScheduledSync();
+    if (this.readyForRevertCooldownTimer !== null) {
+      clearTimeout(this.readyForRevertCooldownTimer);
+      this.readyForRevertCooldownTimer = null;
+    }
     this.unsubscribeProps?.();
     this.unsubscribeSystemTheme?.();
     this.actionHandler?.destroy();

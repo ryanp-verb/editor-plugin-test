@@ -1,17 +1,24 @@
 import { ContentEditor } from '../editor/Editor';
 import { BubbleMock, BubbleAction } from '../mock/BubbleMock';
 
+export interface ActionHandlerOptions {
+  /** Called after set_content runs so the element can e.g. set "ready for revert" cooldown and sync immediately. */
+  onSetContent?: () => void;
+}
+
 /**
  * ActionHandler - Handles Bubble actions and routes them to the editor
  */
 export class ActionHandler {
   private editor: ContentEditor;
   private bubble: BubbleMock;
+  private options: ActionHandlerOptions;
   private unsubscribe: (() => void) | null = null;
 
-  constructor(editor: ContentEditor, bubble: BubbleMock) {
+  constructor(editor: ContentEditor, bubble: BubbleMock, options: ActionHandlerOptions = {}) {
     this.editor = editor;
     this.bubble = bubble;
+    this.options = options;
     this.setupActionListener();
   }
 
@@ -46,6 +53,7 @@ export class ActionHandler {
     const content = params.content as string | undefined;
     if (content !== undefined) {
       this.editor.setContent(content);
+      this.options.onSetContent?.();
     }
   }
 

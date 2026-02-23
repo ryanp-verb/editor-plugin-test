@@ -43,6 +43,8 @@ export interface BubbleStates {
   is_empty: boolean;
   word_count: number;
   json_content: string;
+  /** State id ABM in element.json - "Ready for revert" (false during cooldown after Set content). */
+  ABM?: boolean;
 }
 
 export type BubbleEventName = 
@@ -115,6 +117,7 @@ export class BubbleMock {
       is_empty: true,
       word_count: 0,
       json_content: '{}',
+      ABM: true,
     };
   }
 
