@@ -152,8 +152,9 @@ export class BubbleElement {
   }
 
   private handleEditorCreate(): void {
-    // Publish initial state
-    this.syncStatesToBubble();
+    // Do NOT sync state here. The editor is often still empty (initial_content from Bubble
+    // hasn't arrived yet). Syncing would publish <p></p> and the workflow would overwrite
+    // the draft field with empty. First sync happens on first edit or blur instead.
   }
 
   private handleEditorUpdate(): void {

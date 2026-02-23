@@ -34743,7 +34743,6 @@ class C1 {
     w1(this.container, t);
   }
   handleEditorCreate() {
-    this.syncStatesToBubble();
   }
   handleEditorUpdate() {
     var e, t;
