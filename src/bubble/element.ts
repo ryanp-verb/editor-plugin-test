@@ -33,13 +33,10 @@ export class BubbleElement {
   private unsubscribeProps: (() => void) | null = null;
   private unsubscribeSystemTheme: (() => void) | null = null;
   private lastInitialContentApplyAt = 0;
-  /** So we don't re-apply our own saved content; apply when incoming differs (e.g. Revert button) */
-  private lastPublishedHtml: string | null = null;
-  /** After we publish, ignore incoming initial_content as "external" for this long (avoids echo overwrite). */
-  private lastPublishAt = 0;
   private static readonly INITIAL_CONTENT_APPLY_COOLDOWN_MS = 1500;
-  /** Don't apply "external" initial_content within this long after we last published. */
-  private static readonly POST_PUBLISH_GRACE_MS = 1500;
+  /** Debounce: publish html_content at most this often while typing; always publish on blur. */
+  private static readonly PUBLISH_DEBOUNCE_MS = 1500;
+  private publishDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(config: BubbleElementConfig) {
     this.container = config.container;
@@ -87,10 +84,6 @@ export class BubbleElement {
       onBlur: () => this.handleEditorBlur(),
       onCreate: () => this.handleEditorCreate(),
     });
-    if (initialContent && !this.isEffectivelyEmptyHtml(initialContent)) {
-      this.lastPublishedHtml = this.sanitizeHtmlForStorage(initialContent);
-    }
-
     // Initialize toolbar
     this.toolbar = new Toolbar({
       editor: this.editor,
@@ -170,10 +163,11 @@ export class BubbleElement {
   }
 
   private handleEditorUpdate(): void {
-    // Sync states
-    this.syncStatesToBubble();
-    
-    // Trigger content_changed event (debounced)
+    // Debounce publishing to Bubble so the draft field isn't updated on every keystroke
+    // (avoids echo/overwrite). Full sync runs on blur. Reference: other TipTap plugin uses
+    // 2s debounce for autobinding + immediate on blur.
+    this.scheduleSyncToBubble();
+
     this.eventBridge.triggerDebounced('content_changed', {
       html: this.editor?.getHTML(),
       isEmpty: this.editor?.isEmpty(),
@@ -185,9 +179,24 @@ export class BubbleElement {
   }
 
   private handleEditorBlur(): void {
-    // Publish current content so Bubble's autobinding can write to the "Field to modify"
+    this.cancelScheduledSync();
     this.syncStatesToBubble();
     this.eventBridge.trigger('editor_blurred');
+  }
+
+  private scheduleSyncToBubble(): void {
+    if (this.publishDebounceTimer !== null) return;
+    this.publishDebounceTimer = setTimeout(() => {
+      this.publishDebounceTimer = null;
+      this.syncStatesToBubble();
+    }, BubbleElement.PUBLISH_DEBOUNCE_MS);
+  }
+
+  private cancelScheduledSync(): void {
+    if (this.publishDebounceTimer !== null) {
+      clearTimeout(this.publishDebounceTimer);
+      this.publishDebounceTimer = null;
+    }
   }
 
   /** Strip editor-only attributes from HTML so saved content is clean (e.g. no contenteditable on resize handles) */
@@ -207,8 +216,6 @@ export class BubbleElement {
     const stats = this.editor.getStats();
     const rawHtml = this.editor.getHTML();
     const htmlForStorage = this.sanitizeHtmlForStorage(rawHtml);
-    this.lastPublishedHtml = htmlForStorage;
-    this.lastPublishAt = Date.now();
 
     // Bubble uses individual publishState calls, not batch
     // State names must match what's defined in Bubble plugin
@@ -221,30 +228,19 @@ export class BubbleElement {
   private handlePropertyChanges(changes: Partial<BubbleProperties>): void {
     if (!this.editor) return;
 
-    // When initial_content is provided (e.g. bound to Thing's draft field), set editor when:
-    // (1) Load: editor empty, content non-empty, not in cooldown.
-    // (2) External change: content differs from last published (e.g. Revert) AND we haven't
-    //    published recently (post-publish grace). That way delayed workflow echoes never apply.
+    // One-way binding (like reference plugin): use initial_content only at first load.
+    // Never re-apply from property updates after that — avoids echo overwriting. For "Revert
+    // draft to saved", use the plugin action "Set content" with saved HTML in the workflow.
     if ('initial_content' in changes && changes.initial_content !== undefined) {
       const html = typeof changes.initial_content === 'string' ? changes.initial_content : '';
       const editor = this.editor;
       const now = Date.now();
       const inCooldown = now - this.lastInitialContentApplyAt < BubbleElement.INITIAL_CONTENT_APPLY_COOLDOWN_MS;
-      const normalizedIncoming = this.sanitizeHtmlForStorage(html);
-      const recentlyPublished = now - this.lastPublishAt < BubbleElement.POST_PUBLISH_GRACE_MS;
-      // When focused: only apply if we haven't published recently (avoids echo overwriting while typing).
-      // When unfocused: apply whenever content differs (can't be our echo; must be e.g. Revert).
-      const isExternalChange =
-        this.lastPublishedHtml !== null &&
-        normalizedIncoming !== this.lastPublishedHtml &&
-        (editor.isFocused() ? !recentlyPublished : true);
       const isLoadWhileEmpty =
         editor.isEmpty() && !this.isEffectivelyEmptyHtml(html) && !inCooldown;
-      const shouldApply =
-        editor && !this.isEffectivelyEmptyHtml(html) && (isLoadWhileEmpty || isExternalChange);
+      const shouldApply = editor && !this.isEffectivelyEmptyHtml(html) && isLoadWhileEmpty;
       if (shouldApply) {
         this.lastInitialContentApplyAt = now;
-        this.lastPublishedHtml = normalizedIncoming;
         if (typeof requestAnimationFrame !== 'undefined') {
           requestAnimationFrame(() => editor!.setContent(html));
         } else {
@@ -350,6 +346,7 @@ export class BubbleElement {
    * Destroy the element and clean up
    */
   destroy(): void {
+    this.cancelScheduledSync();
     this.unsubscribeProps?.();
     this.unsubscribeSystemTheme?.();
     this.actionHandler?.destroy();
