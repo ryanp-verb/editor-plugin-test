@@ -218,8 +218,9 @@ export class BubbleElement {
 
     // When initial_content is provided (e.g. bound to Thing's draft field), set editor when:
     // (1) Load: editor empty, content non-empty, not in cooldown.
-    // (2) External change: content differs from what we last published (e.g. Revert draft to saved).
-    // We do NOT apply when the value matches lastPublishedHtml (our own save echoing back).
+    // (2) External change: content differs from last published (e.g. Revert) AND editor not focused.
+    // We only apply external change when not focused so delayed workflow echoes (draft field
+    // updating after we published) don't overwrite the user while they're typing.
     if ('initial_content' in changes && changes.initial_content !== undefined) {
       const html = typeof changes.initial_content === 'string' ? changes.initial_content : '';
       const editor = this.editor;
@@ -229,7 +230,10 @@ export class BubbleElement {
       const isExternalChange = this.lastPublishedHtml !== null && normalizedIncoming !== this.lastPublishedHtml;
       const isLoadWhileEmpty =
         editor.isEmpty() && !this.isEffectivelyEmptyHtml(html) && !inCooldown;
-      const shouldApply = editor && !this.isEffectivelyEmptyHtml(html) && (isLoadWhileEmpty || isExternalChange);
+      const shouldApply =
+        editor &&
+        !this.isEffectivelyEmptyHtml(html) &&
+        (isLoadWhileEmpty || (isExternalChange && !editor.isFocused()));
       if (shouldApply) {
         this.lastInitialContentApplyAt = now;
         this.lastPublishedHtml = normalizedIncoming;
