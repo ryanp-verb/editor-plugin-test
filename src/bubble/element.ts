@@ -32,6 +32,8 @@ export class BubbleElement {
   private editorWrapper: HTMLElement | null = null;
   private unsubscribeProps: (() => void) | null = null;
   private unsubscribeSystemTheme: (() => void) | null = null;
+  private lastInitialContentApplyAt = 0;
+  private static readonly INITIAL_CONTENT_APPLY_COOLDOWN_MS = 1500;
 
   constructor(config: BubbleElementConfig) {
     this.container = config.container;
@@ -183,6 +185,12 @@ export class BubbleElement {
     return html.replace(/\s+contenteditable="false"/gi, '').replace(/\s+contenteditable='false'/gi, '');
   }
 
+  /** True if HTML is empty or just an empty paragraph (don't use for initial load - avoids overwriting with empty) */
+  private isEffectivelyEmptyHtml(html: string): boolean {
+    const trimmed = html.trim();
+    return !trimmed || trimmed === '<p></p>' || trimmed === '<p><br></p>' || trimmed === '<p><br/></p>';
+  }
+
   private syncStatesToBubble(): void {
     if (!this.editor) return;
 
@@ -202,16 +210,25 @@ export class BubbleElement {
     if (!this.editor) return;
 
     // When initial_content is provided (e.g. bound to Thing's draft field), set editor content
-    // only when the editor is empty. Otherwise we'd overwrite the user's typing every time
-    // the workflow saves and Bubble sends the updated value back (causing janky reloads).
+    // only once on load: when editor is empty, content is non-empty, and we're not in cooldown.
+    // This avoids: (1) overwriting user's typing when workflow saves, (2) flashing from multiple
+    // Bubble updates, (3) wiping content by applying empty.
     if ('initial_content' in changes && changes.initial_content !== undefined) {
       const html = typeof changes.initial_content === 'string' ? changes.initial_content : '';
       const editor = this.editor;
-      if (editor && editor.isEmpty()) {
+      const now = Date.now();
+      const inCooldown = now - this.lastInitialContentApplyAt < BubbleElement.INITIAL_CONTENT_APPLY_COOLDOWN_MS;
+      const shouldApply =
+        editor &&
+        editor.isEmpty() &&
+        !this.isEffectivelyEmptyHtml(html) &&
+        !inCooldown;
+      if (shouldApply) {
+        this.lastInitialContentApplyAt = now;
         if (typeof requestAnimationFrame !== 'undefined') {
-          requestAnimationFrame(() => editor.setContent(html || ''));
+          requestAnimationFrame(() => editor!.setContent(html));
         } else {
-          setTimeout(() => editor.setContent(html || ''), 0);
+          setTimeout(() => editor!.setContent(html), 0);
         }
       }
     }
