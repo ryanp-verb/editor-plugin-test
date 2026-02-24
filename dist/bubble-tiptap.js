@@ -32116,6 +32116,17 @@ const Kw = Ce.create({
       ["div", { class: "column-content" }, 0],
       l
     ];
+  },
+  addKeyboardShortcuts() {
+    return {
+      Enter: () => {
+        const { state: n } = this.editor, { $from: e } = n.selection;
+        for (let t = e.depth; t > 0; t--)
+          if (e.node(t).type.name === "column")
+            return this.editor.commands.splitBlock();
+        return !1;
+      }
+    };
   }
 }), Gw = Ee.create({
   name: "columnLayout",
