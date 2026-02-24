@@ -177,10 +177,24 @@ export class ContentEditor {
     chain.setParagraph().run();
   }
 
-  // Link
-  setLink(url: string, opts?: EditorCommandOptions): void {
+  // Link (openInNewTab sets target="_blank" and rel="noopener noreferrer" on the <a> tag)
+  setLink(
+    url: string,
+    opts?: EditorCommandOptions & { openInNewTab?: boolean }
+  ): void {
     const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
-    chain.setLink({ href: url }).run();
+    chain
+      .setLink({
+        href: url,
+        target: opts?.openInNewTab ? '_blank' : null,
+        rel: opts?.openInNewTab ? 'noopener noreferrer' : null,
+      })
+      .run();
+  }
+
+  getLinkAttributes(): { href?: string; target?: string } | null {
+    if (!this.editor.isActive('link')) return null;
+    return this.editor.getAttributes('link') as { href?: string; target?: string };
   }
 
   unsetLink(opts?: EditorCommandOptions): void {

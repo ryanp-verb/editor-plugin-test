@@ -1,4 +1,5 @@
 import { ContentEditor } from './Editor';
+import { showLinkPopup } from './LinkPopup';
 import { icons } from '../utils/icons';
 import { DragDropManager, DragData } from '../utils/DragDropManager';
 
@@ -357,15 +358,14 @@ export class Toolbar {
   }
 
   private handleLinkAction(): void {
-    if (this.editor.isActive('link')) {
-      this.editor.unsetLink();
-      return;
-    }
-    
-    const url = prompt('Enter URL:');
-    if (url) {
-      this.editor.setLink(url);
-    }
+    const isEdit = this.editor.isActive('link');
+    const attrs = this.editor.getLinkAttributes();
+    showLinkPopup(this.editor, {
+      initialUrl: attrs?.href ?? '',
+      initialOpenInNewTab: attrs?.target === '_blank',
+      isEdit,
+      noFocus: false,
+    });
   }
 
   private handleImageAction(): void {

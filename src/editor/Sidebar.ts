@@ -10,6 +10,7 @@
  */
 
 import { ContentEditor, EditorCommandOptions } from './Editor';
+import { showLinkPopup } from './LinkPopup';
 import { defaultColorPalette } from '../utils/themeApplier';
 
 /** Run editor commands without focusing (keeps toolbar hidden when sidebar is open). */
@@ -1063,14 +1064,14 @@ export class Sidebar {
   }
 
   private handleLinkAction(): void {
-    if (this.editor.isActive('link')) {
-      this.editor.unsetLink(NO_FOCUS);
-      return;
-    }
-    const url = prompt('Enter URL:');
-    if (url) {
-      this.editor.setLink(url, NO_FOCUS);
-    }
+    const isEdit = this.editor.isActive('link');
+    const attrs = this.editor.getLinkAttributes();
+    showLinkPopup(this.editor, {
+      initialUrl: attrs?.href ?? '',
+      initialOpenInNewTab: attrs?.target === '_blank',
+      isEdit,
+      noFocus: true,
+    });
   }
 
   private handleImageAction(): void {
