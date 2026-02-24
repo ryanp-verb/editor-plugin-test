@@ -34,19 +34,6 @@ export class BubbleElement {
   private unsubscribeSystemTheme: (() => void) | null = null;
   private lastInitialContentApplyAt = 0;
   private static readonly INITIAL_CONTENT_APPLY_COOLDOWN_MS = 1500;
-  /** Debounce: publish html_content at most this often while typing; always publish on blur. */
-  private static readonly PUBLISH_DEBOUNCE_MS = 1500;
-  private publishDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-  /** Cooldown after Set content (e.g. Revert) before "ready for revert" is true again; avoids double-apply. */
-  private static readonly READY_FOR_REVERT_COOLDOWN_MS = 400;
-  private readyForRevertCooldownTimer: ReturnType<typeof setTimeout> | null = null;
-  /** State key in Bubble for "Ready for revert" (bind button disabled when false). */
-  private static readonly STATE_READY_FOR_REVERT = 'ready_for_revert';
-  /** After applying set_content_trigger, ignore it for this long to break Update echo loops. */
-  private static readonly SET_CONTENT_TRIGGER_COOLDOWN_MS = 2000;
-  private lastSetContentTriggerApplyAt = 0;
-  /** Skip the next sync/content_changed when we just applied initial_content to avoid a loop. */
-  private skipNextSync = false;
 
   constructor(config: BubbleElementConfig) {
     this.container = config.container;
@@ -113,10 +100,8 @@ export class BubbleElement {
     });
     this.sidebar.hide();
 
-    // Setup action handler (onSetContent: cooldown "ready for revert" and sync reverted content immediately)
-    this.actionHandler = new ActionHandler(this.editor, this.bubble, {
-      onSetContent: () => this.handleSetContentFromAction(),
-    });
+    // Setup action handler
+    this.actionHandler = new ActionHandler(this.editor, this.bubble);
 
     // Listen for property changes
     this.unsubscribeProps = this.bubble.onPropertyChange((changes) => {
@@ -170,20 +155,11 @@ export class BubbleElement {
 
   private handleEditorCreate(): void {
     // Do NOT sync state here. The editor is often still empty (initial_content from Bubble
-    // hasn't arrived yet). Syncing would publish <p></p> and the workflow would overwrite
-    // the draft field with empty. First sync happens on first edit or blur instead.
-    this.bubble.publishState(BubbleElement.STATE_READY_FOR_REVERT, true);
+    // hasn't arrived yet). Syncing would publish <p></p> and overwrite the bound field with empty.
   }
 
   private handleEditorUpdate(): void {
-    // When we just applied initial_content, skip one sync so we don't fire content_changed and
-    // trigger the user's workflow (draft = content), which would make Bubble re-run Update in a loop.
-    if (this.skipNextSync) {
-      this.skipNextSync = false;
-      return;
-    }
-    // Debounce publishing to Bubble so the draft field isn't updated on every keystroke
-    this.scheduleSyncToBubble();
+    this.syncStatesToBubble();
     this.eventBridge.triggerDebounced('content_changed', {
       html: this.editor?.getHTML(),
       isEmpty: this.editor?.isEmpty(),
@@ -195,38 +171,8 @@ export class BubbleElement {
   }
 
   private handleEditorBlur(): void {
-    this.cancelScheduledSync();
     this.syncStatesToBubble();
     this.eventBridge.trigger('editor_blurred');
-  }
-
-  private scheduleSyncToBubble(): void {
-    if (this.publishDebounceTimer !== null) return;
-    this.publishDebounceTimer = setTimeout(() => {
-      this.publishDebounceTimer = null;
-      this.syncStatesToBubble();
-    }, BubbleElement.PUBLISH_DEBOUNCE_MS);
-  }
-
-  private cancelScheduledSync(): void {
-    if (this.publishDebounceTimer !== null) {
-      clearTimeout(this.publishDebounceTimer);
-      this.publishDebounceTimer = null;
-    }
-  }
-
-  /** Called when Set content action runs (e.g. Revert). Cooldown "ready for revert" and sync now. */
-  private handleSetContentFromAction(): void {
-    this.bubble.publishState(BubbleElement.STATE_READY_FOR_REVERT, false);
-    this.cancelScheduledSync();
-    this.syncStatesToBubble();
-    if (this.readyForRevertCooldownTimer !== null) {
-      clearTimeout(this.readyForRevertCooldownTimer);
-    }
-    this.readyForRevertCooldownTimer = setTimeout(() => {
-      this.readyForRevertCooldownTimer = null;
-      this.bubble.publishState(BubbleElement.STATE_READY_FOR_REVERT, true);
-    }, BubbleElement.READY_FOR_REVERT_COOLDOWN_MS);
   }
 
   /** Strip editor-only attributes from HTML so saved content is clean (e.g. no contenteditable on resize handles) */
@@ -258,47 +204,19 @@ export class BubbleElement {
   private handlePropertyChanges(changes: Partial<BubbleProperties>): void {
     if (!this.editor) return;
 
-    // Set content trigger: when workflow sets this property (e.g. to saved HTML), replace editor content.
-    // Cooldown: after we apply once, ignore trigger for 2s so repeated Updates from Bubble don't re-apply (loop).
-    // Also skip when incoming matches current content.
-    if ('set_content_trigger' in changes && changes.set_content_trigger !== undefined) {
-      const html = typeof changes.set_content_trigger === 'string' ? changes.set_content_trigger : '';
-      if (html && !this.isEffectivelyEmptyHtml(html)) {
-        const now = Date.now();
-        const inCooldown = now - this.lastSetContentTriggerApplyAt < BubbleElement.SET_CONTENT_TRIGGER_COOLDOWN_MS;
-        const normalizedIncoming = this.sanitizeHtmlForStorage(html);
-        const currentHtml = this.sanitizeHtmlForStorage(this.editor.getHTML());
-        if (!inCooldown && normalizedIncoming !== currentHtml) {
-          this.lastSetContentTriggerApplyAt = now;
-          const editor = this.editor;
-          if (typeof requestAnimationFrame !== 'undefined') {
-            requestAnimationFrame(() => {
-              editor!.setContent(html);
-              this.handleSetContentFromAction();
-            });
-          } else {
-            setTimeout(() => {
-              editor!.setContent(html);
-              this.handleSetContentFromAction();
-            }, 0);
-          }
-        }
-      }
-    }
-
-    // One-way binding (like reference plugin): use initial_content only at first load.
-    // Never re-apply from property updates after that — avoids echo overwriting.
+    // Apply initial_content only when editor is empty and we have content (first load); cooldown avoids flashing.
     if ('initial_content' in changes && changes.initial_content !== undefined) {
       const html = typeof changes.initial_content === 'string' ? changes.initial_content : '';
       const editor = this.editor;
       const now = Date.now();
       const inCooldown = now - this.lastInitialContentApplyAt < BubbleElement.INITIAL_CONTENT_APPLY_COOLDOWN_MS;
-      const isLoadWhileEmpty =
-        editor.isEmpty() && !this.isEffectivelyEmptyHtml(html) && !inCooldown;
-      const shouldApply = editor && !this.isEffectivelyEmptyHtml(html) && isLoadWhileEmpty;
+      const shouldApply =
+        editor &&
+        editor.isEmpty() &&
+        !this.isEffectivelyEmptyHtml(html) &&
+        !inCooldown;
       if (shouldApply) {
         this.lastInitialContentApplyAt = now;
-        this.skipNextSync = true; // avoid sync → content_changed → workflow → Update loop
         if (typeof requestAnimationFrame !== 'undefined') {
           requestAnimationFrame(() => editor!.setContent(html));
         } else {
@@ -404,11 +322,6 @@ export class BubbleElement {
    * Destroy the element and clean up
    */
   destroy(): void {
-    this.cancelScheduledSync();
-    if (this.readyForRevertCooldownTimer !== null) {
-      clearTimeout(this.readyForRevertCooldownTimer);
-      this.readyForRevertCooldownTimer = null;
-    }
     this.unsubscribeProps?.();
     this.unsubscribeSystemTheme?.();
     this.actionHandler?.destroy();

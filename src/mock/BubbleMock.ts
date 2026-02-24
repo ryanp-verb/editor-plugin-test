@@ -15,8 +15,6 @@ export interface BubbleProperties {
   toolbar_visible: boolean;
   min_height: number;
   max_height: number;
-  /** When set by workflow (e.g. to saved HTML), editor content is replaced. Use for Revert without Run script. */
-  set_content_trigger?: string;
   // Theming
   theme: 'light' | 'dark' | 'auto';
   // Brand colors (configurable per-app)
@@ -45,8 +43,6 @@ export interface BubbleStates {
   is_empty: boolean;
   word_count: number;
   json_content: string;
-  /** "Ready for revert" (false during cooldown after Set content). */
-  ready_for_revert?: boolean;
 }
 
 export type BubbleEventName = 
@@ -119,7 +115,6 @@ export class BubbleMock {
       is_empty: true,
       word_count: 0,
       json_content: '{}',
-      ready_for_revert: true,
     };
   }
 

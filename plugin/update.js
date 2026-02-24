@@ -10,27 +10,11 @@ function(instance, properties, context) {
     // Accept either properties.initial_content (field name) or properties.AAA (element.json field id).
     var initialContent = properties.initial_content != null ? properties.initial_content : (properties.AAA != null ? properties.AAA : '');
     if (typeof initialContent !== 'string') initialContent = String(initialContent);
-    if (typeof console !== 'undefined' && console.log) console.log('[TipTap] initial_content length:', initialContent.length, 'preview:', initialContent.substring(0, 60) + (initialContent.length > 60 ? '...' : ''));
 
     // Bubble may send placeholder as .placeholder; ensure we have a string
     var placeholderValue = (properties.placeholder != null && properties.placeholder !== '')
         ? String(properties.placeholder)
         : 'Start writing...';
-
-    // Set content trigger: when workflow sets this to HTML, we replace editor content (e.g. Revert)
-    // Accept set_content (field name in Bubble), set_content_trigger, or AAS (element.json id)
-    // Bubble may send dynamic values as plain string or as object; normalize to string
-    function toStr(v) {
-        if (v == null) return '';
-        if (typeof v === 'string') return v;
-        if (typeof v === 'object' && typeof v.get === 'function') return toStr(v.get());
-        return String(v);
-    }
-    var rawSetContent = properties.set_content != null ? properties.set_content : (properties.set_content_trigger != null ? properties.set_content_trigger : properties.AAS);
-    var setContentTrigger = rawSetContent != null ? toStr(rawSetContent) : '';
-    if (typeof console !== 'undefined' && console.log && setContentTrigger.length > 0) {
-        console.log('[TipTap] set_content_trigger received, length:', setContentTrigger.length);
-    }
 
     // Map Bubble properties to our internal format with defaults
     const allProperties = {
@@ -41,7 +25,6 @@ function(instance, properties, context) {
         toolbar_visible: properties.toolbar_visible !== false,
         min_height: properties.min_height || 200,
         max_height: properties.max_height || 0,
-        set_content_trigger: setContentTrigger,
         // Theme properties
         theme: properties.theme || 'light',
         accent_color: properties.accent_color || '#513EDF',
@@ -62,34 +45,18 @@ function(instance, properties, context) {
         return;
     }
     
-    // Always send all theme-relevant and content-relevant properties
+    // Forward property changes to the element
     const changes = {
         initial_content: allProperties.initial_content,
         placeholder: allProperties.placeholder,
         editable: allProperties.editable,
         toolbar_visible: allProperties.toolbar_visible,
         min_height: allProperties.min_height,
-        set_content_trigger: allProperties.set_content_trigger,
         theme: allProperties.theme,
         accent_color: allProperties.accent_color,
         background_color: allProperties.background_color,
         text_color: allProperties.text_color,
     };
-
-    // Throttle: when Bubble calls Update repeatedly with the same content (e.g. on load), only
-    // forward to the element once per 2s unless initial_content or set_content_trigger changed.
-    var now = Date.now();
-    var throttleMs = 2000;
-    var lastAt = instance.data._lastUpdateCallbackAt || 0;
-    var lastInitial = instance.data._lastUpdateInitialContent;
-    var lastTrigger = instance.data._lastUpdateSetContentTrigger;
-    var contentUnchanged = (initialContent === lastInitial && setContentTrigger === lastTrigger);
-    if (contentUnchanged && (now - lastAt) < throttleMs) {
-        return;
-    }
-    instance.data._lastUpdateCallbackAt = now;
-    instance.data._lastUpdateInitialContent = initialContent;
-    instance.data._lastUpdateSetContentTrigger = setContentTrigger;
 
     callback(changes);
 }

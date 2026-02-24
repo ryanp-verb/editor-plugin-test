@@ -116,20 +116,6 @@ export const Column = Node.create({
     ];
   },
 
-  addKeyboardShortcuts() {
-    return {
-      Enter: () => {
-        const { state } = this.editor;
-        const { $from } = state.selection;
-        for (let d = $from.depth; d > 0; d--) {
-          if ($from.node(d).type.name === 'column') {
-            return this.editor.commands.splitBlock();
-          }
-        }
-        return false;
-      },
-    };
-  },
 });
 
 // Column Layout Container
