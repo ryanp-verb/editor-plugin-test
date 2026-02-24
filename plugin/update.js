@@ -76,6 +76,20 @@ function(instance, properties, context) {
         text_color: allProperties.text_color,
     };
 
-    // Notify the element of property changes
+    // Throttle: when Bubble calls Update repeatedly with the same content (e.g. on load), only
+    // forward to the element once per 2s unless initial_content or set_content_trigger changed.
+    var now = Date.now();
+    var throttleMs = 2000;
+    var lastAt = instance.data._lastUpdateCallbackAt || 0;
+    var lastInitial = instance.data._lastUpdateInitialContent;
+    var lastTrigger = instance.data._lastUpdateSetContentTrigger;
+    var contentUnchanged = (initialContent === lastInitial && setContentTrigger === lastTrigger);
+    if (contentUnchanged && (now - lastAt) < throttleMs) {
+        return;
+    }
+    instance.data._lastUpdateCallbackAt = now;
+    instance.data._lastUpdateInitialContent = initialContent;
+    instance.data._lastUpdateSetContentTrigger = setContentTrigger;
+
     callback(changes);
 }
