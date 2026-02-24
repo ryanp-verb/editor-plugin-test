@@ -12,6 +12,8 @@ export interface ShowLinkPopupOptions {
   isEdit?: boolean;
   /** When true, commands run without focusing editor (e.g. when opened from sidebar). */
   noFocus?: boolean;
+  /** Element that has theme CSS variables (--editor-text, --sidebar-bg, --brand-primary, etc.). Popup is appended here so it inherits light/dark and brand colors. */
+  themeRoot?: HTMLElement;
 }
 
 export function showLinkPopup(editor: ContentEditor, options: ShowLinkPopupOptions = {}): void {
@@ -20,7 +22,10 @@ export function showLinkPopup(editor: ContentEditor, options: ShowLinkPopupOptio
     initialOpenInNewTab = false,
     isEdit = false,
     noFocus = false,
+    themeRoot,
   } = options;
+
+  const mountTarget = themeRoot ?? document.body;
 
   const overlay = document.createElement('div');
   overlay.className = 'bp-link-popup-overlay';
@@ -54,7 +59,7 @@ export function showLinkPopup(editor: ContentEditor, options: ShowLinkPopupOptio
 
   const close = (): void => {
     overlay.remove();
-    document.body.style.overflow = '';
+    document.body.style.overflow = overflowPrior;
   };
 
   const save = (): void => {
@@ -82,7 +87,8 @@ export function showLinkPopup(editor: ContentEditor, options: ShowLinkPopupOptio
     if (ke.key === 'Escape') close();
   });
 
-  document.body.appendChild(overlay);
+  mountTarget.appendChild(overlay);
+  const overflowPrior = document.body.style.overflow;
   document.body.style.overflow = 'hidden';
   const input = dialog.querySelector('#bp-link-url') as HTMLInputElement;
   input?.focus();

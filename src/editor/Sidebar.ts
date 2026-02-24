@@ -1071,6 +1071,7 @@ export class Sidebar {
       initialOpenInNewTab: attrs?.target === '_blank',
       isEdit,
       noFocus: true,
+      themeRoot: this.container,
     });
   }
 

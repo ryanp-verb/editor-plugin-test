@@ -365,6 +365,7 @@ export class Toolbar {
       initialOpenInNewTab: attrs?.target === '_blank',
       isEdit,
       noFocus: false,
+      themeRoot: this.container.parentElement ?? undefined,
     });
   }
 
