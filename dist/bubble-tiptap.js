@@ -34801,12 +34801,15 @@ const ct = class ct {
     if ("set_content_trigger" in e && e.set_content_trigger !== void 0) {
       const s = typeof e.set_content_trigger == "string" ? e.set_content_trigger : "";
       if (s && !this.isEffectivelyEmptyHtml(s)) {
-        const a = this.editor;
-        typeof requestAnimationFrame < "u" ? requestAnimationFrame(() => {
-          a.setContent(s), this.handleSetContentFromAction();
-        }) : setTimeout(() => {
-          a.setContent(s), this.handleSetContentFromAction();
-        }, 0);
+        const a = this.sanitizeHtmlForStorage(s), l = this.sanitizeHtmlForStorage(this.editor.getHTML());
+        if (a !== l) {
+          const c = this.editor;
+          typeof requestAnimationFrame < "u" ? requestAnimationFrame(() => {
+            c.setContent(s), this.handleSetContentFromAction();
+          }) : setTimeout(() => {
+            c.setContent(s), this.handleSetContentFromAction();
+          }, 0);
+        }
       }
     }
     if ("initial_content" in e && e.initial_content !== void 0) {

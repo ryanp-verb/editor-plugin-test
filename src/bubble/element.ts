@@ -251,21 +251,26 @@ export class BubbleElement {
     if (!this.editor) return;
 
     // Set content trigger: when workflow sets this property (e.g. to saved HTML), replace editor content.
-    // Use for Revert when your Bubble setup has no "Run" script for actions — workflow sets this to Thing's saved HTML.
+    // Only apply when incoming HTML is different from current content — avoids feedback loop when a
+    // workflow echoes our published html_content back into this property.
     if ('set_content_trigger' in changes && changes.set_content_trigger !== undefined) {
       const html = typeof changes.set_content_trigger === 'string' ? changes.set_content_trigger : '';
       if (html && !this.isEffectivelyEmptyHtml(html)) {
-        const editor = this.editor;
-        if (typeof requestAnimationFrame !== 'undefined') {
-          requestAnimationFrame(() => {
-            editor!.setContent(html);
-            this.handleSetContentFromAction();
-          });
-        } else {
-          setTimeout(() => {
-            editor!.setContent(html);
-            this.handleSetContentFromAction();
-          }, 0);
+        const normalizedIncoming = this.sanitizeHtmlForStorage(html);
+        const currentHtml = this.sanitizeHtmlForStorage(this.editor.getHTML());
+        if (normalizedIncoming !== currentHtml) {
+          const editor = this.editor;
+          if (typeof requestAnimationFrame !== 'undefined') {
+            requestAnimationFrame(() => {
+              editor!.setContent(html);
+              this.handleSetContentFromAction();
+            });
+          } else {
+            setTimeout(() => {
+              editor!.setContent(html);
+              this.handleSetContentFromAction();
+            }, 0);
+          }
         }
       }
     }
