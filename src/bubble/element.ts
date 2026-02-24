@@ -245,11 +245,12 @@ export class BubbleElement {
     }
 
     if ('toolbar_visible' in changes && changes.toolbar_visible !== undefined) {
-      if (changes.toolbar_visible) {
+      if (changes.toolbar_visible && !this.sidebarExpanded) {
         this.toolbar?.show();
-      } else {
+      } else if (!changes.toolbar_visible) {
         this.toolbar?.hide();
       }
+      // When sidebar is expanded, never show toolbar (keep it hidden until user collapses sidebar)
     }
 
     if ('min_height' in changes || 'max_height' in changes) {

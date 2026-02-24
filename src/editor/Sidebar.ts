@@ -9,8 +9,11 @@
  * - Padding controls with ALL toggle
  */
 
-import { ContentEditor } from './Editor';
+import { ContentEditor, EditorCommandOptions } from './Editor';
 import { defaultColorPalette } from '../utils/themeApplier';
+
+/** Run editor commands without focusing (keeps toolbar hidden when sidebar is open). */
+const NO_FOCUS: EditorCommandOptions = { focus: false };
 import { icons } from '../utils/icons';
 import { DragDropManager, DragData } from '../utils/DragDropManager';
 
@@ -443,8 +446,9 @@ export class Sidebar {
   }
 
   private bindEvents(sidebar: HTMLElement): void {
-    // Button clicks
+    // Button clicks - stop propagation so parent/editor focus handlers don't run (keeps toolbar hidden)
     sidebar.addEventListener('click', (e) => {
+      e.stopPropagation();
       const target = e.target as HTMLElement;
       const btn = target.closest('[data-action]') as HTMLElement;
       if (btn) {
@@ -490,17 +494,17 @@ export class Sidebar {
         this.onCollapse?.();
         return;
       case 'undo':
-        this.editor.undo();
+        this.editor.undo(NO_FOCUS);
         break;
       case 'redo':
-        this.editor.redo();
+        this.editor.redo(NO_FOCUS);
         break;
       case 'heading':
         const level = parseInt(btn.dataset.level || '1', 10) as 1 | 2 | 3 | 4 | 5 | 6;
-        this.editor.setHeading(level as 1 | 2 | 3);
+        this.editor.setHeading(level as 1 | 2 | 3, NO_FOCUS);
         break;
       case 'paragraph':
-        this.editor.setParagraph();
+        this.editor.setParagraph(NO_FOCUS);
         break;
       case 'textSize':
         this.setTextSize(btn.dataset.size || 'medium');
@@ -509,28 +513,28 @@ export class Sidebar {
         this.setTextAlign(btn.dataset.align as 'left' | 'center' | 'right' | 'justify');
         break;
       case 'bold':
-        this.editor.toggleBold();
+        this.editor.toggleBold(NO_FOCUS);
         break;
       case 'italic':
-        this.editor.toggleItalic();
+        this.editor.toggleItalic(NO_FOCUS);
         break;
       case 'strike':
-        this.editor.toggleStrike();
+        this.editor.toggleStrike(NO_FOCUS);
         break;
       case 'blockquote':
-        this.editor.toggleBlockquote();
+        this.editor.toggleBlockquote(NO_FOCUS);
         break;
       case 'bulletList':
-        this.editor.toggleBulletList();
+        this.editor.toggleBulletList(NO_FOCUS);
         break;
       case 'orderedList':
-        this.editor.toggleOrderedList();
+        this.editor.toggleOrderedList(NO_FOCUS);
         break;
       case 'taskList':
-        this.editor.toggleTaskList();
+        this.editor.toggleTaskList(NO_FOCUS);
         break;
       case 'code':
-        this.editor.toggleCode();
+        this.editor.toggleCode(NO_FOCUS);
         break;
       case 'link':
       case 'insertLink':
@@ -540,13 +544,13 @@ export class Sidebar {
         this.clearFormatting();
         break;
       case 'table':
-        this.editor.insertTable(3, 3);
+        this.editor.insertTable(3, 3, NO_FOCUS);
         break;
       case 'image':
         this.handleImageAction();
         break;
       case 'divider':
-        this.editor.setHorizontalRule();
+        this.editor.setHorizontalRule(NO_FOCUS);
         break;
       case 'lineBreak':
         this.insertLineBreak();
@@ -555,10 +559,10 @@ export class Sidebar {
         this.insertColumns(btn.dataset.cols || '2');
         break;
       case 'divBlock':
-        this.editor.toggleDivBlock();
+        this.editor.toggleDivBlock(NO_FOCUS);
         break;
       case 'codeBlock':
-        this.editor.toggleCodeBlock();
+        this.editor.toggleCodeBlock(NO_FOCUS);
         break;
       case 'borderWidth':
         this.setBorderWidth(parseInt(btn.dataset.width || '0', 10));
@@ -768,12 +772,11 @@ export class Sidebar {
 
   private setTextSize(size: string): void {
     const tipTap = this.editor.getTipTapEditor();
-    
+    // Don't focus editor so toolbar doesn't appear when sidebar is open
     if (size === 'medium') {
-      // Medium is the default, so unset the mark
-      tipTap.chain().focus().unsetTextSize().run();
+      tipTap.chain().unsetTextSize().run();
     } else {
-      tipTap.chain().focus().setTextSize(size).run();
+      tipTap.chain().setTextSize(size).run();
     }
     
     // Update button states
@@ -784,9 +787,8 @@ export class Sidebar {
 
   private setTextAlign(align: 'left' | 'center' | 'right' | 'justify'): void {
     this.blockStyle.textAlign = align;
-    // Apply alignment via TipTap
     const tipTap = this.editor.getTipTapEditor();
-    tipTap.chain().focus().setTextAlign(align).run();
+    tipTap.chain().setTextAlign(align).run();
     
     // Update button states
     this.element.querySelectorAll('[data-action="align"]').forEach(btn => {
@@ -798,9 +800,9 @@ export class Sidebar {
     this.blockStyle.textColor = color;
     const tipTap = this.editor.getTipTapEditor();
     if (color === 'transparent' || color === 'inherit') {
-      tipTap.chain().focus().unsetColor().run();
+      tipTap.chain().unsetColor().run();
     } else {
-      tipTap.chain().focus().setColor(color).run();
+      tipTap.chain().setColor(color).run();
     }
   }
 
@@ -1057,51 +1059,49 @@ export class Sidebar {
 
   private clearFormatting(): void {
     const tipTap = this.editor.getTipTapEditor();
-    tipTap.chain().focus().unsetAllMarks().clearNodes().run();
+    tipTap.chain().unsetAllMarks().clearNodes().run();
   }
 
   private handleLinkAction(): void {
     if (this.editor.isActive('link')) {
-      this.editor.unsetLink();
+      this.editor.unsetLink(NO_FOCUS);
       return;
     }
     const url = prompt('Enter URL:');
     if (url) {
-      this.editor.setLink(url);
+      this.editor.setLink(url, NO_FOCUS);
     }
   }
 
   private handleImageAction(): void {
     const url = prompt('Enter image URL:');
     if (url) {
-      this.editor.insertImage(url);
+      this.editor.insertImage(url, undefined, NO_FOCUS);
     }
   }
 
   private insertLineBreak(): void {
     const tipTap = this.editor.getTipTapEditor();
-    tipTap.chain().focus().setHardBreak().run();
+    tipTap.chain().setHardBreak().run();
   }
 
   private insertColumns(cols: string): void {
     switch (cols) {
       case '1':
-        // Single column - remove column layout
-        this.editor.removeColumnLayout();
+        this.editor.removeColumnLayout(NO_FOCUS);
         break;
       case '2':
-        this.editor.insertTwoColumns();
+        this.editor.insertTwoColumns(NO_FOCUS);
         break;
       case '3':
-        this.editor.insertThreeColumns();
+        this.editor.insertThreeColumns(NO_FOCUS);
         break;
       case '4':
-        this.editor.insertColumns(4);
+        this.editor.insertColumns(4, NO_FOCUS);
         break;
       case '1-2':
       case '2-1':
-        // These would need custom column width support
-        this.editor.insertTwoColumns();
+        this.editor.insertTwoColumns(NO_FOCUS);
         break;
     }
   }

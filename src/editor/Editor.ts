@@ -23,6 +23,9 @@ export interface EditorStats {
   isEmpty: boolean;
 }
 
+/** When false, commands run without focusing the editor (e.g. when invoked from sidebar to avoid showing toolbar). */
+export type EditorCommandOptions = { focus?: boolean };
+
 export class ContentEditor {
   private editor: TipTapEditor;
   private config: EditorConfig;
@@ -118,68 +121,83 @@ export class ContentEditor {
     return this.editor.isFocused;
   }
 
-  // Formatting Commands
-  toggleBold(): void {
-    this.editor.chain().focus().toggleBold().run();
+  // Formatting Commands (opts.focus: false when invoking from sidebar to avoid showing toolbar)
+  toggleBold(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.toggleBold().run();
   }
 
-  toggleItalic(): void {
-    this.editor.chain().focus().toggleItalic().run();
+  toggleItalic(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.toggleItalic().run();
   }
 
-  toggleStrike(): void {
-    this.editor.chain().focus().toggleStrike().run();
+  toggleStrike(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.toggleStrike().run();
   }
 
-  toggleCode(): void {
-    this.editor.chain().focus().toggleCode().run();
+  toggleCode(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.toggleCode().run();
   }
 
-  toggleBlockquote(): void {
-    this.editor.chain().focus().toggleBlockquote().run();
+  toggleBlockquote(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.toggleBlockquote().run();
   }
 
-  toggleBulletList(): void {
-    this.editor.chain().focus().toggleBulletList().run();
+  toggleBulletList(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.toggleBulletList().run();
   }
 
-  toggleOrderedList(): void {
-    this.editor.chain().focus().toggleOrderedList().run();
+  toggleOrderedList(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.toggleOrderedList().run();
   }
 
-  toggleTaskList(): void {
-    this.editor.chain().focus().toggleTaskList().run();
+  toggleTaskList(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.toggleTaskList().run();
   }
 
-  toggleCodeBlock(): void {
-    this.editor.chain().focus().toggleCodeBlock().run();
+  toggleCodeBlock(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.toggleCodeBlock().run();
   }
 
-  setHeading(level: 1 | 2 | 3): void {
-    this.editor.chain().focus().toggleHeading({ level }).run();
+  setHeading(level: 1 | 2 | 3, opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.toggleHeading({ level }).run();
   }
 
-  setParagraph(): void {
-    this.editor.chain().focus().setParagraph().run();
+  setParagraph(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.setParagraph().run();
   }
 
   // Link
-  setLink(url: string): void {
-    this.editor.chain().focus().setLink({ href: url }).run();
+  setLink(url: string, opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.setLink({ href: url }).run();
   }
 
-  unsetLink(): void {
-    this.editor.chain().focus().unsetLink().run();
+  unsetLink(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.unsetLink().run();
   }
 
   // Image
-  insertImage(src: string, alt?: string): void {
-    this.editor.chain().focus().setImage({ src, alt }).run();
+  insertImage(src: string, alt?: string, opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.setImage({ src, alt }).run();
   }
 
   // Table
-  insertTable(rows = 3, cols = 3): void {
-    this.editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
+  insertTable(rows = 3, cols = 3, opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.insertTable({ rows, cols, withHeaderRow: true }).run();
   }
 
   deleteTable(): void {
@@ -211,12 +229,14 @@ export class ContentEditor {
   }
 
   // Undo/Redo
-  undo(): void {
-    this.editor.chain().focus().undo().run();
+  undo(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.undo().run();
   }
 
-  redo(): void {
-    this.editor.chain().focus().redo().run();
+  redo(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.redo().run();
   }
 
   // Check active state
@@ -233,46 +253,54 @@ export class ContentEditor {
   }
 
   // Horizontal Rule
-  setHorizontalRule(): void {
-    this.editor.chain().focus().setHorizontalRule().run();
+  setHorizontalRule(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.setHorizontalRule().run();
   }
 
   // Div Block
-  toggleDivBlock(): void {
-    this.editor.chain().focus().toggleDivBlock().run();
+  toggleDivBlock(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.toggleDivBlock().run();
   }
 
-  setDivBlock(): void {
-    this.editor.chain().focus().setDivBlock().run();
+  setDivBlock(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.setDivBlock().run();
   }
 
-  unsetDivBlock(): void {
-    this.editor.chain().focus().unsetDivBlock().run();
+  unsetDivBlock(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.unsetDivBlock().run();
   }
 
   // Column Layout
-  insertColumns(count: number = 2): void {
-    this.editor.chain().focus().insertColumnLayout(count).run();
+  insertColumns(count: number = 2, opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.insertColumnLayout(count).run();
   }
 
-  insertTwoColumns(): void {
-    this.insertColumns(2);
+  insertTwoColumns(opts?: EditorCommandOptions): void {
+    this.insertColumns(2, opts);
   }
 
-  insertThreeColumns(): void {
-    this.insertColumns(3);
+  insertThreeColumns(opts?: EditorCommandOptions): void {
+    this.insertColumns(3, opts);
   }
 
-  addColumn(): void {
-    this.editor.chain().focus().addColumn().run();
+  addColumn(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.addColumn().run();
   }
 
-  removeColumn(): void {
-    this.editor.chain().focus().removeColumn().run();
+  removeColumn(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.removeColumn().run();
   }
 
-  removeColumnLayout(): void {
-    this.editor.chain().focus().removeColumnLayout().run();
+  removeColumnLayout(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.removeColumnLayout().run();
   }
 
   // Email Export
