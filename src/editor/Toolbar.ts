@@ -7,6 +7,8 @@ export interface ToolbarConfig {
   editor: ContentEditor;
   container: HTMLElement;
   onToggleSidebar?: () => void;
+  /** Returns current theme variables for the link popup (text/input colors in light/dark). */
+  getThemeForPopup?: () => Record<string, string>;
 }
 
 interface ToolbarButton {
@@ -34,12 +36,14 @@ export class Toolbar {
   private element: HTMLElement;
   private dragDropManager: DragDropManager | null = null;
   private onToggleSidebar?: () => void;
+  private getThemeForPopup?: () => Record<string, string>;
   private sidebarExpanded = false;
 
   constructor(config: ToolbarConfig) {
     this.editor = config.editor;
     this.container = config.container;
     this.onToggleSidebar = config.onToggleSidebar;
+    this.getThemeForPopup = config.getThemeForPopup;
     this.element = this.createToolbar();
     this.container.prepend(this.element);
     this.setupUpdateListener();
@@ -366,6 +370,7 @@ export class Toolbar {
       isEdit,
       noFocus: false,
       themeRoot: this.container.parentElement ?? undefined,
+      themeVariables: this.getThemeForPopup?.(),
     });
   }
 

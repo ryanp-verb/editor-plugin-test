@@ -23,6 +23,8 @@ export interface SidebarConfig {
   container: HTMLElement;
   colorPalette?: string[];
   onCollapse?: () => void;
+  /** Returns current theme variables for the link popup (text/input colors in light/dark). */
+  getThemeForPopup?: () => Record<string, string>;
 }
 
 interface BlockStyleState {
@@ -52,6 +54,7 @@ export class Sidebar {
   private element: HTMLElement;
   private colorPalette: string[];
   private onCollapse?: () => void;
+  private getThemeForPopup?: () => Record<string, string>;
   private dragDropManager: DragDropManager | null = null;
   
   // Current state for block styling
@@ -84,6 +87,7 @@ export class Sidebar {
     this.container = config.container;
     this.colorPalette = config.colorPalette || defaultColorPalette;
     this.onCollapse = config.onCollapse;
+    this.getThemeForPopup = config.getThemeForPopup;
     this.element = this.createSidebar();
     this.container.appendChild(this.element);
     this.setupUpdateListener();
@@ -1072,6 +1076,7 @@ export class Sidebar {
       isEdit,
       noFocus: true,
       themeRoot: this.container,
+      themeVariables: this.getThemeForPopup?.(),
     });
   }
 

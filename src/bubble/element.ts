@@ -4,7 +4,7 @@ import { Sidebar } from '../editor/Sidebar';
 import { BubbleMock, BubbleProperties } from '../mock/BubbleMock';
 import { EventBridge } from './events';
 import { ActionHandler } from './actions';
-import { applyTheme, watchSystemTheme, ThemeProperties } from '../utils/themeApplier';
+import { applyTheme, watchSystemTheme, ThemeProperties, getThemeVariablesForPopup } from '../utils/themeApplier';
 
 export interface BubbleElementConfig {
   container: HTMLElement;
@@ -88,6 +88,7 @@ export class BubbleElement {
       editor: this.editor,
       container: this.editorWrapper,
       onToggleSidebar: () => this.toggleSidebar(),
+      getThemeForPopup: () => getThemeVariablesForPopup(this.bubble.getProperties()),
     });
 
     if (!props.toolbar_visible) {
@@ -99,6 +100,7 @@ export class BubbleElement {
       editor: this.editor,
       container: this.container, // Sidebar sits next to editor, not inside
       onCollapse: () => this.toggleSidebar(),
+      getThemeForPopup: () => getThemeVariablesForPopup(this.bubble.getProperties()),
     });
     this.sidebar.hide();
 

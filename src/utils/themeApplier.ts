@@ -313,6 +313,54 @@ export function applyTheme(element: HTMLElement, properties: Partial<ThemeProper
 }
 
 /**
+ * Return the same theme variables the link popup needs, computed from the same
+ * props as applyTheme. Use this when the popup is mounted in a context where
+ * it can't inherit from the theme root (e.g. fixed position in some hosts).
+ */
+export function getThemeVariablesForPopup(properties: Partial<ThemeProperties>): Record<string, string> {
+  const effectiveTheme = getEffectiveTheme(properties.theme || 'light');
+  const preset = getThemePreset(effectiveTheme);
+  const theme: ThemeProperties = {
+    theme: properties.theme || 'light',
+    brand_primary: properties.brand_primary || preset.brand_primary || bpBrandColors.primary,
+    brand_light_1: properties.brand_light_1 || preset.brand_light_1 || bpBrandColors.light1,
+    brand_light_2: properties.brand_light_2 || preset.brand_light_2 || bpBrandColors.light2,
+    brand_dark_1: properties.brand_dark_1 || preset.brand_dark_1 || bpBrandColors.dark1,
+    accent_color: properties.accent_color || properties.brand_primary || preset.brand_primary || bpBrandColors.primary,
+    background_color: properties.background_color || preset.background_color || bpBrandColors.white,
+    toolbar_background: properties.toolbar_background || preset.toolbar_background || bpBrandColors.warmGrey1,
+    text_color: properties.text_color || preset.text_color || bpBrandColors.warmGrey6,
+    text_muted_color: properties.text_muted_color || preset.text_muted_color || bpBrandColors.warmGrey5,
+    border_color: properties.border_color || preset.border_color || bpBrandColors.warmGrey3,
+    icon_color: properties.icon_color || preset.icon_color || bpBrandColors.warmGrey5,
+    icon_active_color: properties.icon_active_color || preset.icon_active_color || bpBrandColors.white,
+    font_family: properties.font_family || "'bp Sans', 'DM Sans', system-ui, -apple-system, sans-serif",
+    font_size: properties.font_size ?? 16,
+    border_radius: properties.border_radius ?? 8,
+    color_palette: properties.color_palette,
+  };
+  const derived = getDerivedColors(theme.brand_primary);
+  const controlBtnBg = effectiveTheme === 'dark'
+    ? adjustBrightness(theme.toolbar_background, 15)
+    : bpBrandColors.warmGrey2;
+  const controlBtnBgHover = adjustBrightness(controlBtnBg, effectiveTheme === 'dark' ? 15 : -10);
+
+  return {
+    '--editor-text': theme.text_color,
+    '--editor-text-muted': theme.text_muted_color,
+    '--editor-bg': theme.background_color,
+    '--editor-border': theme.border_color,
+    '--editor-accent-muted': derived.accentMuted,
+    '--sidebar-bg': theme.toolbar_background,
+    '--toolbar-bg': theme.toolbar_background,
+    '--toolbar-icon-active': theme.icon_active_color,
+    '--brand-primary': theme.brand_primary,
+    '--border-radius': `${theme.border_radius}px`,
+    '--control-btn-bg-hover': controlBtnBgHover,
+  };
+}
+
+/**
  * Adjust brightness of any color format (hex, rgb, rgba)
  */
 function adjustBrightness(color: string, amount: number): string {
