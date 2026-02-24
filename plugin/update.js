@@ -25,8 +25,8 @@ function(instance, properties, context) {
         toolbar_visible: properties.toolbar_visible !== false,
         min_height: properties.min_height || 200,
         max_height: properties.max_height || 0,
-        // Theme properties
-        theme: properties.theme || 'light',
+        // Theme properties (Bubble may send by field id e.g. AAG for Theme dropdown)
+        theme: (properties.theme != null ? properties.theme : (properties.AAG != null ? properties.AAG : 'light')),
         accent_color: properties.accent_color || '#513EDF',
         background_color: properties.background_color || '#ffffff',
         text_color: properties.text_color || '#121000',

@@ -33790,7 +33790,7 @@ function Ic(n) {
     font_size: n.font_size ?? 16,
     border_radius: n.border_radius ?? 8,
     color_palette: n.color_palette
-  }, i = Fh(r.brand_primary), o = e === "dark" ? Wt(r.toolbar_background, 15) : Z.warmGrey2, s = Wt(o, e === "dark" ? 15 : -10);
+  }, i = Fh(r.brand_primary), o = e === "dark" ? Wt(r.toolbar_background, 15) : Z.warmGrey2, s = Wt(o, e === "dark" ? 15 : -10), a = e === "dark" ? "#ffffff" : r.icon_active_color;
   return {
     "--editor-text": r.text_color,
     "--editor-text-muted": r.text_muted_color,
@@ -33802,7 +33802,8 @@ function Ic(n) {
     "--toolbar-icon-active": r.icon_active_color,
     "--brand-primary": r.brand_primary,
     "--border-radius": `${r.border_radius}px`,
-    "--control-btn-bg-hover": s
+    "--control-btn-bg-hover": s,
+    "--link-popup-save-text": a
   };
 }
 function Wt(n, e) {

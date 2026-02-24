@@ -345,6 +345,9 @@ export function getThemeVariablesForPopup(properties: Partial<ThemeProperties>):
     : bpBrandColors.warmGrey2;
   const controlBtnBgHover = adjustBrightness(controlBtnBg, effectiveTheme === 'dark' ? 15 : -10);
 
+  // Primary button (Save): always use light text on brand background for contrast
+  const primaryBtnText = effectiveTheme === 'dark' ? '#ffffff' : theme.icon_active_color;
+
   return {
     '--editor-text': theme.text_color,
     '--editor-text-muted': theme.text_muted_color,
@@ -357,6 +360,7 @@ export function getThemeVariablesForPopup(properties: Partial<ThemeProperties>):
     '--brand-primary': theme.brand_primary,
     '--border-radius': `${theme.border_radius}px`,
     '--control-btn-bg-hover': controlBtnBgHover,
+    '--link-popup-save-text': primaryBtnText,
   };
 }
 

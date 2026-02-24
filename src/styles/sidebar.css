@@ -993,7 +993,7 @@
   border: none;
   border-radius: 6px;
   background: var(--brand-primary, #007f00);
-  color: var(--toolbar-icon-active, #fff);
+  color: var(--link-popup-save-text, var(--toolbar-icon-active, #fff));
   cursor: pointer;
 }
 
