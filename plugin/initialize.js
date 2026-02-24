@@ -60,7 +60,10 @@ function(instance, context) {
             instance.data._actionCallback = callback;
             return () => { instance.data._actionCallback = null; };
         },
-        runAction: () => {},
+        runAction: (name, params) => {
+            var cb = instance.data._actionCallback;
+            if (cb) cb({ name: name, params: params || {} });
+        },
         onEvent: () => () => {},
         getEventLog: () => [],
         clearEventLog: () => {},
@@ -91,6 +94,7 @@ function(instance, context) {
                 editable: props.editable,
                 toolbar_visible: props.toolbar_visible,
                 min_height: props.min_height,
+                set_content_trigger: props.set_content_trigger,
                 theme: props.theme,
                 accent_color: props.accent_color,
                 background_color: props.background_color,

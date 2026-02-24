@@ -93,6 +93,11 @@
       "display": "Border radius (px)",
       "type": "number",
       "default_val": 14
+    },
+    "AAS": {
+      "display": "Set content (trigger)",
+      "type": "text",
+      "default_val": ""
     }
   },
   "states": {

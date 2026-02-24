@@ -17,6 +17,11 @@ function(instance, properties, context) {
         ? String(properties.placeholder)
         : 'Start writing...';
 
+    // Set content trigger: when workflow sets this to HTML, we replace editor content (e.g. Revert)
+    var setContentTrigger = (properties.set_content_trigger != null || properties.AAS != null)
+        ? String(properties.set_content_trigger != null ? properties.set_content_trigger : properties.AAS)
+        : '';
+
     // Map Bubble properties to our internal format with defaults
     const allProperties = {
         // Core properties
@@ -26,6 +31,7 @@ function(instance, properties, context) {
         toolbar_visible: properties.toolbar_visible !== false,
         min_height: properties.min_height || 200,
         max_height: properties.max_height || 0,
+        set_content_trigger: setContentTrigger,
         // Theme properties
         theme: properties.theme || 'light',
         accent_color: properties.accent_color || '#513EDF',
@@ -53,6 +59,7 @@ function(instance, properties, context) {
         editable: allProperties.editable,
         toolbar_visible: allProperties.toolbar_visible,
         min_height: allProperties.min_height,
+        set_content_trigger: allProperties.set_content_trigger,
         theme: allProperties.theme,
         accent_color: allProperties.accent_color,
         background_color: allProperties.background_color,

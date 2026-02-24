@@ -100,6 +100,7 @@ bubble-tiptap-plugin/
 | `toolbar_visible` | boolean | Show/hide the toolbar |
 | `min_height` | number | Minimum height in pixels |
 | `max_height` | number | Maximum height in pixels (0 = unlimited) |
+| **Set content (trigger)** | text | When a workflow sets this to an HTML string, the editor content is replaced (e.g. for Revert). Use when your plugin has no Run script: set this to Thing’s saved HTML in the Revert workflow. |
 
 ### States (Outputs)
 
@@ -171,8 +172,10 @@ This generates:
    <link rel="stylesheet" href="https://your-username.github.io/your-repo/dist/bubble-tiptap.css">
    ```
 4. Copy `plugin/initialize.js` to the Initialize function and `plugin/update.js` to the Update function.
-5. Copy `plugin/preview.js` to the Preview function (if needed).
-6. Add the CSS to the shared styles (or rely on the link in Element Code).
+5. **Revert (no Run script needed):** Many Bubble plugin setups don’t show a separate “Run” or “When run” script for element actions. Use the **Set content (trigger)** property instead: in your Revert workflow, add a step that sets the TipTap element’s **Set content (trigger)** to **Thing’s saved HTML** (or the content you want to show). When that property is set, the editor content is replaced. So: step 1 – Make changes to thing (draft = saved); step 2 – Set TipTap’s **Set content (trigger)** to Thing’s saved HTML.
+6. *(Optional)* If your Plugin Editor **does** show a Run/When run script for the element, you can paste `plugin/run.js` there to support the “Set content” **action** as well; then workflows can use either the action or the trigger property.
+7. Copy `plugin/preview.js` to the Preview function (if needed).
+8. Add the CSS to the shared styles (or rely on the link in Element Code).
 
 ## Customization
 

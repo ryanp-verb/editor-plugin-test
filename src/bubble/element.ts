@@ -250,9 +250,28 @@ export class BubbleElement {
   private handlePropertyChanges(changes: Partial<BubbleProperties>): void {
     if (!this.editor) return;
 
+    // Set content trigger: when workflow sets this property (e.g. to saved HTML), replace editor content.
+    // Use for Revert when your Bubble setup has no "Run" script for actions — workflow sets this to Thing's saved HTML.
+    if ('set_content_trigger' in changes && changes.set_content_trigger !== undefined) {
+      const html = typeof changes.set_content_trigger === 'string' ? changes.set_content_trigger : '';
+      if (html && !this.isEffectivelyEmptyHtml(html)) {
+        const editor = this.editor;
+        if (typeof requestAnimationFrame !== 'undefined') {
+          requestAnimationFrame(() => {
+            editor!.setContent(html);
+            this.handleSetContentFromAction();
+          });
+        } else {
+          setTimeout(() => {
+            editor!.setContent(html);
+            this.handleSetContentFromAction();
+          }, 0);
+        }
+      }
+    }
+
     // One-way binding (like reference plugin): use initial_content only at first load.
-    // Never re-apply from property updates after that — avoids echo overwriting. For "Revert
-    // draft to saved", use the plugin action "Set content" with saved HTML in the workflow.
+    // Never re-apply from property updates after that — avoids echo overwriting.
     if ('initial_content' in changes && changes.initial_content !== undefined) {
       const html = typeof changes.initial_content === 'string' ? changes.initial_content : '';
       const editor = this.editor;

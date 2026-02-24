@@ -15,6 +15,8 @@ export interface BubbleProperties {
   toolbar_visible: boolean;
   min_height: number;
   max_height: number;
+  /** When set by workflow (e.g. to saved HTML), editor content is replaced. Use for Revert without Run script. */
+  set_content_trigger?: string;
   // Theming
   theme: 'light' | 'dark' | 'auto';
   // Brand colors (configurable per-app)

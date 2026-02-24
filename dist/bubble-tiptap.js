@@ -34798,6 +34798,17 @@ const ct = class ct {
   handlePropertyChanges(e) {
     var r, i, o;
     if (!this.editor) return;
+    if ("set_content_trigger" in e && e.set_content_trigger !== void 0) {
+      const s = typeof e.set_content_trigger == "string" ? e.set_content_trigger : "";
+      if (s && !this.isEffectivelyEmptyHtml(s)) {
+        const a = this.editor;
+        typeof requestAnimationFrame < "u" ? requestAnimationFrame(() => {
+          a.setContent(s), this.handleSetContentFromAction();
+        }) : setTimeout(() => {
+          a.setContent(s), this.handleSetContentFromAction();
+        }, 0);
+      }
+    }
     if ("initial_content" in e && e.initial_content !== void 0) {
       const s = typeof e.initial_content == "string" ? e.initial_content : "", a = this.editor, l = Date.now(), c = l - this.lastInitialContentApplyAt < ct.INITIAL_CONTENT_APPLY_COOLDOWN_MS, d = a.isEmpty() && !this.isEffectivelyEmptyHtml(s) && !c;
       a && !this.isEffectivelyEmptyHtml(s) && d && (this.lastInitialContentApplyAt = l, typeof requestAnimationFrame < "u" ? requestAnimationFrame(() => a.setContent(s)) : setTimeout(() => a.setContent(s), 0));
