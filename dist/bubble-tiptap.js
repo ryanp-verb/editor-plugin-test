@@ -1,6 +1,6 @@
 var Bh = Object.defineProperty;
 var Ph = (n, e, t) => e in n ? Bh(n, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : n[e] = t;
-var K = (n, e, t) => Ph(n, typeof e != "symbol" ? e + "" : e, t);
+var W = (n, e, t) => Ph(n, typeof e != "symbol" ? e + "" : e, t);
 function Fe(n) {
   this.content = n;
 }
@@ -2865,15 +2865,15 @@ class ls {
     return (this.delInfo & ai) > 0;
   }
 }
-class tt {
+class nt {
   /**
   Create a position map. The modifications to the document are
   represented as an array of numbers, in which each group of three
   represents a modified chunk as `[start, oldSize, newSize]`.
   */
   constructor(e, t = !1) {
-    if (this.ranges = e, this.inverted = t, !e.length && tt.empty)
-      return tt.empty;
+    if (this.ranges = e, this.inverted = t, !e.length && nt.empty)
+      return nt.empty;
   }
   /**
   @internal
@@ -2944,7 +2944,7 @@ class tt {
   map positions in the post-step document to the pre-step document.
   */
   invert() {
-    return new tt(this.ranges, !this.inverted);
+    return new nt(this.ranges, !this.inverted);
   }
   /**
   @internal
@@ -2958,10 +2958,10 @@ class tt {
   sub-document to a larger document, or vice-versa.
   */
   static offset(e) {
-    return e == 0 ? tt.empty : new tt(e < 0 ? [0, -e, 0] : [0, 0, e]);
+    return e == 0 ? nt.empty : new nt(e < 0 ? [0, -e, 0] : [0, 0, e]);
   }
 }
-tt.empty = new tt([]);
+nt.empty = new nt([]);
 class Sr {
   /**
   Create a new mapping with the given position maps.
@@ -3077,7 +3077,7 @@ class je {
   and the new document.
   */
   getMap() {
-    return tt.empty;
+    return nt.empty;
   }
   /**
   Try to merge this step with another one, to be applied directly
@@ -3327,7 +3327,7 @@ class Ie extends je {
     return this.structure && cs(e, this.from, this.to) ? Re.fail("Structure replace would overwrite content") : Re.fromReplace(e, this.from, this.to, this.slice);
   }
   getMap() {
-    return new tt([this.from, this.to - this.from, this.slice.size]);
+    return new nt([this.from, this.to - this.from, this.slice.size]);
   }
   invert(e) {
     return new Ie(this.from, this.from + this.slice.size, e.slice(this.from, this.to));
@@ -3382,7 +3382,7 @@ class Be extends je {
     return r ? Re.fromReplace(e, this.from, this.to, r) : Re.fail("Content does not fit in gap");
   }
   getMap() {
-    return new tt([
+    return new nt([
       this.from,
       this.gapFrom - this.from,
       this.insert,
@@ -4025,7 +4025,7 @@ class Kn extends je {
     return Re.fromReplace(e, this.pos, this.pos + 1, new I(T.from(i), 0, t.isLeaf ? 0 : 1));
   }
   getMap() {
-    return tt.empty;
+    return nt.empty;
   }
   invert(e) {
     return new Kn(this.pos, this.attr, e.nodeAt(this.pos).attrs[this.attr]);
@@ -4060,7 +4060,7 @@ class wr extends je {
     return Re.ok(r);
   }
   getMap() {
-    return tt.empty;
+    return nt.empty;
   }
   invert(e) {
     return new wr(this.attr, e.attrs[this.attr]);
@@ -4423,7 +4423,7 @@ class G {
   negative, it will search backwards first.
   */
   static near(e, t = 1) {
-    return this.findFrom(e, t) || this.findFrom(e, -t) || new rt(e.node(0));
+    return this.findFrom(e, t) || this.findFrom(e, -t) || new it(e.node(0));
   }
   /**
   Find the cursor or leaf node selection closest to the start of
@@ -4432,14 +4432,14 @@ class G {
   exists.
   */
   static atStart(e) {
-    return Pn(e, e, 0, 0, 1) || new rt(e);
+    return Pn(e, e, 0, 0, 1) || new it(e);
   }
   /**
   Find the cursor or leaf node selection closest to the end of the
   given document.
   */
   static atEnd(e) {
-    return Pn(e, e, e.content.size, e.childCount, -1) || new rt(e);
+    return Pn(e, e, e.content.size, e.childCount, -1) || new it(e);
   }
   /**
   Deserialize the JSON representation of a selection. Must be
@@ -4635,7 +4635,7 @@ class Ks {
     return r && H.isSelectable(r) ? new H(t) : G.near(t);
   }
 }
-class rt extends G {
+class it extends G {
   /**
   Create an all-selection over the given document.
   */
@@ -4657,25 +4657,25 @@ class rt extends G {
   @internal
   */
   static fromJSON(e) {
-    return new rt(e);
+    return new it(e);
   }
   map(e) {
-    return new rt(e);
+    return new it(e);
   }
   eq(e) {
-    return e instanceof rt;
+    return e instanceof it;
   }
   getBookmark() {
     return Nf;
   }
 }
-G.jsonID("all", rt);
+G.jsonID("all", it);
 const Nf = {
   map() {
     return this;
   },
   resolve(n) {
-    return new rt(n);
+    return new it(n);
   }
 };
 function Pn(n, e, t, r, i, o = !1) {
@@ -5234,9 +5234,9 @@ function zf(n, e, t) {
       return { node: r.startContainer, offset: Math.min(ut(r.startContainer), r.startOffset) };
   }
 }
-const xt = typeof navigator < "u" ? navigator : null, Za = typeof document < "u" ? document : null, rn = xt && xt.userAgent || "", us = /Edge\/(\d+)/.exec(rn), pd = /MSIE \d/.exec(rn), hs = /Trident\/(?:[7-9]|\d{2,})\..*rv:(\d+)/.exec(rn), Qe = !!(pd || hs || us), Xt = pd ? document.documentMode : hs ? +hs[1] : us ? +us[1] : 0, ht = !Qe && /gecko\/(\d+)/i.test(rn);
+const xt = typeof navigator < "u" ? navigator : null, Za = typeof document < "u" ? document : null, rn = xt && xt.userAgent || "", us = /Edge\/(\d+)/.exec(rn), pd = /MSIE \d/.exec(rn), hs = /Trident\/(?:[7-9]|\d{2,})\..*rv:(\d+)/.exec(rn), et = !!(pd || hs || us), Xt = pd ? document.documentMode : hs ? +hs[1] : us ? +us[1] : 0, ht = !et && /gecko\/(\d+)/i.test(rn);
 ht && +(/Firefox\/(\d+)/.exec(rn) || [0, 0])[1];
-const fs = !Qe && /Chrome\/(\d+)/.exec(rn), De = !!fs, gd = fs ? +fs[1] : 0, Ke = !Qe && !!xt && /Apple Computer/.test(xt.vendor), jn = Ke && (/Mobile\/\w+/.test(rn) || !!xt && xt.maxTouchPoints > 2), dt = jn || (xt ? /Mac/.test(xt.platform) : !1), md = xt ? /Win/.test(xt.platform) : !1, It = /Android \d/.test(rn), Br = !!Za && "webkitFontSmoothing" in Za.documentElement.style, Ff = Br ? +(/\bAppleWebKit\/(\d+)/.exec(navigator.userAgent) || [0, 0])[1] : 0;
+const fs = !et && /Chrome\/(\d+)/.exec(rn), De = !!fs, gd = fs ? +fs[1] : 0, Ke = !et && !!xt && /Apple Computer/.test(xt.vendor), jn = Ke && (/Mobile\/\w+/.test(rn) || !!xt && xt.maxTouchPoints > 2), dt = jn || (xt ? /Mac/.test(xt.platform) : !1), md = xt ? /Win/.test(xt.platform) : !1, It = /Android \d/.test(rn), Br = !!Za && "webkitFontSmoothing" in Za.documentElement.style, Ff = Br ? +(/\bAppleWebKit\/(\d+)/.exec(navigator.userAgent) || [0, 0])[1] : 0;
 function Hf(n) {
   let e = n.defaultView && n.defaultView.visualViewport;
   return e ? {
@@ -6686,7 +6686,7 @@ function hp(n) {
   if (!e)
     return;
   let t = n.cursorWrapper.dom, r = t.nodeName == "IMG";
-  r ? e.collapse(t.parentNode, He(t) + 1) : e.collapse(t, 0), !r && !n.state.selection.visible && Qe && Xt <= 11 && (t.disabled = !0, t.disabled = !1);
+  r ? e.collapse(t.parentNode, He(t) + 1) : e.collapse(t, 0), !r && !n.state.selection.visible && et && Xt <= 11 && (t.disabled = !0, t.disabled = !1);
 }
 function Md(n, e) {
   if (e instanceof H) {
@@ -6907,7 +6907,7 @@ function fl(n, e, t) {
       return Ft(n, s);
   }
   if (!i.parent.inlineContent) {
-    let s = e < 0 ? i : o, a = r instanceof rt ? G.near(s, e) : G.findFrom(s, e);
+    let s = e < 0 ? i : o, a = r instanceof it ? G.near(s, e) : G.findFrom(s, e);
     return a ? Ft(n, a) : !1;
   }
   return !1;
@@ -7458,7 +7458,7 @@ function qp(n, e) {
     t.parentNode && t.parentNode.removeChild(t), n.focus();
   }, 50);
 }
-const Tr = Qe && Xt < 15 || jn && Ff < 604;
+const Tr = et && Xt < 15 || jn && Ff < 604;
 Je.copy = Ze.cut = (n, e) => {
   let t = e, r = n.state.selection, i = t.type == "cut";
   if (r.empty)
@@ -8117,7 +8117,7 @@ const Xp = {
   attributes: !0,
   attributeOldValue: !0,
   subtree: !0
-}, Qp = Qe && Xt <= 11;
+}, Qp = et && Xt <= 11;
 class eg {
   constructor() {
     this.anchorNode = null, this.anchorOffset = 0, this.focusNode = null, this.focusOffset = 0;
@@ -8137,7 +8137,7 @@ class tg {
     this.view = e, this.handleDOMChange = t, this.queue = [], this.flushingSoon = -1, this.observer = null, this.currentSelection = new eg(), this.onCharData = null, this.suppressingSelectionUpdates = !1, this.lastChangedTextNode = null, this.observer = window.MutationObserver && new window.MutationObserver((r) => {
       for (let i = 0; i < r.length; i++)
         this.queue.push(r[i]);
-      Qe && Xt <= 11 && r.some((i) => i.type == "childList" && i.removedNodes.length || i.type == "characterData" && i.oldValue.length > i.target.nodeValue.length) ? this.flushSoon() : Ke && e.composing && r.some((i) => i.type == "childList" && i.target.nodeName == "TR") ? (e.input.badSafariComposition = !0, this.flushSoon()) : this.flush();
+      et && Xt <= 11 && r.some((i) => i.type == "childList" && i.removedNodes.length || i.type == "characterData" && i.oldValue.length > i.target.nodeValue.length) ? this.flushSoon() : Ke && e.composing && r.some((i) => i.type == "childList" && i.target.nodeName == "TR") ? (e.input.badSafariComposition = !0, this.flushSoon()) : this.flush();
     }), Qp && (this.onCharData = (r) => {
       this.queue.push({ target: r.target, type: "characterData", oldValue: r.prevValue }), this.flushSoon();
     }), this.onSelectionChange = this.onSelectionChange.bind(this);
@@ -8178,7 +8178,7 @@ class tg {
     if (dl(this.view)) {
       if (this.suppressingSelectionUpdates)
         return Bt(this.view);
-      if (Qe && Xt <= 11 && !this.view.state.selection.empty) {
+      if (et && Xt <= 11 && !this.view.state.selection.empty) {
         let e = this.view.domSelectionRange();
         if (e.focusNode && Tn(e.focusNode, e.focusOffset, e.anchorNode, e.anchorOffset))
           return this.flushSoon();
@@ -8262,7 +8262,7 @@ class tg {
       if (r.contentDOM && r.contentDOM != r.dom && !r.contentDOM.contains(e.target))
         return { from: r.posBefore, to: r.posAfter };
       let i = e.previousSibling, o = e.nextSibling;
-      if (Qe && Xt <= 11 && e.addedNodes.length)
+      if (et && Xt <= 11 && e.addedNodes.length)
         for (let d = 0; d < e.addedNodes.length; d++) {
           let { previousSibling: u, nextSibling: h } = e.addedNodes[d];
           (!u || Array.prototype.indexOf.call(e.addedNodes, u) < 0) && (i = u), (!h || Array.prototype.indexOf.call(e.addedNodes, h) < 0) && (o = h);
@@ -8411,7 +8411,7 @@ function cg(n, e, t, r, i) {
       }
       return;
     }
-  n.state.selection.from < n.state.selection.to && p.start == p.endB && n.state.selection instanceof q && (p.start > n.state.selection.from && p.start <= n.state.selection.from + 2 && n.state.selection.from >= c.from ? p.start = n.state.selection.from : p.endA < n.state.selection.to && p.endA >= n.state.selection.to - 2 && n.state.selection.to <= c.to && (p.endB += n.state.selection.to - p.endA, p.endA = n.state.selection.to)), Qe && Xt <= 11 && p.endB == p.start + 1 && p.endA == p.start && p.start > c.from && c.doc.textBetween(p.start - c.from - 1, p.start - c.from + 1) == "  " && (p.start--, p.endA--, p.endB--);
+  n.state.selection.from < n.state.selection.to && p.start == p.endB && n.state.selection instanceof q && (p.start > n.state.selection.from && p.start <= n.state.selection.from + 2 && n.state.selection.from >= c.from ? p.start = n.state.selection.from : p.endA < n.state.selection.to && p.endA >= n.state.selection.to - 2 && n.state.selection.to <= c.to && (p.endB += n.state.selection.to - p.endA, p.endA = n.state.selection.to)), et && Xt <= 11 && p.endB == p.start + 1 && p.endA == p.start && p.start > c.from && c.doc.textBetween(p.start - c.from - 1, p.start - c.from + 1) == "  " && (p.start--, p.endA--, p.endB--);
   let g = c.doc.resolveNoCache(p.start - c.from), m = c.doc.resolveNoCache(p.endB - c.from), b = d.resolve(p.start), k = g.sameParent(m) && g.parent.inlineContent && b.end() >= p.endA;
   if ((jn && n.input.lastIOSEnter > Date.now() - 225 && (!k || i.some((O) => O.nodeName == "DIV" || O.nodeName == "P")) || !k && g.pos < c.doc.content.size && (!g.sameParent(m) || !g.parent.inlineContent) && g.pos < m.pos && !/\S/.test(c.doc.textBetween(g.pos, m.pos, "", ""))) && n.someProp("handleKeyDown", (O) => O(n, ln(13, "Enter")))) {
     n.input.lastIOSEnter = 0;
@@ -8430,13 +8430,13 @@ function cg(n, e, t, r, i) {
     let D = O || n.state.tr.replace(_, A, c.doc.slice(p.start - c.from, p.endB - c.from));
     if (c.sel) {
       let U = wl(n, D.doc, c.sel);
-      U && !(De && n.composing && U.empty && (p.start != p.endB || n.input.lastChromeDelete < Date.now() - 100) && (U.head == _ || U.head == D.mapping.map(A) - 1) || Qe && U.empty && U.head == _) && D.setSelection(U);
+      U && !(De && n.composing && U.empty && (p.start != p.endB || n.input.lastChromeDelete < Date.now() - 100) && (U.head == _ || U.head == D.mapping.map(A) - 1) || et && U.empty && U.head == _) && D.setSelection(U);
     }
     return o && D.setMeta("composition", o), D.scrollIntoView();
   }, L;
   if (k)
     if (g.pos == m.pos) {
-      Qe && Xt <= 11 && g.parentOffset == 0 && (n.domObserver.suppressSelectionUpdates(), setTimeout(() => Bt(n), 20));
+      et && Xt <= 11 && g.parentOffset == 0 && (n.domObserver.suppressSelectionUpdates(), setTimeout(() => Bt(n), 20));
       let O = C(n.state.tr.delete(_, A)), D = d.resolve(p.start).marksAcross(d.resolve(p.endA));
       D && O.ensureMarks(D), n.dispatch(O);
     } else if (
@@ -8603,7 +8603,7 @@ class jd {
     let h = d == "preserve" && s && this.dom.style.overflowAnchor == null && Wf(this);
     if (s) {
       this.domObserver.stop();
-      let f = u && (Qe || De) && !this.composing && !i.selection.empty && !e.selection.empty && fg(i.selection, e.selection);
+      let f = u && (et || De) && !this.composing && !i.selection.empty && !e.selection.empty && fg(i.selection, e.selection);
       if (u) {
         let p = De ? this.trackWrites = this.domSelectionRange().focusNode : null;
         this.composing && (this.input.compositionNode = Wp(this)), (o || !this.docView.update(e.doc, c, l, this)) && (this.docView.updateOuterDeco(c), this.docView.destroy(), this.docView = il(e.doc, c, l, this.dom, this)), p && (!this.trackWrites || !this.dom.contains(this.trackWrites)) && (f = !0);
@@ -8678,7 +8678,7 @@ class jd {
   Query whether the view has focus.
   */
   hasFocus() {
-    if (Qe) {
+    if (et) {
       let e = this.root.activeElement;
       if (e == this.dom)
         return !0;
@@ -9254,7 +9254,7 @@ const Ag = (n, e) => {
   return !0;
 }, ru = (n, e) => {
   let t = n.selection, { $from: r, $to: i } = t;
-  if (t instanceof rt || r.parent.inlineContent || i.parent.inlineContent)
+  if (t instanceof it || r.parent.inlineContent || i.parent.inlineContent)
     return !1;
   let o = ia(i.parent.contentMatchAt(i.indexAfter()));
   if (!o || !o.isTextblock)
@@ -9294,7 +9294,7 @@ function Mg(n) {
         o.unshift(null);
       }
     let d = e.tr;
-    (e.selection instanceof q || e.selection instanceof rt) && d.deleteSelection();
+    (e.selection instanceof q || e.selection instanceof it) && d.deleteSelection();
     let u = d.mapping.map(r.pos), h = Dt(d.doc, u, o.length, o);
     if (h || (o[0] = a ? { type: a } : null, h = Dt(d.doc, u, o.length, o)), !h)
       return !1;
@@ -10826,7 +10826,7 @@ const Fm = (n, e) => ({ tr: t, state: r, dispatch: i }) => {
   }), !0) : !1;
 }, Hm = () => ({ tr: n, dispatch: e }) => (e && n.scrollIntoView(), !0), Um = () => ({ tr: n, dispatch: e }) => {
   if (e) {
-    const t = new rt(n.doc);
+    const t = new it(n.doc);
     n.setSelection(t);
   }
   return !0;
@@ -13683,11 +13683,11 @@ function Hy(n, e) {
     e[r].indexOf(n) >= 0 && (t[r] = !0);
   return t;
 }
-function Xe(n = null) {
+function Qe(n = null) {
   this.j = {}, this.jr = [], this.jd = null, this.t = n;
 }
-Xe.groups = {};
-Xe.prototype = {
+Qe.groups = {};
+Qe.prototype = {
   accepts() {
     return !!this.t;
   },
@@ -13740,9 +13740,9 @@ Xe.prototype = {
    * @returns {State<T>} taken after the given input
    */
   tr(n, e, t, r) {
-    r = r || Xe.groups;
+    r = r || Qe.groups;
     let i;
-    return e && e.j ? i = e : (i = new Xe(e), t && r && fn(e, t, r)), this.jr.push([n, i]), i;
+    return e && e.j ? i = e : (i = new Qe(e), t && r && fn(e, t, r)), this.jr.push([n, i]), i;
   },
   /**
    * Short for "take transitions", will take as many sequential transitions as
@@ -13790,13 +13790,13 @@ Xe.prototype = {
    * @returns {State<T>} taken after the given input
    */
   tt(n, e, t, r) {
-    r = r || Xe.groups;
+    r = r || Qe.groups;
     const i = this;
     if (e && e.j)
       return i.j[n] = e, e;
     const o = e;
     let s, a = i.go(n);
-    if (a ? (s = new Xe(), Object.assign(s.j, a.j), s.jr.push.apply(s.jr, a.jr), s.jd = a.jd, s.t = a.t) : s = new Xe(), o) {
+    if (a ? (s = new Qe(), Object.assign(s.j, a.j), s.jr.push.apply(s.jr, a.jr), s.jd = a.jd, s.t = a.t) : s = new Qe(), o) {
       if (r)
         if (s.t && typeof s.t == "string") {
           const l = Object.assign(Hy(s.t, r), t);
@@ -13807,7 +13807,7 @@ Xe.prototype = {
     return i.j[n] = s, s;
   }
 };
-const X = (n, e, t, r, i) => n.ta(e, t, r, i), we = (n, e, t, r, i) => n.tr(e, t, r, i), Kl = (n, e, t, r, i) => n.ts(e, t, r, i), M = (n, e, t, r, i) => n.tt(e, t, r, i), Ot = "WORD", Ms = "UWORD", vu = "ASCIINUMERICAL", Au = "ALPHANUMERICAL", Ar = "LOCALHOST", Ns = "TLD", Os = "UTLD", di = "SCHEME", zn = "SLASH_SCHEME", ha = "NUM", Rs = "WS", fa = "NL", pr = "OPENBRACE", gr = "CLOSEBRACE", vi = "OPENBRACKET", Ai = "CLOSEBRACKET", Mi = "OPENPAREN", Ni = "CLOSEPAREN", Oi = "OPENANGLEBRACKET", Ri = "CLOSEANGLEBRACKET", Li = "FULLWIDTHLEFTPAREN", Ii = "FULLWIDTHRIGHTPAREN", Di = "LEFTCORNERBRACKET", Bi = "RIGHTCORNERBRACKET", Pi = "LEFTWHITECORNERBRACKET", $i = "RIGHTWHITECORNERBRACKET", zi = "FULLWIDTHLESSTHAN", Fi = "FULLWIDTHGREATERTHAN", Hi = "AMPERSAND", Ui = "APOSTROPHE", Wi = "ASTERISK", Ut = "AT", Ki = "BACKSLASH", qi = "BACKTICK", Vi = "CARET", Kt = "COLON", pa = "COMMA", Gi = "DOLLAR", wt = "DOT", ji = "EQUALS", ga = "EXCLAMATION", lt = "HYPHEN", mr = "PERCENT", Yi = "PIPE", Ji = "PLUS", Zi = "POUND", br = "QUERY", ma = "QUOTE", Mu = "FULLWIDTHMIDDLEDOT", ba = "SEMI", Tt = "SLASH", yr = "TILDE", Xi = "UNDERSCORE", Nu = "EMOJI", Qi = "SYM";
+const X = (n, e, t, r, i) => n.ta(e, t, r, i), we = (n, e, t, r, i) => n.tr(e, t, r, i), Kl = (n, e, t, r, i) => n.ts(e, t, r, i), M = (n, e, t, r, i) => n.tt(e, t, r, i), Ot = "WORD", Ms = "UWORD", vu = "ASCIINUMERICAL", Au = "ALPHANUMERICAL", Ar = "LOCALHOST", Ns = "TLD", Os = "UTLD", di = "SCHEME", zn = "SLASH_SCHEME", ha = "NUM", Rs = "WS", fa = "NL", pr = "OPENBRACE", gr = "CLOSEBRACE", vi = "OPENBRACKET", Ai = "CLOSEBRACKET", Mi = "OPENPAREN", Ni = "CLOSEPAREN", Oi = "OPENANGLEBRACKET", Ri = "CLOSEANGLEBRACKET", Li = "FULLWIDTHLEFTPAREN", Ii = "FULLWIDTHRIGHTPAREN", Di = "LEFTCORNERBRACKET", Bi = "RIGHTCORNERBRACKET", Pi = "LEFTWHITECORNERBRACKET", $i = "RIGHTWHITECORNERBRACKET", zi = "FULLWIDTHLESSTHAN", Fi = "FULLWIDTHGREATERTHAN", Hi = "AMPERSAND", Ui = "APOSTROPHE", Wi = "ASTERISK", Ut = "AT", Ki = "BACKSLASH", qi = "BACKTICK", Vi = "CARET", Kt = "COLON", pa = "COMMA", Gi = "DOLLAR", wt = "DOT", ji = "EQUALS", ga = "EXCLAMATION", ct = "HYPHEN", mr = "PERCENT", Yi = "PIPE", Ji = "PLUS", Zi = "POUND", br = "QUERY", ma = "QUOTE", Mu = "FULLWIDTHMIDDLEDOT", ba = "SEMI", Tt = "SLASH", yr = "TILDE", Xi = "UNDERSCORE", Nu = "EMOJI", Qi = "SYM";
 var Ou = /* @__PURE__ */ Object.freeze({
   __proto__: null,
   ALPHANUMERICAL: Au,
@@ -13835,7 +13835,7 @@ var Ou = /* @__PURE__ */ Object.freeze({
   FULLWIDTHLESSTHAN: zi,
   FULLWIDTHMIDDLEDOT: Mu,
   FULLWIDTHRIGHTPAREN: Ii,
-  HYPHEN: lt,
+  HYPHEN: ct,
   LEFTCORNERBRACKET: Di,
   LEFTWHITECORNERBRACKET: Pi,
   LOCALHOST: Ar,
@@ -13871,9 +13871,9 @@ const Mt = /[a-z]/, nr = new RegExp("\\p{L}", "u"), Vo = new RegExp("\\p{Emoji}"
 let Vr = null, Gr = null;
 function Ky(n = []) {
   const e = {};
-  Xe.groups = e;
-  const t = new Xe();
-  Vr == null && (Vr = Vl(By)), Gr == null && (Gr = Vl(Py)), M(t, "'", Ui), M(t, "{", pr), M(t, "}", gr), M(t, "[", vi), M(t, "]", Ai), M(t, "(", Mi), M(t, ")", Ni), M(t, "<", Oi), M(t, ">", Ri), M(t, "（", Li), M(t, "）", Ii), M(t, "「", Di), M(t, "」", Bi), M(t, "『", Pi), M(t, "』", $i), M(t, "＜", zi), M(t, "＞", Fi), M(t, "&", Hi), M(t, "*", Wi), M(t, "@", Ut), M(t, "`", qi), M(t, "^", Vi), M(t, ":", Kt), M(t, ",", pa), M(t, "$", Gi), M(t, ".", wt), M(t, "=", ji), M(t, "!", ga), M(t, "-", lt), M(t, "%", mr), M(t, "|", Yi), M(t, "+", Ji), M(t, "#", Zi), M(t, "?", br), M(t, '"', ma), M(t, "/", Tt), M(t, ";", ba), M(t, "~", yr), M(t, "_", Xi), M(t, "\\", Ki), M(t, "・", Mu);
+  Qe.groups = e;
+  const t = new Qe();
+  Vr == null && (Vr = Vl(By)), Gr == null && (Gr = Vl(Py)), M(t, "'", Ui), M(t, "{", pr), M(t, "}", gr), M(t, "[", vi), M(t, "]", Ai), M(t, "(", Mi), M(t, ")", Ni), M(t, "<", Oi), M(t, ">", Ri), M(t, "（", Li), M(t, "）", Ii), M(t, "「", Di), M(t, "」", Bi), M(t, "『", Pi), M(t, "』", $i), M(t, "＜", zi), M(t, "＞", Fi), M(t, "&", Hi), M(t, "*", Wi), M(t, "@", Ut), M(t, "`", qi), M(t, "^", Vi), M(t, ":", Kt), M(t, ",", pa), M(t, "$", Gi), M(t, ".", wt), M(t, "=", ji), M(t, "!", ga), M(t, "-", ct), M(t, "%", mr), M(t, "|", Yi), M(t, "+", Ji), M(t, "#", Zi), M(t, "?", br), M(t, '"', ma), M(t, "/", Tt), M(t, ";", ba), M(t, "~", yr), M(t, "_", Xi), M(t, "\\", Ki), M(t, "・", Mu);
   const r = we(t, Nt, ha, {
     [xs]: !0
   });
@@ -13932,7 +13932,7 @@ function Ky(n = []) {
   }
   return Kl(t, "localhost", Ar, {
     ascii: !0
-  }), t.jd = new Xe(Qi), {
+  }), t.jd = new Qe(Qi), {
     start: t,
     tokens: Object.assign({
       groups: e
@@ -13973,9 +13973,9 @@ function Pt(n, e, t, r, i) {
   const s = e.length;
   for (let a = 0; a < s - 1; a++) {
     const l = e[a];
-    n.j[l] ? o = n.j[l] : (o = new Xe(r), o.jr = i.slice(), n.j[l] = o), n = o;
+    n.j[l] ? o = n.j[l] : (o = new Qe(r), o.jr = i.slice(), n.j[l] = o), n = o;
   }
-  return o = new Xe(t), o.jr = i.slice(), n.j[e[s - 1]] = o, o;
+  return o = new Qe(t), o.jr = i.slice(), n.j[e[s - 1]] = o, o;
 }
 function Vl(n) {
   const e = [], t = [];
@@ -14225,38 +14225,38 @@ const jl = Eo("email", {
     const n = this.tk;
     return n.length >= 2 && n[0].t !== Ar && n[1].t === Kt;
   }
-}), st = (n) => new Xe(n);
+}), at = (n) => new Qe(n);
 function Gy({
   groups: n
 }) {
-  const e = n.domain.concat([Hi, Wi, Ut, Ki, qi, Vi, Gi, ji, lt, ha, mr, Yi, Ji, Zi, Tt, Qi, yr, Xi]), t = [Ui, Kt, pa, wt, ga, mr, br, ma, ba, Oi, Ri, pr, gr, Ai, vi, Mi, Ni, Li, Ii, Di, Bi, Pi, $i, zi, Fi], r = [Hi, Ui, Wi, Ki, qi, Vi, Gi, ji, lt, pr, gr, mr, Yi, Ji, Zi, br, Tt, Qi, yr, Xi], i = st(), o = M(i, yr);
+  const e = n.domain.concat([Hi, Wi, Ut, Ki, qi, Vi, Gi, ji, ct, ha, mr, Yi, Ji, Zi, Tt, Qi, yr, Xi]), t = [Ui, Kt, pa, wt, ga, mr, br, ma, ba, Oi, Ri, pr, gr, Ai, vi, Mi, Ni, Li, Ii, Di, Bi, Pi, $i, zi, Fi], r = [Hi, Ui, Wi, Ki, qi, Vi, Gi, ji, ct, pr, gr, mr, Yi, Ji, Zi, br, Tt, Qi, yr, Xi], i = at(), o = M(i, yr);
   X(o, r, o), X(o, n.domain, o);
-  const s = st(), a = st(), l = st();
+  const s = at(), a = at(), l = at();
   X(i, n.domain, s), X(i, n.scheme, a), X(i, n.slashscheme, l), X(s, r, o), X(s, n.domain, s);
   const c = M(s, Ut);
   M(o, Ut, c), M(a, Ut, c), M(l, Ut, c);
   const d = M(o, wt);
   X(d, r, o), X(d, n.domain, o);
-  const u = st();
+  const u = at();
   X(c, n.domain, u), X(u, n.domain, u);
   const h = M(u, wt);
   X(h, n.domain, u);
-  const f = st(jl);
+  const f = at(jl);
   X(h, n.tld, f), X(h, n.utld, f), M(c, Ar, f);
-  const p = M(u, lt);
-  M(p, lt, p), X(p, n.domain, u), X(f, n.domain, u), M(f, wt, h), M(f, lt, p);
+  const p = M(u, ct);
+  M(p, ct, p), X(p, n.domain, u), X(f, n.domain, u), M(f, wt, h), M(f, ct, p);
   const g = M(f, Kt);
   X(g, n.numeric, jl);
-  const m = M(s, lt), b = M(s, wt);
-  M(m, lt, m), X(m, n.domain, s), X(b, r, o), X(b, n.domain, s);
-  const k = st(jr);
-  X(b, n.tld, k), X(b, n.utld, k), X(k, n.domain, s), X(k, r, o), M(k, wt, b), M(k, lt, m), M(k, Ut, c);
-  const _ = M(k, Kt), A = st(jr);
+  const m = M(s, ct), b = M(s, wt);
+  M(m, ct, m), X(m, n.domain, s), X(b, r, o), X(b, n.domain, s);
+  const k = at(jr);
+  X(b, n.tld, k), X(b, n.utld, k), X(k, n.domain, s), X(k, r, o), M(k, wt, b), M(k, ct, m), M(k, Ut, c);
+  const _ = M(k, Kt), A = at(jr);
   X(_, n.numeric, A);
-  const C = st(jr), L = st();
+  const C = at(jr), L = at();
   X(C, e, C), X(C, t, L), X(L, e, C), X(L, t, L), M(k, Tt, C), M(A, Tt, C);
   const O = M(a, Kt), D = M(l, Kt), U = M(D, Tt), he = M(U, Tt);
-  X(a, n.domain, s), M(a, wt, b), M(a, lt, m), X(l, n.domain, s), M(l, wt, b), M(l, lt, m), X(O, n.domain, C), M(O, Tt, C), M(O, br, C), X(he, n.domain, C), X(he, e, C), M(he, Tt, C);
+  X(a, n.domain, s), M(a, wt, b), M(a, ct, m), X(l, n.domain, s), M(l, wt, b), M(l, ct, m), X(O, n.domain, C), M(O, Tt, C), M(O, br, C), X(he, n.domain, C), X(he, e, C), M(he, Tt, C);
   const Le = [
     [pr, gr],
     // {}
@@ -14278,9 +14278,9 @@ function Gy({
   for (let Ae = 0; Ae < Le.length; Ae++) {
     const [Me, se] = Le[Ae], ne = M(C, Me);
     M(L, Me, ne), M(ne, se, C);
-    const w = st(jr);
+    const w = at(jr);
     X(ne, e, w);
-    const y = st();
+    const y = at();
     X(ne, t), X(w, e, w), X(w, t, y), X(y, e, w), X(y, t, y), M(w, se, C), M(y, se, C);
   }
   return M(i, Ar, k), M(i, fa, Vy), {
@@ -14320,7 +14320,7 @@ const Yy = typeof console < "u" && console && console.warn || (() => {
   initialized: !1
 };
 function Zy() {
-  return Xe.groups = {}, ge.scanner = null, ge.parser = null, ge.tokenQueue = [], ge.pluginQueue = [], ge.customSchemes = [], ge.initialized = !1, ge;
+  return Qe.groups = {}, ge.scanner = null, ge.parser = null, ge.tokenQueue = [], ge.pluginQueue = [], ge.customSchemes = [], ge.initialized = !1, ge;
 }
 function Jl(n, e = !1) {
   if (ge.initialized && Yy(`linkifyjs: already initialized - will not register custom scheme "${n}" ${Jy}`), !/^[0-9a-z]+(-[0-9a-z]+)*$/.test(n))
@@ -15871,10 +15871,10 @@ function Ps(n, e, t, r, i, o) {
     a ? (t.style.width = s + "px", t.style.minWidth = "") : (t.style.width = "", t.style.minWidth = s + "px");
   }
 }
-const nt = new ve("tableColumnResizing");
+const rt = new ve("tableColumnResizing");
 function Y0({ handleWidth: n = 5, cellMinWidth: e = 25, defaultCellMinWidth: t = 100, View: r = j0, lastColumnResizable: i = !0 } = {}) {
   const o = new ke({
-    key: nt,
+    key: rt,
     state: {
       init(s, a) {
         var l;
@@ -15887,7 +15887,7 @@ function Y0({ handleWidth: n = 5, cellMinWidth: e = 25, defaultCellMinWidth: t =
     },
     props: {
       attributes: (s) => {
-        const a = nt.getState(s);
+        const a = rt.getState(s);
         return a && a.activeHandle > -1 ? { class: "resize-cursor" } : {};
       },
       handleDOMEvents: {
@@ -15902,7 +15902,7 @@ function Y0({ handleWidth: n = 5, cellMinWidth: e = 25, defaultCellMinWidth: t =
         }
       },
       decorations: (s) => {
-        const a = nt.getState(s);
+        const a = rt.getState(s);
         if (a && a.activeHandle > -1) return iE(s, a.activeHandle);
       },
       nodeViews: {}
@@ -15915,7 +15915,7 @@ var J0 = class hi {
     this.activeHandle = e, this.dragging = t;
   }
   apply(e) {
-    const t = this, r = e.getMeta(nt);
+    const t = this, r = e.getMeta(rt);
     if (r && r.setHandle != null) return new hi(r.setHandle, !1);
     if (r && r.setDragging !== void 0) return new hi(t.activeHandle, r.setDragging);
     if (t.activeHandle > -1 && e.docChanged) {
@@ -15927,7 +15927,7 @@ var J0 = class hi {
 };
 function Z0(n, e, t, r) {
   if (!n.editable) return;
-  const i = nt.getState(n.state);
+  const i = rt.getState(n.state);
   if (i && !i.dragging) {
     const o = tE(e.target);
     let s = -1;
@@ -15946,27 +15946,27 @@ function Z0(n, e, t, r) {
 }
 function X0(n) {
   if (!n.editable) return;
-  const e = nt.getState(n.state);
+  const e = rt.getState(n.state);
   e && e.activeHandle > -1 && !e.dragging && Wu(n, -1);
 }
 function Q0(n, e, t, r) {
   var i;
   if (!n.editable) return !1;
-  const o = (i = n.dom.ownerDocument.defaultView) !== null && i !== void 0 ? i : window, s = nt.getState(n.state);
+  const o = (i = n.dom.ownerDocument.defaultView) !== null && i !== void 0 ? i : window, s = rt.getState(n.state);
   if (!s || s.activeHandle == -1 || s.dragging) return !1;
   const a = n.state.doc.nodeAt(s.activeHandle), l = eE(n, s.activeHandle, a.attrs);
-  n.dispatch(n.state.tr.setMeta(nt, { setDragging: {
+  n.dispatch(n.state.tr.setMeta(rt, { setDragging: {
     startX: e.clientX,
     startWidth: l
   } }));
   function c(u) {
     o.removeEventListener("mouseup", c), o.removeEventListener("mousemove", d);
-    const h = nt.getState(n.state);
-    h != null && h.dragging && (nE(n, h.activeHandle, ac(h.dragging, u, t)), n.dispatch(n.state.tr.setMeta(nt, { setDragging: null })));
+    const h = rt.getState(n.state);
+    h != null && h.dragging && (nE(n, h.activeHandle, ac(h.dragging, u, t)), n.dispatch(n.state.tr.setMeta(rt, { setDragging: null })));
   }
   function d(u) {
     if (!u.which) return c(u);
-    const h = nt.getState(n.state);
+    const h = rt.getState(n.state);
     if (h && h.dragging) {
       const f = ac(h.dragging, u, t);
       lc(n, h.activeHandle, f, r);
@@ -16004,7 +16004,7 @@ function ac(n, e, t) {
   return Math.max(t, n.startWidth + r);
 }
 function Wu(n, e) {
-  n.dispatch(n.state.tr.setMeta(nt, { setHandle: e }));
+  n.dispatch(n.state.tr.setMeta(rt, { setHandle: e }));
 }
 function nE(n, e, t) {
   const r = n.state.doc.resolve(e), i = r.node(-1), o = _e.get(i), s = r.start(-1), a = o.colCount(r.pos - s) + r.nodeAfter.attrs.colspan - 1, l = n.state.tr;
@@ -16039,7 +16039,7 @@ function iE(n, e) {
     if ((a == o.width - 1 || o.map[d] != o.map[d + 1]) && (c == 0 || o.map[d] != o.map[d - o.width])) {
       var l;
       const u = o.map[d], h = s + u + i.nodeAt(u).nodeSize - 1, f = document.createElement("div");
-      f.className = "column-resize-handle", !((l = nt.getState(n)) === null || l === void 0) && l.dragging && t.push(We.node(s + u, s + u + i.nodeAt(u).nodeSize, { class: "column-resize-dragging" })), t.push(We.widget(h, f));
+      f.className = "column-resize-handle", !((l = rt.getState(n)) === null || l === void 0) && l.dragging && t.push(We.node(s + u, s + u + i.nodeAt(u).nodeSize, { class: "column-resize-dragging" })), t.push(We.widget(h, f));
     }
   }
   return ye.create(n.doc, t);
@@ -17074,7 +17074,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), V = y, F = S), R === 
         const Y = te.case_insensitive ? v[0].toLowerCase() : v[0], fe = ee(j, Y);
         if (fe) {
           const [gt, _o] = fe;
-          if (J.addText($), $ = "", V[Y] = (V[Y] || 0) + 1, V[Y] <= lk && (ot += _o), gt.startsWith("_"))
+          if (J.addText($), $ = "", V[Y] = (V[Y] || 0) + 1, V[Y] <= lk && (st += _o), gt.startsWith("_"))
             $ += v[0];
           else {
             const Dh = te.classNameAliases[gt] || gt;
@@ -17098,7 +17098,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), V = y, F = S), R === 
         E._top;
       } else
         E = f(oe, j.subLanguage.length ? j.subLanguage : null);
-      j.relevance > 0 && (ot += E.relevance), J.__addSublanguage(E._emitter, E.language);
+      j.relevance > 0 && (st += E.relevance), J.__addSublanguage(E._emitter, E.language);
     }
     function ie() {
       j.subLanguage != null ? Se() : me(), oe = "";
@@ -17154,29 +17154,29 @@ https://github.com/highlightjs/highlight.js/issues/2277`), V = y, F = S), R === 
       const fe = j;
       j.endScope && j.endScope._wrap ? (ie(), Ne(v, j.endScope._wrap)) : j.endScope && j.endScope._multi ? (ie(), x(j.endScope, E)) : fe.skip ? oe += v : (fe.returnEnd || fe.excludeEnd || (oe += v), ie(), fe.excludeEnd && (oe = v));
       do
-        j.scope && J.closeNode(), !j.skip && !j.subLanguage && (ot += j.relevance), j = j.parent;
+        j.scope && J.closeNode(), !j.skip && !j.subLanguage && (st += j.relevance), j = j.parent;
       while (j !== Y.parent);
       return Y.starts && Z(Y.starts, E), fe.returnEnd ? 0 : v.length;
     }
-    function et() {
+    function tt() {
       const E = [];
       for (let v = j; v !== te; v = v.parent)
         v.scope && E.unshift(v.scope);
       E.forEach((v) => J.openNode(v));
     }
-    let it = {};
+    let ot = {};
     function xe(E, v) {
       const $ = v && v[0];
       if (oe += E, $ == null)
         return ie(), 0;
-      if (it.type === "begin" && v.type === "end" && it.index === v.index && $ === "") {
+      if (ot.type === "begin" && v.type === "end" && ot.index === v.index && $ === "") {
         if (oe += S.slice(v.index, v.index + 1), !i) {
           const Y = new Error(`0 width match regex (${y})`);
-          throw Y.languageName = y, Y.badRule = it.rule, Y;
+          throw Y.languageName = y, Y.badRule = ot.rule, Y;
         }
         return 1;
       }
-      if (it = v, v.type === "begin")
+      if (ot = v, v.type === "begin")
         return ze(v);
       if (v.type === "illegal" && !R) {
         const Y = new Error('Illegal lexeme "' + $ + '" for mode "' + (j.scope || "<unnamed>") + '"');
@@ -17196,10 +17196,10 @@ https://github.com/highlightjs/highlight.js/issues/2277`), V = y, F = S), R === 
     if (!te)
       throw En(o.replace("{}", y)), new Error('Unknown language: "' + y + '"');
     const Et = ik(te);
-    let W = "", j = F || Et;
+    let K = "", j = F || Et;
     const Oe = {}, J = new a.__emitter(a);
-    et();
-    let oe = "", ot = 0, pt = 0, sn = 0, B = !1;
+    tt();
+    let oe = "", st = 0, pt = 0, sn = 0, B = !1;
     try {
       if (te.__emitTokens)
         te.__emitTokens(S, J);
@@ -17213,10 +17213,10 @@ https://github.com/highlightjs/highlight.js/issues/2277`), V = y, F = S), R === 
         }
         xe(S.substring(pt));
       }
-      return J.finalize(), W = J.toHTML(), {
+      return J.finalize(), K = J.toHTML(), {
         language: y,
-        value: W,
-        relevance: ot,
+        value: K,
+        relevance: st,
         illegal: !1,
         _emitter: J,
         _top: j
@@ -17233,7 +17233,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), V = y, F = S), R === 
             index: pt,
             context: S.slice(pt - 100, pt + 100),
             mode: E.mode,
-            resultSoFar: W
+            resultSoFar: K
           },
           _emitter: J
         };
@@ -28751,15 +28751,15 @@ function PS(n) {
     end: /\//,
     contains: he
   }, Ae = (te) => {
-    const Et = de(te, /\//), W = de(/\//, te);
+    const Et = de(te, /\//), K = de(/\//, te);
     return {
       begin: Et,
-      end: W,
+      end: K,
       contains: [
         ...he,
         {
           scope: "comment",
-          begin: `#(?!.*${W})`,
+          begin: `#(?!.*${K})`,
           end: /$/
         }
       ]
@@ -28973,7 +28973,7 @@ function PS(n) {
       ...Tc
     ],
     end: /}/
-  }, et = {
+  }, tt = {
     match: [
       /class\b/,
       /\s+/,
@@ -28986,7 +28986,7 @@ function PS(n) {
       3: "keyword",
       5: "title.function"
     }
-  }, it = {
+  }, ot = {
     match: [
       /class\b/,
       /\s+/,
@@ -29029,7 +29029,7 @@ function PS(n) {
   for (const te of U.variants) {
     const Et = te.contains.find((j) => j.label === "interpol");
     Et.keywords = c;
-    const W = [
+    const K = [
       ...d,
       ...f,
       ...m,
@@ -29038,13 +29038,13 @@ function PS(n) {
       ...y
     ];
     Et.contains = [
-      ...W,
+      ...K,
       {
         begin: /\(/,
         end: /\)/,
         contains: [
           "self",
-          ...W
+          ...K
         ]
       }
     ];
@@ -29056,8 +29056,8 @@ function PS(n) {
       ...r,
       re,
       ce,
-      et,
-      it,
+      tt,
+      ot,
       xe,
       ze,
       qe,
@@ -31189,16 +31189,16 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
       return B.keywords[E];
     }
     function ee() {
-      if (!W.keywords) {
+      if (!K.keywords) {
         Oe.addText(J);
         return;
       }
       let B = 0;
-      W.keywordPatternRe.lastIndex = 0;
-      let E = W.keywordPatternRe.exec(J), v = "";
+      K.keywordPatternRe.lastIndex = 0;
+      let E = K.keywordPatternRe.exec(J), v = "";
       for (; E; ) {
         v += J.substring(B, E.index);
-        const $ = xe.case_insensitive ? E[0].toLowerCase() : E[0], Y = V(W, $);
+        const $ = xe.case_insensitive ? E[0].toLowerCase() : E[0], Y = V(K, $);
         if (Y) {
           const [fe, gt] = Y;
           if (Oe.addText(v), v = "", F[$] = (F[$] || 0) + 1, F[$] <= Pw && (oe += gt), fe.startsWith("_"))
@@ -31209,26 +31209,26 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
           }
         } else
           v += E[0];
-        B = W.keywordPatternRe.lastIndex, E = W.keywordPatternRe.exec(J);
+        B = K.keywordPatternRe.lastIndex, E = K.keywordPatternRe.exec(J);
       }
       v += J.substring(B), Oe.addText(v);
     }
     function me() {
       if (J === "") return;
       let B = null;
-      if (typeof W.subLanguage == "string") {
-        if (!e[W.subLanguage]) {
+      if (typeof K.subLanguage == "string") {
+        if (!e[K.subLanguage]) {
           Oe.addText(J);
           return;
         }
-        B = u(W.subLanguage, J, !0, j[W.subLanguage]), j[W.subLanguage] = /** @type {CompiledMode} */
+        B = u(K.subLanguage, J, !0, j[K.subLanguage]), j[K.subLanguage] = /** @type {CompiledMode} */
         B._top;
       } else
-        B = f(J, W.subLanguage.length ? W.subLanguage : null);
-      W.relevance > 0 && (oe += B.relevance), Oe.__addSublanguage(B._emitter, B.language);
+        B = f(J, K.subLanguage.length ? K.subLanguage : null);
+      K.relevance > 0 && (oe += B.relevance), Oe.__addSublanguage(B._emitter, B.language);
     }
     function Se() {
-      W.subLanguage != null ? me() : ee(), J = "";
+      K.subLanguage != null ? me() : ee(), J = "";
     }
     function ie(B, E) {
       B !== "" && (Oe.startScope(E), Oe.addText(B), Oe.endScope());
@@ -31246,7 +31246,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
       }
     }
     function x(B, E) {
-      return B.scope && typeof B.scope == "string" && Oe.openNode(xe.classNameAliases[B.scope] || B.scope), B.beginScope && (B.beginScope._wrap ? (ie(J, xe.classNameAliases[B.beginScope._wrap] || B.beginScope._wrap), J = "") : B.beginScope._multi && (Ne(B.beginScope, E), J = "")), W = Object.create(B, { parent: { value: W } }), W;
+      return B.scope && typeof B.scope == "string" && Oe.openNode(xe.classNameAliases[B.scope] || B.scope), B.beginScope && (B.beginScope._wrap ? (ie(J, xe.classNameAliases[B.beginScope._wrap] || B.beginScope._wrap), J = "") : B.beginScope._multi && (Ne(B.beginScope, E), J = "")), K = Object.create(B, { parent: { value: K } }), K;
     }
     function Z(B, E, v) {
       let $ = QS(B.endRe, v);
@@ -31265,7 +31265,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
         return Z(B.parent, E, v);
     }
     function re(B) {
-      return W.matcher.regexIndex === 0 ? (J += B[0], 1) : (sn = !0, 0);
+      return K.matcher.regexIndex === 0 ? (J += B[0], 1) : (sn = !0, 0);
     }
     function ce(B) {
       const E = B[0], v = B.rule, $ = new xc(v), Y = [v.__beforeBegin, v["on:begin"]];
@@ -31275,39 +31275,39 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
       return v.skip ? J += E : (v.excludeBegin && (J += E), Se(), !v.returnBegin && !v.excludeBegin && (J = E)), x(v, B), v.returnBegin ? 0 : E.length;
     }
     function ze(B) {
-      const E = B[0], v = y.substring(B.index), $ = Z(W, B, v);
+      const E = B[0], v = y.substring(B.index), $ = Z(K, B, v);
       if (!$)
         return Oc;
-      const Y = W;
-      W.endScope && W.endScope._wrap ? (Se(), ie(E, W.endScope._wrap)) : W.endScope && W.endScope._multi ? (Se(), Ne(W.endScope, B)) : Y.skip ? J += E : (Y.returnEnd || Y.excludeEnd || (J += E), Se(), Y.excludeEnd && (J = E));
+      const Y = K;
+      K.endScope && K.endScope._wrap ? (Se(), ie(E, K.endScope._wrap)) : K.endScope && K.endScope._multi ? (Se(), Ne(K.endScope, B)) : Y.skip ? J += E : (Y.returnEnd || Y.excludeEnd || (J += E), Se(), Y.excludeEnd && (J = E));
       do
-        W.scope && Oe.closeNode(), !W.skip && !W.subLanguage && (oe += W.relevance), W = W.parent;
-      while (W !== $.parent);
+        K.scope && Oe.closeNode(), !K.skip && !K.subLanguage && (oe += K.relevance), K = K.parent;
+      while (K !== $.parent);
       return $.starts && x($.starts, B), Y.returnEnd ? 0 : E.length;
     }
     function qe() {
       const B = [];
-      for (let E = W; E !== xe; E = E.parent)
+      for (let E = K; E !== xe; E = E.parent)
         E.scope && B.unshift(E.scope);
       B.forEach((E) => Oe.openNode(E));
     }
-    let et = {};
-    function it(B, E) {
+    let tt = {};
+    function ot(B, E) {
       const v = E && E[0];
       if (J += B, v == null)
         return Se(), 0;
-      if (et.type === "begin" && E.type === "end" && et.index === E.index && v === "") {
+      if (tt.type === "begin" && E.type === "end" && tt.index === E.index && v === "") {
         if (J += y.slice(E.index, E.index + 1), !i) {
           const $ = new Error(`0 width match regex (${w})`);
-          throw $.languageName = w, $.badRule = et.rule, $;
+          throw $.languageName = w, $.badRule = tt.rule, $;
         }
         return 1;
       }
-      if (et = E, E.type === "begin")
+      if (tt = E, E.type === "begin")
         return ce(E);
       if (E.type === "illegal" && !S) {
-        const $ = new Error('Illegal lexeme "' + v + '" for mode "' + (W.scope || "<unnamed>") + '"');
-        throw $.mode = W, $;
+        const $ = new Error('Illegal lexeme "' + v + '" for mode "' + (K.scope || "<unnamed>") + '"');
+        throw $.mode = K, $;
       } else if (E.type === "end") {
         const $ = ze(E);
         if ($ !== Oc)
@@ -31324,22 +31324,22 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
     if (!xe)
       throw kn(o.replace("{}", w)), new Error('Unknown language: "' + w + '"');
     const te = Lw(xe);
-    let Et = "", W = R || te;
+    let Et = "", K = R || te;
     const j = {}, Oe = new a.__emitter(a);
     qe();
-    let J = "", oe = 0, ot = 0, pt = 0, sn = !1;
+    let J = "", oe = 0, st = 0, pt = 0, sn = !1;
     try {
       if (xe.__emitTokens)
         xe.__emitTokens(y, Oe);
       else {
-        for (W.matcher.considerAll(); ; ) {
-          pt++, sn ? sn = !1 : W.matcher.considerAll(), W.matcher.lastIndex = ot;
-          const B = W.matcher.exec(y);
+        for (K.matcher.considerAll(); ; ) {
+          pt++, sn ? sn = !1 : K.matcher.considerAll(), K.matcher.lastIndex = st;
+          const B = K.matcher.exec(y);
           if (!B) break;
-          const E = y.substring(ot, B.index), v = it(E, B);
-          ot = B.index + v;
+          const E = y.substring(st, B.index), v = ot(E, B);
+          st = B.index + v;
         }
-        it(y.substring(ot));
+        ot(y.substring(st));
       }
       return Oe.finalize(), Et = Oe.toHTML(), {
         language: w,
@@ -31347,7 +31347,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
         relevance: oe,
         illegal: !1,
         _emitter: Oe,
-        _top: W
+        _top: K
       };
     } catch (B) {
       if (B.message && B.message.includes("Illegal"))
@@ -31358,8 +31358,8 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
           relevance: 0,
           _illegalBy: {
             message: B.message,
-            index: ot,
-            context: y.slice(ot - 100, ot + 100),
+            index: st,
+            context: y.slice(st - 100, st + 100),
             mode: B.mode,
             resultSoFar: Et
           },
@@ -31373,7 +31373,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
           relevance: 0,
           errorRaised: B,
           _emitter: Oe,
-          _top: W
+          _top: K
         };
       throw B;
     }
@@ -31739,7 +31739,7 @@ class Uw {
   }
 }
 const Ww = new ve("blockSelection");
-function at(n) {
+function lt(n) {
   if (!n) return;
   const e = parseFloat(n);
   return isNaN(e) ? void 0 : e;
@@ -31774,22 +31774,22 @@ const Kw = Ce.create({
           },
           borderTopWidth: {
             default: null,
-            parseHTML: (n) => at(n.style.borderTopWidth),
+            parseHTML: (n) => lt(n.style.borderTopWidth),
             renderHTML: () => ({})
           },
           borderRightWidth: {
             default: null,
-            parseHTML: (n) => at(n.style.borderRightWidth),
+            parseHTML: (n) => lt(n.style.borderRightWidth),
             renderHTML: () => ({})
           },
           borderBottomWidth: {
             default: null,
-            parseHTML: (n) => at(n.style.borderBottomWidth),
+            parseHTML: (n) => lt(n.style.borderBottomWidth),
             renderHTML: () => ({})
           },
           borderLeftWidth: {
             default: null,
-            parseHTML: (n) => at(n.style.borderLeftWidth),
+            parseHTML: (n) => lt(n.style.borderLeftWidth),
             renderHTML: () => ({})
           },
           borderColor: {
@@ -31799,42 +31799,42 @@ const Kw = Ce.create({
           },
           borderTopLeftRadius: {
             default: null,
-            parseHTML: (n) => at(n.style.borderTopLeftRadius),
+            parseHTML: (n) => lt(n.style.borderTopLeftRadius),
             renderHTML: () => ({})
           },
           borderTopRightRadius: {
             default: null,
-            parseHTML: (n) => at(n.style.borderTopRightRadius),
+            parseHTML: (n) => lt(n.style.borderTopRightRadius),
             renderHTML: () => ({})
           },
           borderBottomRightRadius: {
             default: null,
-            parseHTML: (n) => at(n.style.borderBottomRightRadius),
+            parseHTML: (n) => lt(n.style.borderBottomRightRadius),
             renderHTML: () => ({})
           },
           borderBottomLeftRadius: {
             default: null,
-            parseHTML: (n) => at(n.style.borderBottomLeftRadius),
+            parseHTML: (n) => lt(n.style.borderBottomLeftRadius),
             renderHTML: () => ({})
           },
           paddingTop: {
             default: null,
-            parseHTML: (n) => at(n.style.paddingTop),
+            parseHTML: (n) => lt(n.style.paddingTop),
             renderHTML: () => ({})
           },
           paddingRight: {
             default: null,
-            parseHTML: (n) => at(n.style.paddingRight),
+            parseHTML: (n) => lt(n.style.paddingRight),
             renderHTML: () => ({})
           },
           paddingBottom: {
             default: null,
-            parseHTML: (n) => at(n.style.paddingBottom),
+            parseHTML: (n) => lt(n.style.paddingBottom),
             renderHTML: () => ({})
           },
           paddingLeft: {
             default: null,
-            parseHTML: (n) => at(n.style.paddingLeft),
+            parseHTML: (n) => lt(n.style.paddingLeft),
             renderHTML: () => ({})
           },
           // Combined style attribute for rendering
@@ -32755,8 +32755,8 @@ async function p1(n, e) {
 }
 class g1 {
   constructor(e) {
-    K(this, "editor");
-    K(this, "config");
+    W(this, "editor");
+    W(this, "config");
     this.config = e;
     const t = {
       placeholder: e.placeholder,
@@ -33038,10 +33038,10 @@ const N = 18, $t = 14, P = {
 };
 class Lh {
   constructor(e) {
-    K(this, "editor");
-    K(this, "editorElement");
-    K(this, "dropIndicator", null);
-    K(this, "brandColor");
+    W(this, "editor");
+    W(this, "editorElement");
+    W(this, "dropIndicator", null);
+    W(this, "brandColor");
     this.editor = e.editor, this.editorElement = e.editorElement, this.brandColor = e.brandColor || "#007f00", this.setupDropZone();
   }
   /**
@@ -33219,12 +33219,12 @@ class Lh {
 }
 class m1 {
   constructor(e) {
-    K(this, "editor");
-    K(this, "container");
-    K(this, "element");
-    K(this, "dragDropManager", null);
-    K(this, "onToggleSidebar");
-    K(this, "sidebarExpanded", !1);
+    W(this, "editor");
+    W(this, "container");
+    W(this, "element");
+    W(this, "dragDropManager", null);
+    W(this, "onToggleSidebar");
+    W(this, "sidebarExpanded", !1);
     this.editor = e.editor, this.container = e.container, this.onToggleSidebar = e.onToggleSidebar, this.element = this.createToolbar(), this.container.prepend(this.element), this.setupUpdateListener(), this.initDragDrop();
   }
   initDragDrop() {
@@ -33705,14 +33705,14 @@ function Lc(n) {
 }
 class x1 {
   constructor(e) {
-    K(this, "editor");
-    K(this, "container");
-    K(this, "element");
-    K(this, "colorPalette");
-    K(this, "onCollapse");
-    K(this, "dragDropManager", null);
+    W(this, "editor");
+    W(this, "container");
+    W(this, "element");
+    W(this, "colorPalette");
+    W(this, "onCollapse");
+    W(this, "dragDropManager", null);
     // Current state for block styling
-    K(this, "blockStyle", {
+    W(this, "blockStyle", {
       textAlign: "left",
       textColor: "#121000",
       backgroundColor: "transparent",
@@ -33731,10 +33731,10 @@ class x1 {
       paddingLeft: 0
     });
     // Toggle states
-    K(this, "borderAllLinked", !1);
+    W(this, "borderAllLinked", !1);
     // Default: sides unlinked
-    K(this, "radiusAllLinked", !0);
-    K(this, "paddingAllLinked", !0);
+    W(this, "radiusAllLinked", !0);
+    W(this, "paddingAllLinked", !0);
     this.editor = e.editor, this.container = e.container, this.colorPalette = e.colorPalette || b1, this.onCollapse = e.onCollapse, this.element = this.createSidebar(), this.container.appendChild(this.element), this.setupUpdateListener(), this.setupDraggableButtons(), this.initDragDrop();
   }
   initDragDrop() {
@@ -34580,8 +34580,8 @@ class x1 {
 }
 class C1 {
   constructor(e) {
-    K(this, "bubble");
-    K(this, "debounceTimers", /* @__PURE__ */ new Map());
+    W(this, "bubble");
+    W(this, "debounceTimers", /* @__PURE__ */ new Map());
     this.bubble = e;
   }
   /**
@@ -34620,10 +34620,10 @@ class C1 {
 }
 class v1 {
   constructor(e, t, r = {}) {
-    K(this, "editor");
-    K(this, "bubble");
-    K(this, "options");
-    K(this, "unsubscribe", null);
+    W(this, "editor");
+    W(this, "bubble");
+    W(this, "options");
+    W(this, "unsubscribe", null);
     this.editor = e, this.bubble = t, this.options = r, this.setupActionListener();
   }
   setupActionListener() {
@@ -34670,22 +34670,23 @@ class v1 {
     this.unsubscribe && (this.unsubscribe(), this.unsubscribe = null);
   }
 }
-const ct = class ct {
+const Xe = class Xe {
   constructor(e) {
-    K(this, "container");
-    K(this, "bubble");
-    K(this, "editor", null);
-    K(this, "toolbar", null);
-    K(this, "sidebar", null);
-    K(this, "sidebarExpanded", !1);
-    K(this, "eventBridge");
-    K(this, "actionHandler", null);
-    K(this, "editorWrapper", null);
-    K(this, "unsubscribeProps", null);
-    K(this, "unsubscribeSystemTheme", null);
-    K(this, "lastInitialContentApplyAt", 0);
-    K(this, "publishDebounceTimer", null);
-    K(this, "readyForRevertCooldownTimer", null);
+    W(this, "container");
+    W(this, "bubble");
+    W(this, "editor", null);
+    W(this, "toolbar", null);
+    W(this, "sidebar", null);
+    W(this, "sidebarExpanded", !1);
+    W(this, "eventBridge");
+    W(this, "actionHandler", null);
+    W(this, "editorWrapper", null);
+    W(this, "unsubscribeProps", null);
+    W(this, "unsubscribeSystemTheme", null);
+    W(this, "lastInitialContentApplyAt", 0);
+    W(this, "publishDebounceTimer", null);
+    W(this, "readyForRevertCooldownTimer", null);
+    W(this, "lastSetContentTriggerApplyAt", 0);
     this.container = e.container, this.bubble = e.bubble, this.eventBridge = new C1(this.bubble);
   }
   /**
@@ -34752,7 +34753,7 @@ const ct = class ct {
     _1(this.container, t);
   }
   handleEditorCreate() {
-    this.bubble.publishState(ct.STATE_READY_FOR_REVERT, !0);
+    this.bubble.publishState(Xe.STATE_READY_FOR_REVERT, !0);
   }
   handleEditorUpdate() {
     var e, t;
@@ -34770,16 +34771,16 @@ const ct = class ct {
   scheduleSyncToBubble() {
     this.publishDebounceTimer === null && (this.publishDebounceTimer = setTimeout(() => {
       this.publishDebounceTimer = null, this.syncStatesToBubble();
-    }, ct.PUBLISH_DEBOUNCE_MS));
+    }, Xe.PUBLISH_DEBOUNCE_MS));
   }
   cancelScheduledSync() {
     this.publishDebounceTimer !== null && (clearTimeout(this.publishDebounceTimer), this.publishDebounceTimer = null);
   }
   /** Called when Set content action runs (e.g. Revert). Cooldown "ready for revert" and sync now. */
   handleSetContentFromAction() {
-    this.bubble.publishState(ct.STATE_READY_FOR_REVERT, !1), this.cancelScheduledSync(), this.syncStatesToBubble(), this.readyForRevertCooldownTimer !== null && clearTimeout(this.readyForRevertCooldownTimer), this.readyForRevertCooldownTimer = setTimeout(() => {
-      this.readyForRevertCooldownTimer = null, this.bubble.publishState(ct.STATE_READY_FOR_REVERT, !0);
-    }, ct.READY_FOR_REVERT_COOLDOWN_MS);
+    this.bubble.publishState(Xe.STATE_READY_FOR_REVERT, !1), this.cancelScheduledSync(), this.syncStatesToBubble(), this.readyForRevertCooldownTimer !== null && clearTimeout(this.readyForRevertCooldownTimer), this.readyForRevertCooldownTimer = setTimeout(() => {
+      this.readyForRevertCooldownTimer = null, this.bubble.publishState(Xe.STATE_READY_FOR_REVERT, !0);
+    }, Xe.READY_FOR_REVERT_COOLDOWN_MS);
   }
   /** Strip editor-only attributes from HTML so saved content is clean (e.g. no contenteditable on resize handles) */
   sanitizeHtmlForStorage(e) {
@@ -34801,19 +34802,20 @@ const ct = class ct {
     if ("set_content_trigger" in e && e.set_content_trigger !== void 0) {
       const s = typeof e.set_content_trigger == "string" ? e.set_content_trigger : "";
       if (s && !this.isEffectivelyEmptyHtml(s)) {
-        const a = this.sanitizeHtmlForStorage(s), l = this.sanitizeHtmlForStorage(this.editor.getHTML());
-        if (a !== l) {
-          const c = this.editor;
+        const a = Date.now(), l = a - this.lastSetContentTriggerApplyAt < Xe.SET_CONTENT_TRIGGER_COOLDOWN_MS, c = this.sanitizeHtmlForStorage(s), d = this.sanitizeHtmlForStorage(this.editor.getHTML());
+        if (!l && c !== d) {
+          this.lastSetContentTriggerApplyAt = a;
+          const u = this.editor;
           typeof requestAnimationFrame < "u" ? requestAnimationFrame(() => {
-            c.setContent(s), this.handleSetContentFromAction();
+            u.setContent(s), this.handleSetContentFromAction();
           }) : setTimeout(() => {
-            c.setContent(s), this.handleSetContentFromAction();
+            u.setContent(s), this.handleSetContentFromAction();
           }, 0);
         }
       }
     }
     if ("initial_content" in e && e.initial_content !== void 0) {
-      const s = typeof e.initial_content == "string" ? e.initial_content : "", a = this.editor, l = Date.now(), c = l - this.lastInitialContentApplyAt < ct.INITIAL_CONTENT_APPLY_COOLDOWN_MS, d = a.isEmpty() && !this.isEffectivelyEmptyHtml(s) && !c;
+      const s = typeof e.initial_content == "string" ? e.initial_content : "", a = this.editor, l = Date.now(), c = l - this.lastInitialContentApplyAt < Xe.INITIAL_CONTENT_APPLY_COOLDOWN_MS, d = a.isEmpty() && !this.isEffectivelyEmptyHtml(s) && !c;
       a && !this.isEffectivelyEmptyHtml(s) && d && (this.lastInitialContentApplyAt = l, typeof requestAnimationFrame < "u" ? requestAnimationFrame(() => a.setContent(s)) : setTimeout(() => a.setContent(s), 0));
     }
     "placeholder" in e && this.editor.refreshPlaceholder(), "editable" in e && e.editable !== void 0 && this.editor.setEditable(e.editable), "toolbar_visible" in e && e.toolbar_visible !== void 0 && (e.toolbar_visible ? (r = this.toolbar) == null || r.show() : (i = this.toolbar) == null || i.hide()), ("min_height" in e || "max_height" in e) && this.applyDimensionStyles(this.bubble.getProperties()), [
@@ -34869,19 +34871,20 @@ const ct = class ct {
     this.cancelScheduledSync(), this.readyForRevertCooldownTimer !== null && (clearTimeout(this.readyForRevertCooldownTimer), this.readyForRevertCooldownTimer = null), (e = this.unsubscribeProps) == null || e.call(this), (t = this.unsubscribeSystemTheme) == null || t.call(this), (r = this.actionHandler) == null || r.destroy(), this.eventBridge.destroy(), (i = this.toolbar) == null || i.destroy(), (o = this.sidebar) == null || o.destroy(), (s = this.editor) == null || s.destroy(), this.editorWrapper && (this.editorWrapper.remove(), this.editorWrapper = null), this.editor = null, this.toolbar = null, this.actionHandler = null;
   }
 };
-K(ct, "INITIAL_CONTENT_APPLY_COOLDOWN_MS", 1500), /** Debounce: publish html_content at most this often while typing; always publish on blur. */
-K(ct, "PUBLISH_DEBOUNCE_MS", 1500), /** Cooldown after Set content (e.g. Revert) before "ready for revert" is true again; avoids double-apply. */
-K(ct, "READY_FOR_REVERT_COOLDOWN_MS", 400), /** State key in Bubble for "Ready for revert" (bind button disabled when false). */
-K(ct, "STATE_READY_FOR_REVERT", "ready_for_revert");
-let zs = ct;
+W(Xe, "INITIAL_CONTENT_APPLY_COOLDOWN_MS", 1500), /** Debounce: publish html_content at most this often while typing; always publish on blur. */
+W(Xe, "PUBLISH_DEBOUNCE_MS", 1500), /** Cooldown after Set content (e.g. Revert) before "ready for revert" is true again; avoids double-apply. */
+W(Xe, "READY_FOR_REVERT_COOLDOWN_MS", 400), /** State key in Bubble for "Ready for revert" (bind button disabled when false). */
+W(Xe, "STATE_READY_FOR_REVERT", "ready_for_revert"), /** After applying set_content_trigger, ignore it for this long to break Update echo loops. */
+W(Xe, "SET_CONTENT_TRIGGER_COOLDOWN_MS", 2e3);
+let zs = Xe;
 class A1 {
   constructor() {
-    K(this, "properties");
-    K(this, "states");
-    K(this, "eventLog", []);
-    K(this, "propertyChangeCallbacks", []);
-    K(this, "actionCallbacks", []);
-    K(this, "eventListeners", /* @__PURE__ */ new Map());
+    W(this, "properties");
+    W(this, "states");
+    W(this, "eventLog", []);
+    W(this, "propertyChangeCallbacks", []);
+    W(this, "actionCallbacks", []);
+    W(this, "eventListeners", /* @__PURE__ */ new Map());
     this.properties = {
       initial_content: "",
       placeholder: "Start writing something amazing...",
@@ -35242,12 +35245,12 @@ greet('World');</code></pre>
         Z[ze](), R();
       }), re[ze])) {
         const qe = ce;
-        qe.draggable = !0, qe.classList.add("draggable"), qe.addEventListener("dragstart", (et) => {
-          var it;
-          if (et.dataTransfer) {
-            et.dataTransfer.setData("application/json", JSON.stringify(re[ze])), et.dataTransfer.effectAllowed = "copy", qe.classList.add("dragging");
+        qe.draggable = !0, qe.classList.add("draggable"), qe.addEventListener("dragstart", (tt) => {
+          var ot;
+          if (tt.dataTransfer) {
+            tt.dataTransfer.setData("application/json", JSON.stringify(re[ze])), tt.dataTransfer.effectAllowed = "copy", qe.classList.add("dragging");
             const xe = document.createElement("div");
-            xe.textContent = ((it = ce.querySelector("span")) == null ? void 0 : it.textContent) || ze, xe.style.cssText = `
+            xe.textContent = ((ot = ce.querySelector("span")) == null ? void 0 : ot.textContent) || ze, xe.style.cssText = `
               position: absolute;
               top: -1000px;
               left: -1000px;
@@ -35260,7 +35263,7 @@ greet('World');</code></pre>
               font-family: system-ui, sans-serif;
               white-space: nowrap;
               box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            `, document.body.appendChild(xe), et.dataTransfer.setDragImage(xe, 40, 20), setTimeout(() => xe.remove(), 0);
+            `, document.body.appendChild(xe), tt.dataTransfer.setDragImage(xe, 40, 20), setTimeout(() => xe.remove(), 0);
           }
         }), qe.addEventListener("dragend", () => {
           qe.classList.remove("dragging"), qe.dataset.wasDragged = "true", setTimeout(() => {

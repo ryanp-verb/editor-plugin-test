@@ -42,6 +42,9 @@ export class BubbleElement {
   private readyForRevertCooldownTimer: ReturnType<typeof setTimeout> | null = null;
   /** State key in Bubble for "Ready for revert" (bind button disabled when false). */
   private static readonly STATE_READY_FOR_REVERT = 'ready_for_revert';
+  /** After applying set_content_trigger, ignore it for this long to break Update echo loops. */
+  private static readonly SET_CONTENT_TRIGGER_COOLDOWN_MS = 2000;
+  private lastSetContentTriggerApplyAt = 0;
 
   constructor(config: BubbleElementConfig) {
     this.container = config.container;
@@ -251,14 +254,17 @@ export class BubbleElement {
     if (!this.editor) return;
 
     // Set content trigger: when workflow sets this property (e.g. to saved HTML), replace editor content.
-    // Only apply when incoming HTML is different from current content — avoids feedback loop when a
-    // workflow echoes our published html_content back into this property.
+    // Cooldown: after we apply once, ignore trigger for 2s so repeated Updates from Bubble don't re-apply (loop).
+    // Also skip when incoming matches current content.
     if ('set_content_trigger' in changes && changes.set_content_trigger !== undefined) {
       const html = typeof changes.set_content_trigger === 'string' ? changes.set_content_trigger : '';
       if (html && !this.isEffectivelyEmptyHtml(html)) {
+        const now = Date.now();
+        const inCooldown = now - this.lastSetContentTriggerApplyAt < BubbleElement.SET_CONTENT_TRIGGER_COOLDOWN_MS;
         const normalizedIncoming = this.sanitizeHtmlForStorage(html);
         const currentHtml = this.sanitizeHtmlForStorage(this.editor.getHTML());
-        if (normalizedIncoming !== currentHtml) {
+        if (!inCooldown && normalizedIncoming !== currentHtml) {
+          this.lastSetContentTriggerApplyAt = now;
           const editor = this.editor;
           if (typeof requestAnimationFrame !== 'undefined') {
             requestAnimationFrame(() => {
