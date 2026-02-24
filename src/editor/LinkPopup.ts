@@ -12,9 +12,23 @@ export interface ShowLinkPopupOptions {
   isEdit?: boolean;
   /** When true, commands run without focusing editor (e.g. when opened from sidebar). */
   noFocus?: boolean;
-  /** Element that has theme CSS variables (--editor-text, --sidebar-bg, --brand-primary, etc.). Popup is appended here so it inherits light/dark and brand colors. */
+  /** Element that has theme CSS variables (--editor-text, --sidebar-bg, --brand-primary, etc.). Popup is appended here and we copy these variables onto the overlay so text/input colors stay dynamic in light/dark. */
   themeRoot?: HTMLElement;
 }
+
+const LINK_POPUP_THEME_VARS = [
+  '--editor-text',
+  '--editor-text-muted',
+  '--editor-bg',
+  '--editor-border',
+  '--editor-accent-muted',
+  '--sidebar-bg',
+  '--toolbar-bg',
+  '--toolbar-icon-active',
+  '--brand-primary',
+  '--border-radius',
+  '--control-btn-bg-hover',
+] as const;
 
 export function showLinkPopup(editor: ContentEditor, options: ShowLinkPopupOptions = {}): void {
   const {
@@ -88,6 +102,17 @@ export function showLinkPopup(editor: ContentEditor, options: ShowLinkPopupOptio
   });
 
   mountTarget.appendChild(overlay);
+
+  // Copy theme variables from theme root onto the overlay so the fixed-position popup
+  // and its input/labels resolve text and background colors in light/dark and brand.
+  if (themeRoot) {
+    const computed = window.getComputedStyle(themeRoot);
+    for (const v of LINK_POPUP_THEME_VARS) {
+      const value = computed.getPropertyValue(v).trim();
+      if (value) overlay.style.setProperty(v, value);
+    }
+  }
+
   const overflowPrior = document.body.style.overflow;
   document.body.style.overflow = 'hidden';
   const input = dialog.querySelector('#bp-link-url') as HTMLInputElement;
