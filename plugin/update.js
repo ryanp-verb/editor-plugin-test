@@ -18,8 +18,9 @@ function(instance, properties, context) {
         : 'Start writing...';
 
     // Set content trigger: when workflow sets this to HTML, we replace editor content (e.g. Revert)
-    var setContentTrigger = (properties.set_content_trigger != null || properties.AAS != null)
-        ? String(properties.set_content_trigger != null ? properties.set_content_trigger : properties.AAS)
+    // Accept set_content (field name in Bubble), set_content_trigger, or AAS (element.json id)
+    var setContentTrigger = (properties.set_content != null || properties.set_content_trigger != null || properties.AAS != null)
+        ? String(properties.set_content != null ? properties.set_content : (properties.set_content_trigger != null ? properties.set_content_trigger : properties.AAS))
         : '';
 
     // Map Bubble properties to our internal format with defaults
