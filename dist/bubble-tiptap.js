@@ -1,6 +1,6 @@
 var Bh = Object.defineProperty;
 var Ph = (n, e, t) => e in n ? Bh(n, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : n[e] = t;
-var W = (n, e, t) => Ph(n, typeof e != "symbol" ? e + "" : e, t);
+var U = (n, e, t) => Ph(n, typeof e != "symbol" ? e + "" : e, t);
 function Fe(n) {
   this.content = n;
 }
@@ -8384,8 +8384,8 @@ function cg(n, e, t, r, i) {
     if (D && !n.state.selection.eq(D)) {
       if (De && It && n.input.lastKeyCode === 13 && Date.now() - 100 < n.input.lastKeyCodeTime && n.someProp("handleKeyDown", (he) => he(n, ln(13, "Enter"))))
         return;
-      let U = n.state.tr.setSelection(D);
-      O == "pointer" ? U.setMeta("pointer", !0) : O == "key" && U.scrollIntoView(), o && U.setMeta("composition", o), n.dispatch(U);
+      let W = n.state.tr.setSelection(D);
+      O == "pointer" ? W.setMeta("pointer", !0) : O == "key" && W.scrollIntoView(), o && W.setMeta("composition", o), n.dispatch(W);
     }
     return;
   }
@@ -8429,8 +8429,8 @@ function cg(n, e, t, r, i) {
   let _ = p.start, A = p.endA, C = (O) => {
     let D = O || n.state.tr.replace(_, A, c.doc.slice(p.start - c.from, p.endB - c.from));
     if (c.sel) {
-      let U = wl(n, D.doc, c.sel);
-      U && !(De && n.composing && U.empty && (p.start != p.endB || n.input.lastChromeDelete < Date.now() - 100) && (U.head == _ || U.head == D.mapping.map(A) - 1) || et && U.empty && U.head == _) && D.setSelection(U);
+      let W = wl(n, D.doc, c.sel);
+      W && !(De && n.composing && W.empty && (p.start != p.endB || n.input.lastChromeDelete < Date.now() - 100) && (W.head == _ || W.head == D.mapping.map(A) - 1) || et && W.empty && W.head == _) && D.setSelection(W);
     }
     return o && D.setMeta("composition", o), D.scrollIntoView();
   }, L;
@@ -8447,7 +8447,7 @@ function cg(n, e, t, r, i) {
       L.type == "add" ? O.addMark(_, A, L.mark) : O.removeMark(_, A, L.mark), n.dispatch(O);
     } else if (g.parent.child(g.index()).isText && g.index() == m.index() - (m.textOffset ? 0 : 1)) {
       let O = g.parent.textBetween(g.parentOffset, m.parentOffset), D = () => C(n.state.tr.insertText(O, _, A));
-      n.someProp("handleTextInput", (U) => U(n, _, A, O, D)) || n.dispatch(D());
+      n.someProp("handleTextInput", (W) => W(n, _, A, O, D)) || n.dispatch(D());
     } else
       n.dispatch(C());
   else
@@ -11178,10 +11178,10 @@ const hb = ({ keepMarks: n = !0 } = {}) => ({ tr: e, state: t, dispatch: r, edit
       const L = l.before(l.depth - (k - 1));
       t.replace(L, l.after(-_), new I(b, 4 - k, 0));
       let O = -1;
-      t.doc.nodesBetween(L, t.doc.content.size, (D, U) => {
+      t.doc.nodesBetween(L, t.doc.content.size, (D, W) => {
         if (O > -1)
           return !1;
-        D.isTextblock && D.content.size === 0 && (O = U + 1);
+        D.isTextblock && D.content.size === 0 && (O = W + 1);
       }), O > -1 && t.setSelection(q.near(t.doc.resolve(O))), t.scrollIntoView();
     }
     return !0;
@@ -14255,7 +14255,7 @@ function Gy({
   X(_, n.numeric, A);
   const C = at(jr), L = at();
   X(C, e, C), X(C, t, L), X(L, e, C), X(L, t, L), M(k, Tt, C), M(A, Tt, C);
-  const O = M(a, Kt), D = M(l, Kt), U = M(D, Tt), he = M(U, Tt);
+  const O = M(a, Kt), D = M(l, Kt), W = M(D, Tt), he = M(W, Tt);
   X(a, n.domain, s), M(a, wt, b), M(a, ct, m), X(l, n.domain, s), M(l, wt, b), M(l, ct, m), X(O, n.domain, C), M(O, Tt, C), M(O, br, C), X(he, n.domain, C), X(he, e, C), M(he, Tt, C);
   const Le = [
     [pr, gr],
@@ -17039,10 +17039,10 @@ const Xo = qu, mc = Yt, bc = Symbol("nomatch"), lk = 7, nh = function(n) {
     S += y.parentNode ? y.parentNode.className : "";
     const R = a.languageDetectRe.exec(S);
     if (R) {
-      const F = U(R[1]);
+      const F = W(R[1]);
       return F || (gc(o.replace("{}", R[1])), gc("Falling back to no-highlight mode for this block.", y)), F ? R[1] : "no-highlight";
     }
-    return S.split(/\s+/).find((F) => l(F) || U(F));
+    return S.split(/\s+/).find((F) => l(F) || W(F));
   }
   function d(y, S, R) {
     let F = "", V = "";
@@ -17192,7 +17192,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), V = y, F = S), R === 
         throw new Error("potential infinite loop, way more iterations than matches");
       return oe += $, $.length;
     }
-    const te = U(y);
+    const te = W(y);
     if (!te)
       throw En(o.replace("{}", y)), new Error('Unknown language: "' + y + '"');
     const Et = ik(te);
@@ -17262,16 +17262,16 @@ https://github.com/highlightjs/highlight.js/issues/2277`), V = y, F = S), R === 
   }
   function f(y, S) {
     S = S || a.languages || Object.keys(e);
-    const R = h(y), F = S.filter(U).filter(Le).map(
+    const R = h(y), F = S.filter(W).filter(Le).map(
       (ie) => u(ie, y, !1)
     );
     F.unshift(R);
     const V = F.sort((ie, Ne) => {
       if (ie.relevance !== Ne.relevance) return Ne.relevance - ie.relevance;
       if (ie.language && Ne.language) {
-        if (U(ie.language).supersetOf === Ne.language)
+        if (W(ie.language).supersetOf === Ne.language)
           return 1;
-        if (U(Ne.language).supersetOf === ie.language)
+        if (W(Ne.language).supersetOf === ie.language)
           return -1;
       }
       return 0;
@@ -17352,7 +17352,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), V = y, F = S), R === 
   function D() {
     return Object.keys(e);
   }
-  function U(y) {
+  function W(y) {
     return y = (y || "").toLowerCase(), e[y] || e[t[y]];
   }
   function he(y, { languageName: S }) {
@@ -17361,7 +17361,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), V = y, F = S), R === 
     });
   }
   function Le(y) {
-    const S = U(y);
+    const S = W(y);
     return S && !S.disableAutodetect;
   }
   function Ae(y) {
@@ -17404,7 +17404,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), V = y, F = S), R === 
     registerLanguage: L,
     unregisterLanguage: O,
     listLanguages: D,
-    getLanguage: U,
+    getLanguage: W,
     registerAliases: he,
     autoDetection: Le,
     inherit: mc,
@@ -22270,7 +22270,7 @@ function jk(n) {
         ...sh
       ]
     }
-  }, U = {
+  }, W = {
     label: "use_strict",
     className: "meta",
     relevance: 10,
@@ -22381,7 +22381,7 @@ function jk(n) {
         binary: "node",
         relevance: 5
       }),
-      U,
+      W,
       n.APOS_STRING_MODE,
       n.QUOTE_STRING_MODE,
       f,
@@ -25164,7 +25164,7 @@ function uS(n) {
         3: "variable.language"
       }
     }
-  ] }, U = {
+  ] }, W = {
     scope: "attr",
     match: e.concat(r, e.lookahead(":"), e.lookahead(/(?!::)/))
   }, he = {
@@ -25173,7 +25173,7 @@ function uS(n) {
     end: /\)/,
     keywords: A,
     contains: [
-      U,
+      W,
       s,
       D,
       n.C_BLOCK_COMMENT_MODE,
@@ -25196,7 +25196,7 @@ function uS(n) {
   };
   he.contains.push(Le);
   const Ae = [
-    U,
+    W,
     D,
     n.C_BLOCK_COMMENT_MODE,
     p,
@@ -28253,7 +28253,7 @@ function MS(n) {
     when: O
   } = {}) {
     const D = O;
-    return L = L || [], C.map((U) => U.match(/\|\d+$/) || L.includes(U) ? U : D(U) ? `${U}|0` : U);
+    return L = L || [], C.map((W) => W.match(/\|\d+$/) || L.includes(W) ? W : D(W) ? `${W}|0` : W);
   }
   return {
     name: "SQL",
@@ -28726,7 +28726,7 @@ function PS(n) {
       A(te),
       L(te)
     ]
-  }), U = {
+  }), W = {
     className: "string",
     variants: [
       O(),
@@ -28793,7 +28793,7 @@ function PS(n) {
         contains: [
           ...m,
           _,
-          U
+          W
         ]
       }
     ] }
@@ -28869,7 +28869,7 @@ function PS(n) {
       ...f,
       ...m,
       _,
-      U,
+      W,
       ...y,
       ...V,
       ee
@@ -28909,7 +28909,7 @@ function PS(n) {
       ...d,
       ...m,
       _,
-      U,
+      W,
       ...V,
       ee,
       ie
@@ -29026,7 +29026,7 @@ function PS(n) {
       }
     ]
   };
-  for (const te of U.variants) {
+  for (const te of W.variants) {
     const Et = te.contains.find((j) => j.label === "interpol");
     Et.keywords = c;
     const K = [
@@ -29034,7 +29034,7 @@ function PS(n) {
       ...f,
       ...m,
       _,
-      U,
+      W,
       ...y
     ];
     Et.contains = [
@@ -29072,7 +29072,7 @@ function PS(n) {
       ...f,
       ...m,
       _,
-      U,
+      W,
       ...y,
       ...V,
       ee,
@@ -29483,7 +29483,7 @@ function $S(n) {
         ...bh
       ]
     }
-  }, U = {
+  }, W = {
     label: "use_strict",
     className: "meta",
     relevance: 10,
@@ -29594,7 +29594,7 @@ function $S(n) {
         binary: "node",
         relevance: 5
       }),
-      U,
+      W,
       n.APOS_STRING_MODE,
       n.QUOTE_STRING_MODE,
       f,
@@ -31469,7 +31469,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
         throw R;
       S = s;
     }
-    S.name || (S.name = w), e[w] = S, S.rawDefinition = y.bind(null, n), S.aliases && U(S.aliases, { languageName: w });
+    S.name || (S.name = w), e[w] = S, S.rawDefinition = y.bind(null, n), S.aliases && W(S.aliases, { languageName: w });
   }
   function L(w) {
     delete e[w];
@@ -31482,7 +31482,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
   function D(w) {
     return w = (w || "").toLowerCase(), e[w] || e[t[w]];
   }
-  function U(w, { languageName: y }) {
+  function W(w, { languageName: y }) {
     typeof w == "string" && (w = [w]), w.forEach((S) => {
       t[S.toLowerCase()] = y;
     });
@@ -31532,7 +31532,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`), F = w, R = y), S === 
     unregisterLanguage: L,
     listLanguages: O,
     getLanguage: D,
-    registerAliases: U,
+    registerAliases: W,
     autoDetection: he,
     inherit: Nc,
     addPlugin: Ae,
@@ -32755,8 +32755,8 @@ async function p1(n, e) {
 }
 class g1 {
   constructor(e) {
-    W(this, "editor");
-    W(this, "config");
+    U(this, "editor");
+    U(this, "config");
     this.config = e;
     const t = {
       placeholder: e.placeholder,
@@ -33038,10 +33038,10 @@ const N = 18, $t = 14, P = {
 };
 class Lh {
   constructor(e) {
-    W(this, "editor");
-    W(this, "editorElement");
-    W(this, "dropIndicator", null);
-    W(this, "brandColor");
+    U(this, "editor");
+    U(this, "editorElement");
+    U(this, "dropIndicator", null);
+    U(this, "brandColor");
     this.editor = e.editor, this.editorElement = e.editorElement, this.brandColor = e.brandColor || "#007f00", this.setupDropZone();
   }
   /**
@@ -33219,12 +33219,12 @@ class Lh {
 }
 class m1 {
   constructor(e) {
-    W(this, "editor");
-    W(this, "container");
-    W(this, "element");
-    W(this, "dragDropManager", null);
-    W(this, "onToggleSidebar");
-    W(this, "sidebarExpanded", !1);
+    U(this, "editor");
+    U(this, "container");
+    U(this, "element");
+    U(this, "dragDropManager", null);
+    U(this, "onToggleSidebar");
+    U(this, "sidebarExpanded", !1);
     this.editor = e.editor, this.container = e.container, this.onToggleSidebar = e.onToggleSidebar, this.element = this.createToolbar(), this.container.prepend(this.element), this.setupUpdateListener(), this.initDragDrop();
   }
   initDragDrop() {
@@ -33705,14 +33705,14 @@ function Lc(n) {
 }
 class x1 {
   constructor(e) {
-    W(this, "editor");
-    W(this, "container");
-    W(this, "element");
-    W(this, "colorPalette");
-    W(this, "onCollapse");
-    W(this, "dragDropManager", null);
+    U(this, "editor");
+    U(this, "container");
+    U(this, "element");
+    U(this, "colorPalette");
+    U(this, "onCollapse");
+    U(this, "dragDropManager", null);
     // Current state for block styling
-    W(this, "blockStyle", {
+    U(this, "blockStyle", {
       textAlign: "left",
       textColor: "#121000",
       backgroundColor: "transparent",
@@ -33731,10 +33731,10 @@ class x1 {
       paddingLeft: 0
     });
     // Toggle states
-    W(this, "borderAllLinked", !1);
+    U(this, "borderAllLinked", !1);
     // Default: sides unlinked
-    W(this, "radiusAllLinked", !0);
-    W(this, "paddingAllLinked", !0);
+    U(this, "radiusAllLinked", !0);
+    U(this, "paddingAllLinked", !0);
     this.editor = e.editor, this.container = e.container, this.colorPalette = e.colorPalette || b1, this.onCollapse = e.onCollapse, this.element = this.createSidebar(), this.container.appendChild(this.element), this.setupUpdateListener(), this.setupDraggableButtons(), this.initDragDrop();
   }
   initDragDrop() {
@@ -34580,8 +34580,8 @@ class x1 {
 }
 class C1 {
   constructor(e) {
-    W(this, "bubble");
-    W(this, "debounceTimers", /* @__PURE__ */ new Map());
+    U(this, "bubble");
+    U(this, "debounceTimers", /* @__PURE__ */ new Map());
     this.bubble = e;
   }
   /**
@@ -34620,10 +34620,10 @@ class C1 {
 }
 class v1 {
   constructor(e, t, r = {}) {
-    W(this, "editor");
-    W(this, "bubble");
-    W(this, "options");
-    W(this, "unsubscribe", null);
+    U(this, "editor");
+    U(this, "bubble");
+    U(this, "options");
+    U(this, "unsubscribe", null);
     this.editor = e, this.bubble = t, this.options = r, this.setupActionListener();
   }
   setupActionListener() {
@@ -34672,21 +34672,23 @@ class v1 {
 }
 const Xe = class Xe {
   constructor(e) {
-    W(this, "container");
-    W(this, "bubble");
-    W(this, "editor", null);
-    W(this, "toolbar", null);
-    W(this, "sidebar", null);
-    W(this, "sidebarExpanded", !1);
-    W(this, "eventBridge");
-    W(this, "actionHandler", null);
-    W(this, "editorWrapper", null);
-    W(this, "unsubscribeProps", null);
-    W(this, "unsubscribeSystemTheme", null);
-    W(this, "lastInitialContentApplyAt", 0);
-    W(this, "publishDebounceTimer", null);
-    W(this, "readyForRevertCooldownTimer", null);
-    W(this, "lastSetContentTriggerApplyAt", 0);
+    U(this, "container");
+    U(this, "bubble");
+    U(this, "editor", null);
+    U(this, "toolbar", null);
+    U(this, "sidebar", null);
+    U(this, "sidebarExpanded", !1);
+    U(this, "eventBridge");
+    U(this, "actionHandler", null);
+    U(this, "editorWrapper", null);
+    U(this, "unsubscribeProps", null);
+    U(this, "unsubscribeSystemTheme", null);
+    U(this, "lastInitialContentApplyAt", 0);
+    U(this, "publishDebounceTimer", null);
+    U(this, "readyForRevertCooldownTimer", null);
+    U(this, "lastSetContentTriggerApplyAt", 0);
+    /** Skip the next sync/content_changed when we just applied initial_content to avoid a loop. */
+    U(this, "skipNextSync", !1);
     this.container = e.container, this.bubble = e.bubble, this.eventBridge = new C1(this.bubble);
   }
   /**
@@ -34757,6 +34759,10 @@ const Xe = class Xe {
   }
   handleEditorUpdate() {
     var e, t;
+    if (this.skipNextSync) {
+      this.skipNextSync = !1;
+      return;
+    }
     this.scheduleSyncToBubble(), this.eventBridge.triggerDebounced("content_changed", {
       html: (e = this.editor) == null ? void 0 : e.getHTML(),
       isEmpty: (t = this.editor) == null ? void 0 : t.isEmpty()
@@ -34816,7 +34822,7 @@ const Xe = class Xe {
     }
     if ("initial_content" in e && e.initial_content !== void 0) {
       const s = typeof e.initial_content == "string" ? e.initial_content : "", a = this.editor, l = Date.now(), c = l - this.lastInitialContentApplyAt < Xe.INITIAL_CONTENT_APPLY_COOLDOWN_MS, d = a.isEmpty() && !this.isEffectivelyEmptyHtml(s) && !c;
-      a && !this.isEffectivelyEmptyHtml(s) && d && (this.lastInitialContentApplyAt = l, typeof requestAnimationFrame < "u" ? requestAnimationFrame(() => a.setContent(s)) : setTimeout(() => a.setContent(s), 0));
+      a && !this.isEffectivelyEmptyHtml(s) && d && (this.lastInitialContentApplyAt = l, this.skipNextSync = !0, typeof requestAnimationFrame < "u" ? requestAnimationFrame(() => a.setContent(s)) : setTimeout(() => a.setContent(s), 0));
     }
     "placeholder" in e && this.editor.refreshPlaceholder(), "editable" in e && e.editable !== void 0 && this.editor.setEditable(e.editable), "toolbar_visible" in e && e.toolbar_visible !== void 0 && (e.toolbar_visible ? (r = this.toolbar) == null || r.show() : (i = this.toolbar) == null || i.hide()), ("min_height" in e || "max_height" in e) && this.applyDimensionStyles(this.bubble.getProperties()), [
       "theme",
@@ -34871,20 +34877,20 @@ const Xe = class Xe {
     this.cancelScheduledSync(), this.readyForRevertCooldownTimer !== null && (clearTimeout(this.readyForRevertCooldownTimer), this.readyForRevertCooldownTimer = null), (e = this.unsubscribeProps) == null || e.call(this), (t = this.unsubscribeSystemTheme) == null || t.call(this), (r = this.actionHandler) == null || r.destroy(), this.eventBridge.destroy(), (i = this.toolbar) == null || i.destroy(), (o = this.sidebar) == null || o.destroy(), (s = this.editor) == null || s.destroy(), this.editorWrapper && (this.editorWrapper.remove(), this.editorWrapper = null), this.editor = null, this.toolbar = null, this.actionHandler = null;
   }
 };
-W(Xe, "INITIAL_CONTENT_APPLY_COOLDOWN_MS", 1500), /** Debounce: publish html_content at most this often while typing; always publish on blur. */
-W(Xe, "PUBLISH_DEBOUNCE_MS", 1500), /** Cooldown after Set content (e.g. Revert) before "ready for revert" is true again; avoids double-apply. */
-W(Xe, "READY_FOR_REVERT_COOLDOWN_MS", 400), /** State key in Bubble for "Ready for revert" (bind button disabled when false). */
-W(Xe, "STATE_READY_FOR_REVERT", "ready_for_revert"), /** After applying set_content_trigger, ignore it for this long to break Update echo loops. */
-W(Xe, "SET_CONTENT_TRIGGER_COOLDOWN_MS", 2e3);
+U(Xe, "INITIAL_CONTENT_APPLY_COOLDOWN_MS", 1500), /** Debounce: publish html_content at most this often while typing; always publish on blur. */
+U(Xe, "PUBLISH_DEBOUNCE_MS", 1500), /** Cooldown after Set content (e.g. Revert) before "ready for revert" is true again; avoids double-apply. */
+U(Xe, "READY_FOR_REVERT_COOLDOWN_MS", 400), /** State key in Bubble for "Ready for revert" (bind button disabled when false). */
+U(Xe, "STATE_READY_FOR_REVERT", "ready_for_revert"), /** After applying set_content_trigger, ignore it for this long to break Update echo loops. */
+U(Xe, "SET_CONTENT_TRIGGER_COOLDOWN_MS", 2e3);
 let zs = Xe;
 class A1 {
   constructor() {
-    W(this, "properties");
-    W(this, "states");
-    W(this, "eventLog", []);
-    W(this, "propertyChangeCallbacks", []);
-    W(this, "actionCallbacks", []);
-    W(this, "eventListeners", /* @__PURE__ */ new Map());
+    U(this, "properties");
+    U(this, "states");
+    U(this, "eventLog", []);
+    U(this, "propertyChangeCallbacks", []);
+    U(this, "actionCallbacks", []);
+    U(this, "eventListeners", /* @__PURE__ */ new Map());
     this.properties = {
       initial_content: "",
       placeholder: "Start writing something amazing...",
@@ -35070,7 +35076,7 @@ function M1() {
   }), g == null || g.addEventListener("change", () => {
     be.setProperty("toolbar_visible", g.checked);
   });
-  const m = document.getElementById("theme-preset"), b = document.getElementById("theme-accent"), k = document.getElementById("theme-accent-text"), _ = document.getElementById("theme-background"), A = document.getElementById("theme-icon-color"), C = document.getElementById("theme-icon-active"), L = document.getElementById("theme-font"), O = document.getElementById("theme-font-size"), D = document.getElementById("theme-radius"), U = document.getElementById("font-size-value"), he = document.getElementById("radius-value");
+  const m = document.getElementById("theme-preset"), b = document.getElementById("theme-accent"), k = document.getElementById("theme-accent-text"), _ = document.getElementById("theme-background"), A = document.getElementById("theme-icon-color"), C = document.getElementById("theme-icon-active"), L = document.getElementById("theme-font"), O = document.getElementById("theme-font-size"), D = document.getElementById("theme-radius"), W = document.getElementById("font-size-value"), he = document.getElementById("radius-value");
   function Le(x) {
     const Z = x ? u : d;
     _ && (_.value = Z.background_color), A && (A.value = Z.icon_color), C && (C.value = Z.icon_active_color);
@@ -35092,7 +35098,7 @@ function M1() {
     be.setProperty("font_family", L.value);
   }), O == null || O.addEventListener("input", () => {
     const x = parseInt(O.value, 10);
-    be.setProperty("font_size", x), U && (U.textContent = String(x));
+    be.setProperty("font_size", x), W && (W.textContent = String(x));
   }), D == null || D.addEventListener("input", () => {
     const x = parseInt(D.value, 10);
     be.setProperty("border_radius", x), he && (he.textContent = String(x));

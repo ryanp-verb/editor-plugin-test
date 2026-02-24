@@ -28,10 +28,8 @@ function(instance, properties, context) {
     }
     var rawSetContent = properties.set_content != null ? properties.set_content : (properties.set_content_trigger != null ? properties.set_content_trigger : properties.AAS);
     var setContentTrigger = rawSetContent != null ? toStr(rawSetContent) : '';
-    if (typeof console !== 'undefined' && console.log) {
-        if (setContentTrigger.length > 0) console.log('[TipTap] set_content_trigger received, length:', setContentTrigger.length);
-        // If Revert still doesn't work, check console for "TipTap update" to see what keys Bubble sent
-        if (setContentTrigger.length > 0) console.log('[TipTap] update property keys:', Object.keys(properties));
+    if (typeof console !== 'undefined' && console.log && setContentTrigger.length > 0) {
+        console.log('[TipTap] set_content_trigger received, length:', setContentTrigger.length);
     }
 
     // Map Bubble properties to our internal format with defaults

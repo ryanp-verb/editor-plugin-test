@@ -45,6 +45,8 @@ export class BubbleElement {
   /** After applying set_content_trigger, ignore it for this long to break Update echo loops. */
   private static readonly SET_CONTENT_TRIGGER_COOLDOWN_MS = 2000;
   private lastSetContentTriggerApplyAt = 0;
+  /** Skip the next sync/content_changed when we just applied initial_content to avoid a loop. */
+  private skipNextSync = false;
 
   constructor(config: BubbleElementConfig) {
     this.container = config.container;
@@ -174,11 +176,14 @@ export class BubbleElement {
   }
 
   private handleEditorUpdate(): void {
+    // When we just applied initial_content, skip one sync so we don't fire content_changed and
+    // trigger the user's workflow (draft = content), which would make Bubble re-run Update in a loop.
+    if (this.skipNextSync) {
+      this.skipNextSync = false;
+      return;
+    }
     // Debounce publishing to Bubble so the draft field isn't updated on every keystroke
-    // (avoids echo/overwrite). Full sync runs on blur. Reference: other TipTap plugin uses
-    // 2s debounce for autobinding + immediate on blur.
     this.scheduleSyncToBubble();
-
     this.eventBridge.triggerDebounced('content_changed', {
       html: this.editor?.getHTML(),
       isEmpty: this.editor?.isEmpty(),
@@ -293,6 +298,7 @@ export class BubbleElement {
       const shouldApply = editor && !this.isEffectivelyEmptyHtml(html) && isLoadWhileEmpty;
       if (shouldApply) {
         this.lastInitialContentApplyAt = now;
+        this.skipNextSync = true; // avoid sync → content_changed → workflow → Update loop
         if (typeof requestAnimationFrame !== 'undefined') {
           requestAnimationFrame(() => editor!.setContent(html));
         } else {
