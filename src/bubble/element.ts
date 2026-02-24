@@ -34,6 +34,8 @@ export class BubbleElement {
   private unsubscribeSystemTheme: (() => void) | null = null;
   private lastInitialContentApplyAt = 0;
   private static readonly INITIAL_CONTENT_APPLY_COOLDOWN_MS = 1500;
+  /** Last HTML we synced to Bubble; only sync when content actually changes (avoids spurious updates from setEditable etc.). */
+  private lastSyncedHtml: string | null = null;
 
   constructor(config: BubbleElementConfig) {
     this.container = config.container;
@@ -159,11 +161,18 @@ export class BubbleElement {
   }
 
   private handleEditorUpdate(): void {
-    this.syncStatesToBubble();
-    this.eventBridge.triggerDebounced('content_changed', {
-      html: this.editor?.getHTML(),
-      isEmpty: this.editor?.isEmpty(),
-    });
+    // Only sync when document content actually changed. TipTap fires 'update' for other reasons
+    // (e.g. setEditable()), which would otherwise cause constant state publishes in Bubble.
+    const rawHtml = this.editor?.getHTML() ?? '';
+    const htmlForStorage = this.sanitizeHtmlForStorage(rawHtml);
+    if (htmlForStorage !== this.lastSyncedHtml) {
+      this.lastSyncedHtml = htmlForStorage;
+      this.syncStatesToBubble();
+      this.eventBridge.triggerDebounced('content_changed', {
+        html: rawHtml,
+        isEmpty: this.editor?.isEmpty(),
+      });
+    }
   }
 
   private handleEditorFocus(): void {
@@ -171,6 +180,7 @@ export class BubbleElement {
   }
 
   private handleEditorBlur(): void {
+    // Always sync on blur so Bubble has latest content even if we skipped intermediate updates.
     this.syncStatesToBubble();
     this.eventBridge.trigger('editor_blurred');
   }
@@ -199,6 +209,7 @@ export class BubbleElement {
     this.bubble.publishState('is_empty', stats.isEmpty);
     this.bubble.publishState('word_count', stats.wordCount);
     this.bubble.publishState('json_content', JSON.stringify(this.editor.getJSON()));
+    this.lastSyncedHtml = htmlForStorage;
   }
 
   private handlePropertyChanges(changes: Partial<BubbleProperties>): void {

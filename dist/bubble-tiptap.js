@@ -34682,6 +34682,8 @@ const ro = class ro {
     j(this, "unsubscribeProps", null);
     j(this, "unsubscribeSystemTheme", null);
     j(this, "lastInitialContentApplyAt", 0);
+    /** Last HTML we synced to Bubble; only sync when content actually changes (avoids spurious updates from setEditable etc.). */
+    j(this, "lastSyncedHtml", null);
     this.container = e.container, this.bubble = e.bubble, this.eventBridge = new C1(this.bubble);
   }
   /**
@@ -34748,11 +34750,12 @@ const ro = class ro {
   handleEditorCreate() {
   }
   handleEditorUpdate() {
-    var e, t;
-    this.syncStatesToBubble(), this.eventBridge.triggerDebounced("content_changed", {
-      html: (e = this.editor) == null ? void 0 : e.getHTML(),
-      isEmpty: (t = this.editor) == null ? void 0 : t.isEmpty()
-    });
+    var r, i;
+    const e = ((r = this.editor) == null ? void 0 : r.getHTML()) ?? "", t = this.sanitizeHtmlForStorage(e);
+    t !== this.lastSyncedHtml && (this.lastSyncedHtml = t, this.syncStatesToBubble(), this.eventBridge.triggerDebounced("content_changed", {
+      html: e,
+      isEmpty: (i = this.editor) == null ? void 0 : i.isEmpty()
+    }));
   }
   handleEditorFocus() {
     this.eventBridge.trigger("editor_focused");
@@ -34772,7 +34775,7 @@ const ro = class ro {
   syncStatesToBubble() {
     if (!this.editor) return;
     const e = this.editor.getStats(), t = this.editor.getHTML(), r = this.sanitizeHtmlForStorage(t);
-    this.bubble.publishState("html_content", r), this.bubble.publishState("is_empty", e.isEmpty), this.bubble.publishState("word_count", e.wordCount), this.bubble.publishState("json_content", JSON.stringify(this.editor.getJSON()));
+    this.bubble.publishState("html_content", r), this.bubble.publishState("is_empty", e.isEmpty), this.bubble.publishState("word_count", e.wordCount), this.bubble.publishState("json_content", JSON.stringify(this.editor.getJSON())), this.lastSyncedHtml = r;
   }
   handlePropertyChanges(e) {
     var r, i, o;
