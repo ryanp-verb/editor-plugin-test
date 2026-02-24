@@ -5,6 +5,7 @@
 
 import { ContentEditor } from './Editor';
 import { icons } from '../utils/icons';
+import { getThemeVariablesForPopup } from '../utils/themeApplier';
 
 export interface ShowLinkPopupOptions {
   initialUrl?: string;
@@ -107,17 +108,36 @@ export function showLinkPopup(editor: ContentEditor, options: ShowLinkPopupOptio
   mountTarget.appendChild(overlay);
 
   // Apply theme variables so text and input colors match light/dark and brand.
-  // Prefer explicitly computed themeVariables (reliable in all hosts); fallback to copying from themeRoot.
-  if (themeVariables && Object.keys(themeVariables).length > 0) {
-    for (const [key, value] of Object.entries(themeVariables)) {
-      if (value) overlay.style.setProperty(key, value);
-    }
-  } else if (themeRoot) {
+  // Prefer theme root's data-theme so popup always matches visible UI (fixes black text when getProperties().theme is wrong).
+  const resolvedTheme =
+    themeRoot?.dataset?.theme ||
+    (themeRoot?.closest?.('[data-theme]') as HTMLElement)?.dataset?.theme;
+  let varsToApply: Record<string, string> | null = null;
+  if (resolvedTheme === 'dark' || resolvedTheme === 'light') {
+    varsToApply = getThemeVariablesForPopup({ theme: resolvedTheme });
+  }
+  if (!varsToApply && themeVariables && Object.keys(themeVariables).length > 0) {
+    varsToApply = themeVariables;
+  }
+  if (!varsToApply && themeRoot) {
     const computed = window.getComputedStyle(themeRoot);
+    varsToApply = {};
     for (const v of LINK_POPUP_THEME_VARS) {
       const value = computed.getPropertyValue(v).trim();
-      if (value) overlay.style.setProperty(v, value);
+      if (value) varsToApply[v] = value;
     }
+    if (resolvedTheme === 'dark') {
+      const darkVars = getThemeVariablesForPopup({ theme: 'dark' });
+      Object.assign(varsToApply, darkVars);
+    }
+  }
+  if (varsToApply && Object.keys(varsToApply).length > 0) {
+    for (const [key, value] of Object.entries(varsToApply)) {
+      if (value) overlay.style.setProperty(key, value);
+    }
+  }
+  if (resolvedTheme === 'dark' || resolvedTheme === 'light') {
+    overlay.setAttribute('data-theme', resolvedTheme);
   }
 
   const overflowPrior = document.body.style.overflow;
