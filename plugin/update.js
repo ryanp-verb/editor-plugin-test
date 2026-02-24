@@ -19,9 +19,20 @@ function(instance, properties, context) {
 
     // Set content trigger: when workflow sets this to HTML, we replace editor content (e.g. Revert)
     // Accept set_content (field name in Bubble), set_content_trigger, or AAS (element.json id)
-    var setContentTrigger = (properties.set_content != null || properties.set_content_trigger != null || properties.AAS != null)
-        ? String(properties.set_content != null ? properties.set_content : (properties.set_content_trigger != null ? properties.set_content_trigger : properties.AAS))
-        : '';
+    // Bubble may send dynamic values as plain string or as object; normalize to string
+    function toStr(v) {
+        if (v == null) return '';
+        if (typeof v === 'string') return v;
+        if (typeof v === 'object' && typeof v.get === 'function') return toStr(v.get());
+        return String(v);
+    }
+    var rawSetContent = properties.set_content != null ? properties.set_content : (properties.set_content_trigger != null ? properties.set_content_trigger : properties.AAS);
+    var setContentTrigger = rawSetContent != null ? toStr(rawSetContent) : '';
+    if (typeof console !== 'undefined' && console.log) {
+        if (setContentTrigger.length > 0) console.log('[TipTap] set_content_trigger received, length:', setContentTrigger.length);
+        // If Revert still doesn't work, check console for "TipTap update" to see what keys Bubble sent
+        if (setContentTrigger.length > 0) console.log('[TipTap] update property keys:', Object.keys(properties));
+    }
 
     // Map Bubble properties to our internal format with defaults
     const allProperties = {
