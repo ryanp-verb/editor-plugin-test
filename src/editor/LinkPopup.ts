@@ -31,6 +31,7 @@ const LINK_POPUP_THEME_VARS = [
   '--brand-primary',
   '--border-radius',
   '--control-btn-bg-hover',
+  '--link-popup-save-text',
 ] as const;
 
 export function showLinkPopup(editor: ContentEditor, options: ShowLinkPopupOptions = {}): void {
@@ -107,34 +108,67 @@ export function showLinkPopup(editor: ContentEditor, options: ShowLinkPopupOptio
 
   mountTarget.appendChild(overlay);
 
-  // Apply theme variables so text and input colors match light/dark and brand.
-  // Prefer theme root's data-theme so popup always matches visible UI (fixes black text when getProperties().theme is wrong).
+  // Apply theme variables so text and background use the same source.
+  // Prefer theme root's computed style (same way the popup background gets its color when mounted inside themeRoot).
   const resolvedTheme =
     themeRoot?.dataset?.theme ||
     (themeRoot?.closest?.('[data-theme]') as HTMLElement)?.dataset?.theme;
-  let varsToApply: Record<string, string> | null = null;
-  if (resolvedTheme === 'dark' || resolvedTheme === 'light') {
-    varsToApply = getThemeVariablesForPopup({ theme: resolvedTheme });
-  }
-  if (!varsToApply && themeVariables && Object.keys(themeVariables).length > 0) {
-    varsToApply = themeVariables;
-  }
-  if (!varsToApply && themeRoot) {
+  let varsToApply: Record<string, string> = {};
+  if (themeRoot) {
     const computed = window.getComputedStyle(themeRoot);
-    varsToApply = {};
     for (const v of LINK_POPUP_THEME_VARS) {
       const value = computed.getPropertyValue(v).trim();
       if (value) varsToApply[v] = value;
     }
-    if (resolvedTheme === 'dark') {
-      const darkVars = getThemeVariablesForPopup({ theme: 'dark' });
-      Object.assign(varsToApply, darkVars);
+  }
+  // If theme root didn't have vars (or we didn't mount in it), use explicit theme or passed themeVariables.
+  if (Object.keys(varsToApply).length === 0) {
+    if (resolvedTheme === 'dark' || resolvedTheme === 'light') {
+      varsToApply = getThemeVariablesForPopup({ theme: resolvedTheme });
+    } else if (themeVariables && Object.keys(themeVariables).length > 0) {
+      varsToApply = { ...themeVariables };
+    }
+  } else if (resolvedTheme === 'dark' || resolvedTheme === 'light') {
+    const preset = getThemeVariablesForPopup({ theme: resolvedTheme });
+    // When we have theme root, keep its computed background; ensure text vars come from preset so they match.
+    const textVarKeys = ['--editor-text', '--editor-text-muted', '--link-popup-save-text'];
+    if (Object.keys(varsToApply).length > 0) {
+      for (const k of textVarKeys) {
+        if (preset[k]) varsToApply[k] = preset[k];
+      }
+    } else {
+      Object.assign(varsToApply, preset);
     }
   }
   if (varsToApply && Object.keys(varsToApply).length > 0) {
     for (const [key, value] of Object.entries(varsToApply)) {
       if (value) overlay.style.setProperty(key, value);
     }
+    // Apply background and text color as inline styles from the same vars so they
+    // always match (Bubble/iframe can break var() inheritance for text).
+    const bg = varsToApply['--sidebar-bg'] || varsToApply['--toolbar-bg'] || varsToApply['--editor-bg'];
+    const text = varsToApply['--editor-text'];
+    const textMuted = varsToApply['--editor-text-muted'];
+    const saveText = varsToApply['--link-popup-save-text'];
+    if (bg) dialog.style.background = bg;
+    if (text) {
+      dialog.style.color = text;
+      dialog.querySelectorAll('.bp-link-popup-title, .bp-link-popup-label, .bp-link-popup-checkbox-wrap').forEach((el) => {
+        (el as HTMLElement).style.color = text;
+      });
+    }
+    if (textMuted) {
+      dialog.querySelectorAll('.bp-link-popup-close, .bp-link-popup-remove').forEach((el) => {
+        (el as HTMLElement).style.color = textMuted;
+      });
+    }
+    const input = dialog.querySelector('.bp-link-popup-input') as HTMLElement;
+    if (input) {
+      if (varsToApply['--editor-bg']) input.style.background = varsToApply['--editor-bg'];
+      if (text) input.style.color = text;
+    }
+    const saveBtn = dialog.querySelector('.bp-link-popup-save') as HTMLElement;
+    if (saveBtn && saveText) saveBtn.style.color = saveText;
   }
   if (resolvedTheme === 'dark' || resolvedTheme === 'light') {
     overlay.setAttribute('data-theme', resolvedTheme);
