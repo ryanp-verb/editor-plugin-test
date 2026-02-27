@@ -528,55 +528,16 @@
   background: var(--brand-primary, #007f00);
 }
 
-/* Center ALL button - horizontal layout, icon left of text */
+/* Wrapper to center the border ALL control (control carries its own styles) */
 .bp-border-center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  width: 64px;
-  height: 32px;
-  background: var(--control-bg, #d9dbd0);
-  border: none;
-  border-radius: 10px;
-  color: var(--border-inactive, #7a7a6c);
-  cursor: pointer;
-  transition: all 0.15s ease;
   z-index: 1;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.bp-border-center span {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.bp-border-center svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* ALL button states */
-.bp-border-center:hover {
-  background: var(--brand-light-1, #8edf00);
-  color: var(--brand-primary, #007f00);
-}
-
-.bp-border-center.active {
-  background: var(--brand-dark-1, #004f00);
-  color: white;
-}
-
-.bp-border-center.active:hover {
-  background: var(--brand-light-1, #8edf00);
-  color: var(--brand-primary, #007f00);
 }
 
 
@@ -637,6 +598,241 @@
   border-right: none;
   border-top: none;
   border-bottom-left-radius: 12px;
+}
+
+/* ============================================
+   Radius Corner Control (Figma: Border Radius Control - per corner)
+   One component per corner (TL, BL, TR, BR). States: default/off, hover, active (non-zero),
+   active+hover; when parent has .all-linked, active corners use light green.
+   Group: four corners at corners of group, ALL control at center.
+   ============================================ */
+.bp-radius-corner-group {
+  position: relative;
+  width: 148px;
+  height: 104px;
+}
+
+.bp-radius-corner-controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bp-radius-corner-controls > * {
+  pointer-events: auto;
+}
+
+.bp-radius-corner-controls .bp-radius-corner-control[data-corner="topLeft"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.bp-radius-corner-controls .bp-radius-corner-control[data-corner="topRight"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.bp-radius-corner-controls .bp-radius-corner-control[data-corner="bottomLeft"] {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.bp-radius-corner-controls .bp-radius-corner-control[data-corner="bottomRight"] {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.bp-radius-all-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: auto;
+}
+
+/* When ALL is off: ALL control has transparent bg and input hidden */
+.bp-radius-all-center .bp-link-all-control:not(.active) {
+  background: transparent;
+}
+
+.bp-radius-all-center .bp-link-all-control:not(.active) .bp-link-all-value-input {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* When ALL is active: corner controls have transparent bg, inputs hidden, demo strokes = bp green */
+.bp-radius-corner-controls.all-linked .bp-radius-corner-control {
+  background: transparent;
+  color: var(--brand-primary, #007f00);
+}
+
+.bp-radius-corner-controls.all-linked .bp-radius-corner-control .bp-radius-corner-control-input {
+  display: none;
+}
+
+.bp-radius-corner-controls.all-linked .bp-radius-corner-control:hover {
+  background: var(--brand-light-1, #8edf00);
+}
+
+.bp-radius-corner-controls.all-linked .bp-radius-corner-control.active {
+  background: transparent;
+}
+
+.bp-radius-corner-controls.all-linked .bp-radius-corner-control.active:hover {
+  background: var(--brand-light-1, #8edf00);
+}
+
+.bp-radius-corner-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 42px;
+  padding: 0;
+  border: none;
+  border-radius: var(--control-btn-radius, 8px);
+  background: var(--neutral-warm-grey-2, #e1e3d6);
+  color: var(--neutral-warm-grey-5, #494736);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.bp-radius-corner-control-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.bp-radius-corner-control-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 28px;
+  overflow: visible;
+}
+
+.bp-radius-corner-control-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: currentColor;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Sharp corner when radius is 0 (no rounded join) */
+.bp-radius-corner-control-svg.bp-radius-corner-sharp path {
+  stroke-linejoin: miter;
+}
+
+.bp-radius-corner-control-input {
+  position: absolute;
+  width: 40px;
+  min-width: 32px;
+  padding: 1px 4px;
+  border: none;
+  border-radius: 2px;
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-family-primary);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  text-align: center;
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+.bp-radius-corner-control-input:focus {
+  outline: none;
+  background: transparent;
+}
+
+.bp-radius-corner-control-input::placeholder {
+  opacity: 0.7;
+}
+
+/* Input inside the corner: opposite corner of the demo (TL demo → input bottom-right, etc.) */
+.bp-radius-corner-control[data-corner="topLeft"] .bp-radius-corner-control-input {
+  right: 2px;
+  bottom: 2px;
+  text-align: right;
+}
+
+.bp-radius-corner-control[data-corner="topRight"] .bp-radius-corner-control-input {
+  left: 2px;
+  bottom: 2px;
+  text-align: left;
+}
+
+.bp-radius-corner-control[data-corner="bottomRight"] .bp-radius-corner-control-input {
+  left: 2px;
+  top: 2px;
+  text-align: left;
+}
+
+.bp-radius-corner-control[data-corner="bottomLeft"] .bp-radius-corner-control-input {
+  right: 2px;
+  top: 2px;
+  text-align: right;
+}
+
+/* Default hovered (value 0 or any, not active) */
+.bp-radius-corner-control:hover {
+  background: var(--brand-light-1, #8edf00);
+  color: var(--brand-primary, #007f00);
+}
+
+.bp-radius-corner-control:hover .bp-radius-corner-control-input {
+  color: var(--neutral-warm-grey-6, #121000);
+}
+
+/* Active (non-zero), ALL inactive - dark green */
+.bp-radius-corner-control.active {
+  background: var(--brand-dark-1, #004f00);
+  color: var(--brand-light-2, #ccff00);
+}
+
+.bp-radius-corner-control.active .bp-radius-corner-control-input {
+  color: var(--brand-light-2, #ccff00);
+}
+
+/* Active + hovered, ALL inactive - light green */
+.bp-radius-corner-control.active:hover {
+  background: var(--brand-light-1, #8edf00);
+  color: var(--brand-primary, #007f00);
+}
+
+.bp-radius-corner-control.active:hover .bp-radius-corner-control-input {
+  color: var(--neutral-warm-grey-6, #121000);
+}
+
+/* When ALL is linked: corner default is transparent (handled above); only hover shows light green */
+.bp-radius-corner-controls.all-linked .bp-radius-corner-control.active .bp-radius-corner-control-input {
+  color: var(--neutral-warm-grey-6, #121000);
+}
+
+.bp-radius-corner-controls.all-linked .bp-radius-corner-control.active:hover {
+  background: var(--brand-light-1, #8edf00);
+  color: var(--brand-primary, #007f00);
 }
 
 /* ============================================
@@ -703,9 +899,12 @@
   flex-shrink: 0;
 }
 
+/* Value readout: match ALL label (same size/weight) */
 .bp-link-all-control .bp-link-all-value {
   margin-left: 2px;
-  font-weight: 500;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
 }
 
 .bp-link-all-control.active .bp-link-all-value {
@@ -714,6 +913,77 @@
 
 .bp-link-all-control.active:hover .bp-link-all-value {
   color: var(--brand-primary, #007f00);
+}
+
+.bp-link-all-label {
+  font-size: 12px;
+  letter-spacing: -0.5px;
+}
+
+/* Single rectangle with toggle + value input inside */
+.bp-link-all-with-input {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  min-width: auto;
+  padding-left: 9px;
+  padding-right: 4px;
+}
+
+.bp-link-all-with-input .bp-link-all-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.bp-link-all-with-input .bp-link-all-toggle:hover {
+  background: transparent;
+  color: inherit;
+}
+
+.bp-link-all-with-input .bp-link-all-value-input {
+  width: 44px;
+  min-width: 44px;
+  padding: 0 6px;
+  border: none;
+  border-left: none;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  text-align: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.bp-link-all-with-input .bp-link-all-value-input::placeholder {
+  opacity: 0.7;
+}
+
+.bp-link-all-with-input .bp-link-all-value-input:focus {
+  outline: none;
+  background: transparent;
+}
+
+.bp-link-all-with-input.active .bp-link-all-value-input {
+  border-left-color: rgba(255, 255, 255, 0.2);
+}
+
+.bp-link-all-with-input.active .bp-link-all-value-input:focus {
+  background: transparent;
 }
 
 /* Legacy class: alias for radius row (same styles) */
@@ -849,33 +1119,15 @@
   transform: translateY(-50%);
 }
 
+/* Wrapper to center the padding ALL control (control carries its own styles, same as radius) */
 .bp-padding-center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  background: var(--brand-light-1, #8edf00);
-  border: none;
-  border-radius: 8px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--neutral-warm-grey-6, #121000);
-  transition: all 0.15s ease;
-}
-
-.bp-padding-center svg {
-  width: 14px;
-  height: 14px;
-}
-
-.bp-padding-center.active {
-  background: var(--brand-light-2, #ccff00);
+  justify-content: center;
 }
 
 /* ============================================

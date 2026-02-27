@@ -27,10 +27,10 @@ export interface BlockStyleAttributes {
   borderBottomWidth?: number;
   borderLeftWidth?: number;
   borderColor?: string;
-  borderTopLeftRadius?: number;
-  borderTopRightRadius?: number;
-  borderBottomRightRadius?: number;
-  borderBottomLeftRadius?: number;
+  borderTopLeftRadius?: number | string;
+  borderTopRightRadius?: number | string;
+  borderBottomRightRadius?: number | string;
+  borderBottomLeftRadius?: number | string;
   paddingTop?: number;
   paddingRight?: number;
   paddingBottom?: number;
@@ -59,7 +59,7 @@ declare module '@tiptap/core' {
       /**
        * Set border radius
        */
-      setBlockBorderRadius: (radius: number) => ReturnType;
+      setBlockBorderRadius: (radius: number | string) => ReturnType;
       /**
        * Set padding
        */
@@ -79,6 +79,15 @@ declare module '@tiptap/core' {
 function parseStyleValue(value: string | undefined): number | undefined {
   if (!value) return undefined;
   const num = parseFloat(value);
+  return isNaN(num) ? undefined : num;
+}
+
+/** Parse radius: preserve em/rem/% as string, px as number. */
+function parseRadiusValue(value: string | undefined): number | string | undefined {
+  if (!value) return undefined;
+  const s = value.trim();
+  if (/em|rem|%$/i.test(s)) return s;
+  const num = parseFloat(s);
   return isNaN(num) ? undefined : num;
 }
 
@@ -108,15 +117,16 @@ export function buildBlockStyleString(attrs: BlockStyleAttributes): string {
     }
   }
   
-  // Border radius
-  const rtl = attrs.borderTopLeftRadius ?? 0;
-  const rtr = attrs.borderTopRightRadius ?? 0;
-  const rbr = attrs.borderBottomRightRadius ?? 0;
-  const rbl = attrs.borderBottomLeftRadius ?? 0;
-  
-  if (rtl || rtr || rbr || rbl) {
-    parts.push(`border-radius: ${rtl}px ${rtr}px ${rbr}px ${rbl}px`);
-  }
+  // Border radius (number = px, string = e.g. "1em", "50%") — always output so in-content element matches controls
+  const rtl = attrs.borderTopLeftRadius;
+  const rtr = attrs.borderTopRightRadius;
+  const rbr = attrs.borderBottomRightRadius;
+  const rbl = attrs.borderBottomLeftRadius;
+  const fmt = (v: number | string | undefined): string => {
+    if (v === undefined || v === null) return '0';
+    return typeof v === 'string' ? v : `${v}px`;
+  };
+  parts.push(`border-radius: ${fmt(rtl)} ${fmt(rtr)} ${fmt(rbr)} ${fmt(rbl)}`);
   
   // Padding
   const pt = attrs.paddingTop ?? 0;
@@ -181,22 +191,22 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
           },
           borderTopLeftRadius: {
             default: null,
-            parseHTML: element => parseStyleValue(element.style.borderTopLeftRadius),
+            parseHTML: element => parseRadiusValue(element.style.borderTopLeftRadius),
             renderHTML: () => ({}),
           },
           borderTopRightRadius: {
             default: null,
-            parseHTML: element => parseStyleValue(element.style.borderTopRightRadius),
+            parseHTML: element => parseRadiusValue(element.style.borderTopRightRadius),
             renderHTML: () => ({}),
           },
           borderBottomRightRadius: {
             default: null,
-            parseHTML: element => parseStyleValue(element.style.borderBottomRightRadius),
+            parseHTML: element => parseRadiusValue(element.style.borderBottomRightRadius),
             renderHTML: () => ({}),
           },
           borderBottomLeftRadius: {
             default: null,
-            parseHTML: element => parseStyleValue(element.style.borderBottomLeftRadius),
+            parseHTML: element => parseRadiusValue(element.style.borderBottomLeftRadius),
             renderHTML: () => ({}),
           },
           paddingTop: {
@@ -289,7 +299,7 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
           );
         },
       setBlockBorderRadius:
-        (radius: number) =>
+        (radius: number | string) =>
         ({ commands }) => {
           return this.options.types.every(type =>
             commands.updateAttributes(type, {

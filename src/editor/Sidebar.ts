@@ -18,6 +18,8 @@ const NO_FOCUS: EditorCommandOptions = { focus: false };
 import { icons } from '../utils/icons';
 import { DragDropManager, DragData } from '../utils/DragDropManager';
 import { createLinkAllControlHTML } from '../components/LinkAllControl';
+import { createRadiusCornerControlHTML, getCornerPathPx, type RadiusCorner } from '../components/RadiusCornerControl';
+import { parseLengthInput, lengthToPxForDemo } from '../utils/parseLength';
 
 export interface SidebarConfig {
   editor: ContentEditor;
@@ -37,10 +39,10 @@ interface BlockStyleState {
   borderBottom: number;
   borderLeft: number;
   borderColor: string;
-  borderRadiusTopLeft: number;
-  borderRadiusTopRight: number;
-  borderRadiusBottomRight: number;
-  borderRadiusBottomLeft: number;
+  borderRadiusTopLeft: number | string;
+  borderRadiusTopRight: number | string;
+  borderRadiusBottomRight: number | string;
+  borderRadiusBottomLeft: number | string;
   paddingTop: number;
   paddingRight: number;
   paddingBottom: number;
@@ -309,20 +311,56 @@ export class Sidebar {
               <button class="bp-border-side bp-border-left" data-side="left" title="Left border">
                 <span class="bp-border-bar"></span>
               </button>
-              ${createLinkAllControlHTML({
-                dataAction: 'borderAll',
-                dataSide: 'all',
-                linked: this.borderAllLinked,
-                className: 'bp-border-center bp-border-all',
-              })}
+              <div class="bp-border-center">
+                ${createLinkAllControlHTML({
+                  dataAction: 'borderAll',
+                  dataSide: 'all',
+                  linked: this.borderAllLinked,
+                  className: 'bp-btn-link-all bp-border-all',
+                })}
+              </div>
             </div>
           </div>
           <div class="bp-radius-control" data-control="radius">
-            <div class="bp-radius-visual">
-              <button class="bp-radius-corner bp-radius-tl" data-corner="topLeft" title="Top left radius"></button>
-              <button class="bp-radius-corner bp-radius-tr" data-corner="topRight" title="Top right radius"></button>
-              <button class="bp-radius-corner bp-radius-br" data-corner="bottomRight" title="Bottom right radius"></button>
-              <button class="bp-radius-corner bp-radius-bl" data-corner="bottomLeft" title="Bottom left radius"></button>
+            <div class="bp-radius-corner-group">
+              <div class="bp-radius-corner-controls${this.radiusAllLinked ? ' all-linked' : ''}" data-radius-corner-controls>
+                ${createRadiusCornerControlHTML({
+                  corner: 'topLeft',
+                  valueDisplay: this.formatRadiusForDisplay(this.blockStyle.borderRadiusTopLeft),
+                  active: !this.isRadiusOff(this.blockStyle.borderRadiusTopLeft),
+                  radiusValuePx: this.radiusToPxForDemo(this.blockStyle.borderRadiusTopLeft),
+                })}
+                ${createRadiusCornerControlHTML({
+                  corner: 'topRight',
+                  valueDisplay: this.formatRadiusForDisplay(this.blockStyle.borderRadiusTopRight),
+                  active: !this.isRadiusOff(this.blockStyle.borderRadiusTopRight),
+                  radiusValuePx: this.radiusToPxForDemo(this.blockStyle.borderRadiusTopRight),
+                })}
+                ${createRadiusCornerControlHTML({
+                  corner: 'bottomLeft',
+                  valueDisplay: this.formatRadiusForDisplay(this.blockStyle.borderRadiusBottomLeft),
+                  active: !this.isRadiusOff(this.blockStyle.borderRadiusBottomLeft),
+                  radiusValuePx: this.radiusToPxForDemo(this.blockStyle.borderRadiusBottomLeft),
+                })}
+                ${createRadiusCornerControlHTML({
+                  corner: 'bottomRight',
+                  valueDisplay: this.formatRadiusForDisplay(this.blockStyle.borderRadiusBottomRight),
+                  active: !this.isRadiusOff(this.blockStyle.borderRadiusBottomRight),
+                  radiusValuePx: this.radiusToPxForDemo(this.blockStyle.borderRadiusBottomRight),
+                })}
+              </div>
+              <div class="bp-radius-all-center">
+                ${createLinkAllControlHTML({
+                  dataAction: 'toggleRadiusAll',
+                  linked: this.radiusAllLinked,
+                  value: typeof this.blockStyle.borderRadiusTopLeft === 'number' ? this.blockStyle.borderRadiusTopLeft : 0,
+                  valueDisplay: this.formatRadiusForDisplay(this.blockStyle.borderRadiusTopLeft),
+                  showValue: true,
+                  valueAsInput: true,
+                  valueInputData: 'radius',
+                  className: 'bp-btn-link-all',
+                })}
+              </div>
             </div>
           </div>
           <div class="bp-border-inputs">
@@ -330,17 +368,6 @@ export class Sidebar {
               <input type="number" class="bp-input bp-input-sm" data-input="borderWidth" value="0" min="0" max="50">
               <span class="bp-input-unit">px</span>
             </div>
-            <div class="bp-input-row">
-              <input type="number" class="bp-input bp-input-sm" data-input="radius" value="0" min="0" max="50">
-              <span class="bp-input-unit">px</span>
-            </div>
-            ${createLinkAllControlHTML({
-              dataAction: 'toggleRadiusAll',
-              linked: this.radiusAllLinked,
-              value: this.blockStyle.borderRadiusTopLeft,
-              showValue: true,
-              className: 'bp-btn-link-all',
-            })}
           </div>
         </div>
         <div class="bp-control-group">
@@ -428,13 +455,18 @@ export class Sidebar {
               <input type="number" class="bp-input bp-padding-input bp-padding-right" data-padding="right" value="0" min="0" placeholder="0">
               <input type="number" class="bp-input bp-padding-input bp-padding-bottom" data-padding="bottom" value="0" min="0" placeholder="0">
               <input type="number" class="bp-input bp-padding-input bp-padding-left" data-padding="left" value="0" min="0" placeholder="0">
-              ${createLinkAllControlHTML({
-                dataAction: 'togglePaddingAll',
-                linked: this.paddingAllLinked,
-                value: this.blockStyle.paddingTop,
-                showValue: true,
-                className: 'bp-padding-center',
-              })}
+              <div class="bp-padding-center">
+                ${createLinkAllControlHTML({
+                  dataAction: 'togglePaddingAll',
+                  linked: this.paddingAllLinked,
+                  value: this.blockStyle.paddingTop,
+                  valueDisplay: String(this.blockStyle.paddingTop),
+                  showValue: true,
+                  valueAsInput: true,
+                  valueInputData: 'padding',
+                  className: 'bp-btn-link-all',
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -474,15 +506,17 @@ export class Sidebar {
       }
       
       // Border side clicks
-      const borderSide = target.closest('.bp-border-side, .bp-border-center') as HTMLElement;
+      const borderSide = target.closest('.bp-border-side, .bp-border-all') as HTMLElement;
       if (borderSide) {
         this.handleBorderSideClick(borderSide);
       }
       
-      // Radius corner clicks  
-      const radiusCorner = target.closest('.bp-radius-corner') as HTMLElement;
-      if (radiusCorner) {
-        this.handleRadiusCornerClick(radiusCorner);
+      // Radius corner clicks (legacy .bp-radius-corner or new .bp-radius-corner-control; not when clicking the input)
+      if (!target.closest('.bp-radius-corner-control-input')) {
+        const radiusCorner = target.closest('.bp-radius-corner, .bp-radius-corner-control') as HTMLElement;
+        if (radiusCorner) {
+          this.handleRadiusCornerClick(radiusCorner);
+        }
       }
     });
     
@@ -496,6 +530,65 @@ export class Sidebar {
         this.handleInputChange(target);
       }
     });
+    sidebar.addEventListener('blur', (e) => {
+      const target = e.target as HTMLInputElement;
+      if (target.dataset.linkAllValue) {
+        this.handleLinkAllValueInput(target);
+      }
+      if (target.dataset.radiusCorner) {
+        this.handleRadiusCornerInput(target);
+      }
+    }, true);
+  }
+
+  /** Format for display; number-only values show as "Npx" (default unit). */
+  private formatRadiusForDisplay(r: number | string | undefined): string {
+    if (r === undefined || r === null) return '';
+    if (typeof r === 'number') return r === 0 ? '0' : `${r}px`;
+    return r;
+  }
+
+  private isRadiusOff(r: number | string | undefined): boolean {
+    if (r === undefined || r === null) return true;
+    if (typeof r === 'number') return r === 0;
+    const parsed = parseLengthInput(String(r));
+    return !parsed || (parsed.value === 0 && parsed.unit === 'px');
+  }
+
+  /** Convert radius to px for corner demo SVG; rem/em use 16px, % uses ref size. */
+  private radiusToPxForDemo(r: number | string | undefined): number {
+    if (r === undefined || r === null) return 0;
+    if (typeof r === 'number') return r;
+    const parsed = parseLengthInput(String(r));
+    return lengthToPxForDemo(parsed);
+  }
+
+  private handleLinkAllValueInput(input: HTMLInputElement): void {
+    const kind = input.dataset.linkAllValue;
+    if (kind === 'radius') {
+      const parsed = parseLengthInput(input.value);
+      if (!parsed) return;
+      this.blockStyle.borderRadiusTopLeft = parsed.css;
+      this.blockStyle.borderRadiusTopRight = parsed.css;
+      this.blockStyle.borderRadiusBottomRight = parsed.css;
+      this.blockStyle.borderRadiusBottomLeft = parsed.css;
+      this.applyBlockStyles();
+      this.updateRadiusLinkAllButton();
+      this.updateRadiusCornerControls();
+    }
+    if (kind === 'padding') {
+      const num = parseInt(input.value, 10) || 0;
+      if (!this.paddingAllLinked) return;
+      this.blockStyle.paddingTop = num;
+      this.blockStyle.paddingRight = num;
+      this.blockStyle.paddingBottom = num;
+      this.blockStyle.paddingLeft = num;
+      this.element.querySelectorAll('.bp-padding-input').forEach((el) => {
+        (el as HTMLInputElement).value = String(num);
+      });
+      this.applyBlockStyles();
+      this.updatePaddingLinkAllButton();
+    }
   }
 
   private handleAction(btn: HTMLElement): void {
@@ -745,11 +838,33 @@ export class Sidebar {
     this.applyBlockStyles();
   }
 
-  private handleRadiusCornerClick(element: HTMLElement): void {
-    element.classList.toggle('active');
-    // Changing one corner → ALL becomes inactive (one of the 4 values changed)
+  private handleRadiusCornerInput(input: HTMLInputElement): void {
+    const corner = input.dataset.radiusCorner as RadiusCorner | null;
+    if (!corner) return;
+    const parsed = parseLengthInput(input.value);
+    if (!parsed) return;
+    const key = corner === 'topLeft' ? 'borderRadiusTopLeft' : corner === 'topRight' ? 'borderRadiusTopRight' : corner === 'bottomRight' ? 'borderRadiusBottomRight' : 'borderRadiusBottomLeft';
+    this.blockStyle[key] = parsed.css;
     this.radiusAllLinked = false;
+    this.applyBlockStyles();
     this.updateRadiusLinkAllButton();
+    this.updateRadiusCornerControls();
+  }
+
+  private handleRadiusCornerClick(element: HTMLElement): void {
+    const corner = element.getAttribute('data-corner') as RadiusCorner | null;
+    if (!corner) return;
+    const key = corner === 'topLeft' ? 'borderRadiusTopLeft' : corner === 'topRight' ? 'borderRadiusTopRight' : corner === 'bottomRight' ? 'borderRadiusBottomRight' : 'borderRadiusBottomLeft';
+    const current = this.blockStyle[key];
+    const isOff = this.isRadiusOff(current);
+    // Toggle: if off, set to 8px or current linked value; if on, set to 0
+    const valueWhenOn = this.radiusAllLinked ? this.blockStyle.borderRadiusTopLeft : 8;
+    const applied = isOff ? (this.isRadiusOff(valueWhenOn) ? 8 : valueWhenOn) : 0;
+    this.blockStyle[key] = applied;
+    this.radiusAllLinked = false;
+    this.applyBlockStyles();
+    this.updateRadiusLinkAllButton();
+    this.updateRadiusCornerControls();
   }
 
   private handlePaddingChange(input: HTMLInputElement): void {
@@ -772,13 +887,8 @@ export class Sidebar {
     const inputType = input.dataset.input;
     const value = parseInt(input.value, 10) || 0;
     
-    switch (inputType) {
-      case 'borderWidth':
-        this.setBorderWidth(value);
-        break;
-      case 'radius':
-        this.setRadius(value);
-        break;
+    if (inputType === 'borderWidth') {
+      this.setBorderWidth(value);
     }
   }
 
@@ -916,49 +1026,114 @@ export class Sidebar {
       this.blockStyle.borderRadiusTopRight = 0;
       this.blockStyle.borderRadiusBottomRight = 0;
       this.blockStyle.borderRadiusBottomLeft = 0;
-      const radiusInput = this.element.querySelector('[data-input="radius"]') as HTMLInputElement | null;
-      if (radiusInput) radiusInput.value = '0';
     } else {
       // Inactive → set all 4 to same value and activate. If all are 0 ("off"), use default 10px.
-      const radiusInput = this.element.querySelector('[data-input="radius"]') as HTMLInputElement | null;
-      const current = radiusInput ? parseInt(radiusInput.value, 10) || 0 : 0;
+      const container = this.element.querySelector('[data-action="toggleRadiusAll"]')?.closest('.bp-link-all-control');
+      const valueInput = container?.querySelector('[data-link-all-value="radius"]') as HTMLInputElement | null;
+      const current = valueInput ? parseLengthInput(valueInput.value) : null;
       const allZero =
-        this.blockStyle.borderRadiusTopLeft === 0 &&
-        this.blockStyle.borderRadiusTopRight === 0 &&
-        this.blockStyle.borderRadiusBottomRight === 0 &&
-        this.blockStyle.borderRadiusBottomLeft === 0;
-      const value = allZero ? 10 : current;
+        this.isRadiusOff(this.blockStyle.borderRadiusTopLeft) &&
+        this.isRadiusOff(this.blockStyle.borderRadiusTopRight) &&
+        this.isRadiusOff(this.blockStyle.borderRadiusBottomRight) &&
+        this.isRadiusOff(this.blockStyle.borderRadiusBottomLeft);
+      const applied: number | string = allZero ? 10 : (current?.css ?? `${current?.value ?? 0}px`);
       this.radiusAllLinked = true;
-      this.blockStyle.borderRadiusTopLeft = value;
-      this.blockStyle.borderRadiusTopRight = value;
-      this.blockStyle.borderRadiusBottomRight = value;
-      this.blockStyle.borderRadiusBottomLeft = value;
-      if (radiusInput) radiusInput.value = String(value);
+      this.blockStyle.borderRadiusTopLeft = applied;
+      this.blockStyle.borderRadiusTopRight = applied;
+      this.blockStyle.borderRadiusBottomRight = applied;
+      this.blockStyle.borderRadiusBottomLeft = applied;
     }
     this.applyBlockStyles();
     this.updateRadiusLinkAllButton();
+    this.updateRadiusCornerControls();
   }
 
-  /** Updates the radius "ALL" button: active state, icon, and value readout. */
+  /** Updates the radius "ALL" button: active state, icon, and value input. */
   private updateRadiusLinkAllButton(): void {
     const btn = this.element.querySelector('[data-action="toggleRadiusAll"]') as HTMLElement | null;
     if (!btn) return;
-    const radiusInput = this.element.querySelector('[data-input="radius"]') as HTMLInputElement | null;
-    const value = radiusInput ? parseInt(radiusInput.value, 10) || 0 : this.blockStyle.borderRadiusTopLeft;
+    const container = (btn.closest('.bp-link-all-control') || btn) as HTMLElement;
+    const valueInput = container.querySelector('[data-link-all-value="radius"]') as HTMLInputElement | null;
+    if (valueInput) valueInput.value = this.formatRadiusForDisplay(this.blockStyle.borderRadiusTopLeft);
     const icon = this.radiusAllLinked ? icons.linkSm : icons.linkBroken;
-    btn.classList.toggle('active', this.radiusAllLinked);
-    btn.innerHTML = `${icon}<span class="bp-link-all-label">ALL</span><span class="bp-link-all-value" aria-hidden="true">${value} px</span>`;
+    container.classList.toggle('active', this.radiusAllLinked);
+    btn.innerHTML = `${icon}<span class="bp-link-all-label">ALL</span>`;
   }
 
-  /** Updates the padding "ALL" button: active state, icon, and value readout. */
+  /** Offset (px) added to corner value for the control's outer border-radius so it aligns with the demo stroke. */
+  private static readonly CORNER_CONTROL_RADIUS_OFFSET = 6;
+  /** Max radius the demo stroke displays (matches RadiusCornerControl cap). Keeps outer radius concentric. */
+  private static readonly MAX_DEMO_RADIUS_PX = 20;
+
+  /** Updates each radius corner control: .all-linked on wrapper, .active, value text, path, and outer border-radius. */
+  private updateRadiusCornerControls(): void {
+    const wrapper = this.element.querySelector('[data-radius-corner-controls]') as HTMLElement | null;
+    if (!wrapper) return;
+    wrapper.classList.toggle('all-linked', this.radiusAllLinked);
+    const cornerKeys: { corner: RadiusCorner; key: keyof BlockStyleState }[] = [
+      { corner: 'topLeft', key: 'borderRadiusTopLeft' },
+      { corner: 'bottomLeft', key: 'borderRadiusBottomLeft' },
+      { corner: 'topRight', key: 'borderRadiusTopRight' },
+      { corner: 'bottomRight', key: 'borderRadiusBottomRight' },
+    ];
+    cornerKeys.forEach(({ corner, key }) => {
+      const control = wrapper.querySelector(`.bp-radius-corner-control[data-corner="${corner}"]`) as HTMLElement | null;
+      if (!control) return;
+      const value = this.blockStyle[key];
+      control.classList.toggle('active', !this.isRadiusOff(value));
+      const inputEl = control.querySelector('.bp-radius-corner-control-input') as HTMLInputElement | null;
+      if (inputEl) {
+        const display = this.formatRadiusForDisplay(value);
+        inputEl.value = /(?:px|em|rem|%)$/i.test(display.trim()) ? display : display;
+      }
+      const svgEl = control.querySelector('.bp-radius-corner-control-svg');
+      const pathEl = svgEl?.querySelector('path');
+      const radiusPx = this.radiusToPxForDemo(value);
+      if (pathEl) pathEl.setAttribute('d', getCornerPathPx(corner, radiusPx));
+      if (svgEl) svgEl.classList.toggle('bp-radius-corner-sharp', radiusPx <= 0);
+      const outerR = radiusPx <= 0 ? 0 : Math.min(radiusPx + Sidebar.CORNER_CONTROL_RADIUS_OFFSET, Sidebar.MAX_DEMO_RADIUS_PX + Sidebar.CORNER_CONTROL_RADIUS_OFFSET);
+      const primary = `${outerR}px`;
+      const inner = '10px';  /* opposite the controlling corner */
+      const other = '8px';   /* the other two corners */
+      switch (corner) {
+        case 'topLeft':
+          control.style.borderTopLeftRadius = primary;
+          control.style.borderTopRightRadius = other;
+          control.style.borderBottomLeftRadius = other;
+          control.style.borderBottomRightRadius = inner;
+          break;
+        case 'topRight':
+          control.style.borderTopLeftRadius = other;
+          control.style.borderTopRightRadius = primary;
+          control.style.borderBottomLeftRadius = inner;
+          control.style.borderBottomRightRadius = other;
+          break;
+        case 'bottomLeft':
+          control.style.borderTopLeftRadius = other;
+          control.style.borderTopRightRadius = inner;
+          control.style.borderBottomLeftRadius = primary;
+          control.style.borderBottomRightRadius = other;
+          break;
+        case 'bottomRight':
+          control.style.borderTopLeftRadius = inner;
+          control.style.borderTopRightRadius = other;
+          control.style.borderBottomLeftRadius = other;
+          control.style.borderBottomRightRadius = primary;
+          break;
+      }
+    });
+  }
+
+  /** Updates the padding "ALL" button: active state, icon, and value input. */
   private updatePaddingLinkAllButton(): void {
     const btn = this.element.querySelector('[data-action="togglePaddingAll"]') as HTMLElement | null;
     if (!btn) return;
-    const topInput = this.element.querySelector('[data-padding="top"]') as HTMLInputElement | null;
-    const value = topInput ? parseInt(topInput.value, 10) || 0 : this.blockStyle.paddingTop;
+    const container = (btn.closest('.bp-link-all-control') || btn) as HTMLElement;
+    const valueInput = container.querySelector('[data-link-all-value="padding"]') as HTMLInputElement | null;
+    if (valueInput) valueInput.value = String(this.blockStyle.paddingTop);
     const icon = this.paddingAllLinked ? icons.linkSm : icons.linkBroken;
-    btn.classList.toggle('active', this.paddingAllLinked);
-    btn.innerHTML = `${icon}<span class="bp-link-all-label">ALL</span><span class="bp-link-all-value" aria-hidden="true">${value} px</span>`;
+    container.classList.toggle('active', this.paddingAllLinked);
+    btn.innerHTML = `${icon}<span class="bp-link-all-label">ALL</span>`;
   }
 
   private selectParentContainer(): void {
@@ -1095,18 +1270,6 @@ export class Sidebar {
     // Update border visual (side buttons)
     this.updateBorderVisual();
     
-    // Update radius input
-    const radiusInput = this.element.querySelector('[data-input="radius"]') as HTMLInputElement;
-    if (radiusInput) {
-      const maxRadius = Math.max(
-        this.blockStyle.borderRadiusTopLeft,
-        this.blockStyle.borderRadiusTopRight,
-        this.blockStyle.borderRadiusBottomRight,
-        this.blockStyle.borderRadiusBottomLeft
-      );
-      radiusInput.value = String(maxRadius);
-    }
-    
     // Update padding inputs
     const paddingInputs = {
       top: this.element.querySelector('[data-padding="top"]') as HTMLInputElement,
@@ -1131,7 +1294,7 @@ export class Sidebar {
       this.blockStyle.borderRadiusTopLeft === this.blockStyle.borderRadiusTopRight &&
       this.blockStyle.borderRadiusTopRight === this.blockStyle.borderRadiusBottomRight &&
       this.blockStyle.borderRadiusBottomRight === this.blockStyle.borderRadiusBottomLeft;
-    this.radiusAllLinked = allRadiiEqual && this.blockStyle.borderRadiusTopLeft > 0;
+    this.radiusAllLinked = allRadiiEqual && !this.isRadiusOff(this.blockStyle.borderRadiusTopLeft);
 
     const allPaddingsEqual =
       this.blockStyle.paddingTop === this.blockStyle.paddingRight &&
@@ -1151,6 +1314,7 @@ export class Sidebar {
       allBtn.innerHTML = `${icon}<span class="bp-link-all-label">ALL</span>`;
     }
     this.updateRadiusLinkAllButton();
+    this.updateRadiusCornerControls();
     this.updatePaddingLinkAllButton();
   }
 
