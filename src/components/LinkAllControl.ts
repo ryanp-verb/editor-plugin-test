@@ -22,8 +22,14 @@ export interface LinkAllControlOptions {
   linked: boolean;
   /** Optional numeric value to show when linked (e.g. radius in px). */
   value?: number;
-  /** Whether to show the value readout (e.g. "0 px") when linked. */
+  /** Whether to show the value readout when linked. */
   showValue?: boolean;
+  /** When true, value is an editable input (accepts px, em, rem, %; default px). */
+  valueAsInput?: boolean;
+  /** Data attribute for the value input so parent can bind (e.g. "radius", "padding"). */
+  valueInputData?: string;
+  /** Initial display string for the value input (e.g. "10", "10px", "1em"). */
+  valueDisplay?: string;
   /** Label text (default "ALL"). */
   label?: string;
   /** Optional unit for value (default "px"). */
@@ -43,16 +49,45 @@ export function createLinkAllControlHTML(options: LinkAllControlOptions): string
     linked,
     value = 0,
     showValue = false,
+    valueAsInput = false,
+    valueInputData = '',
+    valueDisplay,
     label = 'ALL',
     unit = 'px',
     className = '',
   } = options;
 
   const icon = linked ? icons.linkSm : icons.linkBroken;
+  const displayStr = valueDisplay ?? (showValue ? `${value}` : '');
   const valuePart =
-    showValue && linked
+    showValue && linked && !valueAsInput
       ? `<span class="bp-link-all-value" aria-hidden="true">${value} ${unit}</span>`
       : '';
+
+  if (showValue && valueAsInput && valueInputData) {
+    // One rectangle: container with toggle button + input inside
+    const containerClasses = ['bp-link-all-control', 'bp-link-all-with-input', linked ? 'active' : '', className].filter(Boolean).join(' ');
+    const buttonAttrs = [
+      'type="button"',
+      'class="bp-link-all-toggle"',
+      `data-action="${dataAction}"`,
+      dataSide ? `data-side="${dataSide}"` : '',
+      `title="${linked ? 'Unlink (set individually)' : 'Link all (same value)'}"`,
+    ].filter(Boolean).join(' ');
+    const inputAttrs = [
+      'type="text"',
+      'inputmode="decimal"',
+      'class="bp-link-all-value-input"',
+      `data-link-all-value="${valueInputData}"`,
+      `value="${displayStr}"`,
+      'placeholder="0"',
+      'aria-label="Value"',
+    ].join(' ');
+    return `<div class="${containerClasses}">
+  <button ${buttonAttrs}>${icon}<span class="bp-link-all-label">${label}</span></button>
+  <input ${inputAttrs}>
+</div>`;
+  }
 
   const classNames = ['bp-link-all-control', linked ? 'active' : '', className].filter(Boolean).join(' ');
   const attrs = [
@@ -61,7 +96,6 @@ export function createLinkAllControlHTML(options: LinkAllControlOptions): string
     dataSide ? `data-side="${dataSide}"` : '',
     `title="${linked ? 'Unlink (set individually)' : 'Link all (same value)'}"`,
   ].filter(Boolean).join(' ');
-
   return `<button type="button" ${attrs}>
   ${icon}
   <span class="bp-link-all-label">${label}</span>

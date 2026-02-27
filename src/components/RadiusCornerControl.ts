@@ -18,8 +18,6 @@ export interface RadiusCornerControlOptions {
   active: boolean;
   /** Numeric radius in px for the corner demo stroke (used for SVG arc). Pass 0 or omit for sharp corner. */
   radiusValuePx?: number;
-  /** Optional unit suffix (default "px"). */
-  unit?: string;
   /** Optional title for the button. */
   title?: string;
 }
@@ -84,7 +82,6 @@ export function createRadiusCornerControlHTML(options: RadiusCornerControlOption
     valueDisplay,
     active,
     radiusValuePx = 0,
-    unit = 'px',
     title = getDefaultTitle(corner),
   } = options;
 
@@ -106,11 +103,6 @@ export function createRadiusCornerControlHTML(options: RadiusCornerControlOption
 </div>`;
 }
 
-/** True if the display value already ends with a CSS unit (px, em, rem, %). */
-function hasUnitSuffix(s: string): boolean {
-  return /(?:px|em|rem|%)$/i.test(String(s).trim());
-}
-
 function getDefaultTitle(corner: RadiusCorner): string {
   const labels: Record<RadiusCorner, string> = {
     topLeft: 'Top left radius',
@@ -123,8 +115,4 @@ function getDefaultTitle(corner: RadiusCorner): string {
 
 function escapeAttr(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

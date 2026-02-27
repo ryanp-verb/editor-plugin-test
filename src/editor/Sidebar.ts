@@ -973,17 +973,6 @@ export class Sidebar {
     this.updateBorderVisual();
   }
 
-  private setRadius(value: number): void {
-    if (this.radiusAllLinked) {
-      this.blockStyle.borderRadiusTopLeft = value;
-      this.blockStyle.borderRadiusTopRight = value;
-      this.blockStyle.borderRadiusBottomRight = value;
-      this.blockStyle.borderRadiusBottomLeft = value;
-    }
-    this.applyBlockStyles();
-    this.updateRadiusLinkAllButton();
-  }
-
   private togglePaddingLinked(): void {
     if (this.paddingAllLinked) {
       // Active → clear all to 0 and deactivate
