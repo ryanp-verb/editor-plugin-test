@@ -375,6 +375,7 @@
    ============================================ */
 .bp-borders-row {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   align-items: flex-start;
   margin-bottom: 16px;
@@ -654,30 +655,98 @@
   gap: 4px;
 }
 
-/* Radius ALL link button */
-.bp-btn-link-all {
-  display: flex;
+/* ============================================
+   LinkAll Control (Figma: Border Radius Control - all)
+   Toggle link/unlink all borders (same width) or all corners (same radius).
+   States: off, on, hover (light green bg #8edf00 for both).
+   ============================================ */
+.bp-link-all-control {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 8px 16px;
-  background: var(--brand-light-1, #8edf00);
+  padding: 9px 10px;
+  min-width: 64px;
+  height: 32px;
+  box-sizing: border-box;
+  background: var(--neutral-warm-grey-2, #e1e3d6);
   border: none;
-  border-radius: 20px;
-  color: var(--brand-primary, #007f00);
-  font-size: 11px;
-  font-weight: 600;
+  border-radius: 8px;
+  color: var(--neutral-warm-grey-5, #494736);
+  font-family: var(--font-family-primary);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: -1.12px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.bp-link-all-control:hover {
+  background: var(--brand-light-1, #8edf00);
+  color: var(--neutral-warm-grey-6, #121000);
+}
+
+.bp-link-all-control.active {
+  background: var(--brand-dark-1, #004f00);
+  color: var(--brand-light-2, #ccff00);
+  font-weight: 500;
+}
+
+.bp-link-all-control.active:hover {
+  background: var(--brand-light-1, #8edf00);
+  color: var(--brand-primary, #007f00);
+}
+
+.bp-link-all-control svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.bp-link-all-control .bp-link-all-value {
+  margin-left: 2px;
+  font-weight: 500;
+}
+
+.bp-link-all-control.active .bp-link-all-value {
+  color: var(--neutral-white, #ffffff);
+}
+
+.bp-link-all-control.active:hover .bp-link-all-value {
+  color: var(--brand-primary, #007f00);
+}
+
+/* Legacy class: alias for radius row (same styles) */
+.bp-btn-link-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 9px 10px;
+  min-width: 64px;
+  height: 32px;
+  box-sizing: border-box;
+  background: var(--neutral-warm-grey-2, #e1e3d6);
+  border: none;
+  border-radius: 8px;
+  color: var(--neutral-warm-grey-5, #494736);
+  font-family: var(--font-family-primary);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: -1.12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .bp-btn-link-all:hover {
-  background: var(--brand-light-2, #ccff00);
+  background: var(--brand-light-1, #8edf00);
+  color: var(--neutral-warm-grey-6, #121000);
 }
 
 .bp-btn-link-all.active {
   background: var(--brand-dark-1, #004f00);
-  color: white;
+  color: var(--brand-light-2, #ccff00);
+  font-weight: 500;
 }
 
 .bp-btn-link-all.active:hover {

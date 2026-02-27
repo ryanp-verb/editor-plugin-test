@@ -17,6 +17,7 @@ import { defaultColorPalette } from '../utils/themeApplier';
 const NO_FOCUS: EditorCommandOptions = { focus: false };
 import { icons } from '../utils/icons';
 import { DragDropManager, DragData } from '../utils/DragDropManager';
+import { createLinkAllControlHTML } from '../components/LinkAllControl';
 
 export interface SidebarConfig {
   editor: ContentEditor;
@@ -161,8 +162,6 @@ export class Sidebar {
             <button class="bp-btn" data-action="heading" data-level="4" title="Heading 4">H4</button>
             <button class="bp-btn" data-action="heading" data-level="5" title="Heading 5">H5</button>
             <button class="bp-btn" data-action="heading" data-level="6" title="Heading 6">H6</button>
-          </div>
-          <div class="bp-btn-row" style="margin-top: 8px;">
             <button class="bp-btn bp-btn-wide active" data-action="paragraph" title="Paragraph">P</button>
           </div>
         </div>
@@ -310,10 +309,12 @@ export class Sidebar {
               <button class="bp-border-side bp-border-left" data-side="left" title="Left border">
                 <span class="bp-border-bar"></span>
               </button>
-              <button class="bp-border-center bp-border-all" data-side="all" title="Link/unlink all borders">
-                ${icons.linkBroken}
-                <span>ALL</span>
-              </button>
+              ${createLinkAllControlHTML({
+                dataAction: 'borderAll',
+                dataSide: 'all',
+                linked: this.borderAllLinked,
+                className: 'bp-border-center bp-border-all',
+              })}
             </div>
           </div>
           <div class="bp-radius-control" data-control="radius">
@@ -333,10 +334,13 @@ export class Sidebar {
               <input type="number" class="bp-input bp-input-sm" data-input="radius" value="0" min="0" max="50">
               <span class="bp-input-unit">px</span>
             </div>
-            <button class="bp-btn bp-btn-sm bp-btn-link-all" data-action="toggleRadiusAll">
-              ${icons.linkSm}
-              <span>ALL</span>
-            </button>
+            ${createLinkAllControlHTML({
+              dataAction: 'toggleRadiusAll',
+              linked: this.radiusAllLinked,
+              value: this.blockStyle.borderRadiusTopLeft,
+              showValue: true,
+              className: 'bp-btn-link-all',
+            })}
           </div>
         </div>
         <div class="bp-control-group">
@@ -420,14 +424,17 @@ export class Sidebar {
           <label class="bp-control-label">Padding</label>
           <div class="bp-padding-control">
             <div class="bp-padding-visual">
-              <input type="number" class="bp-input bp-padding-input bp-padding-top" data-padding="top" value="20" min="0" placeholder="0">
+              <input type="number" class="bp-input bp-padding-input bp-padding-top" data-padding="top" value="0" min="0" placeholder="0">
               <input type="number" class="bp-input bp-padding-input bp-padding-right" data-padding="right" value="0" min="0" placeholder="0">
               <input type="number" class="bp-input bp-padding-input bp-padding-bottom" data-padding="bottom" value="0" min="0" placeholder="0">
               <input type="number" class="bp-input bp-padding-input bp-padding-left" data-padding="left" value="0" min="0" placeholder="0">
-              <button class="bp-padding-center" data-action="togglePaddingAll" title="Link all padding">
-                ${icons.linkSm}
-                <span>ALL</span>
-              </button>
+              ${createLinkAllControlHTML({
+                dataAction: 'togglePaddingAll',
+                linked: this.paddingAllLinked,
+                value: this.blockStyle.paddingTop,
+                showValue: true,
+                className: 'bp-padding-center',
+              })}
             </div>
           </div>
         </div>
@@ -734,31 +741,25 @@ export class Sidebar {
 
   private handleRadiusCornerClick(element: HTMLElement): void {
     element.classList.toggle('active');
-    // Visual state is already toggled via classList
+    // Changing one corner → ALL becomes inactive (one of the 4 values changed)
+    this.radiusAllLinked = false;
+    this.updateRadiusLinkAllButton();
   }
 
   private handlePaddingChange(input: HTMLInputElement): void {
     const side = input.dataset.padding as 'top' | 'right' | 'bottom' | 'left';
     const value = parseInt(input.value, 10) || 0;
-    
+    const key = `padding${side.charAt(0).toUpperCase() + side.slice(1)}` as keyof BlockStyleState;
+
     if (this.paddingAllLinked) {
-      // Update all padding values
-      this.blockStyle.paddingTop = value;
-      this.blockStyle.paddingRight = value;
-      this.blockStyle.paddingBottom = value;
-      this.blockStyle.paddingLeft = value;
-      
-      // Update all inputs
-      this.element.querySelectorAll('.bp-padding-input').forEach((el) => {
-        (el as HTMLInputElement).value = String(value);
-      });
+      // One value changed while active → become inactive; only this side gets the new value
+      this.paddingAllLinked = false;
+      this.blockStyle[key] = value;
     } else {
-      // Update single side
-      const key = `padding${side.charAt(0).toUpperCase() + side.slice(1)}`;
       this.blockStyle[key] = value;
     }
-    
     this.applyBlockStyles();
+    this.updatePaddingLinkAllButton();
   }
 
   private handleInputChange(input: HTMLInputElement): void {
@@ -864,18 +865,82 @@ export class Sidebar {
       this.blockStyle.borderRadiusBottomLeft = value;
     }
     this.applyBlockStyles();
+    this.updateRadiusLinkAllButton();
   }
 
   private togglePaddingLinked(): void {
-    this.paddingAllLinked = !this.paddingAllLinked;
-    const btn = this.element.querySelector('[data-action="togglePaddingAll"]');
-    btn?.classList.toggle('active', this.paddingAllLinked);
+    if (this.paddingAllLinked) {
+      // Active → clear all to 0 and deactivate
+      this.paddingAllLinked = false;
+      this.blockStyle.paddingTop = 0;
+      this.blockStyle.paddingRight = 0;
+      this.blockStyle.paddingBottom = 0;
+      this.blockStyle.paddingLeft = 0;
+      this.element.querySelectorAll('.bp-padding-input').forEach((el) => {
+        (el as HTMLInputElement).value = '0';
+      });
+    } else {
+      // Inactive → set all 4 to same value (from first input or 0) and activate
+      const topInput = this.element.querySelector('[data-padding="top"]') as HTMLInputElement | null;
+      const value = topInput ? parseInt(topInput.value, 10) || 0 : 0;
+      this.paddingAllLinked = true;
+      this.blockStyle.paddingTop = value;
+      this.blockStyle.paddingRight = value;
+      this.blockStyle.paddingBottom = value;
+      this.blockStyle.paddingLeft = value;
+      this.element.querySelectorAll('.bp-padding-input').forEach((el) => {
+        (el as HTMLInputElement).value = String(value);
+      });
+    }
+    this.applyBlockStyles();
+    this.updatePaddingLinkAllButton();
   }
 
   private toggleRadiusLinked(): void {
-    this.radiusAllLinked = !this.radiusAllLinked;
-    const btn = this.element.querySelector('[data-action="toggleRadiusAll"]');
-    btn?.classList.toggle('active', this.radiusAllLinked);
+    if (this.radiusAllLinked) {
+      // Active → clear all to 0 and deactivate
+      this.radiusAllLinked = false;
+      this.blockStyle.borderRadiusTopLeft = 0;
+      this.blockStyle.borderRadiusTopRight = 0;
+      this.blockStyle.borderRadiusBottomRight = 0;
+      this.blockStyle.borderRadiusBottomLeft = 0;
+      const radiusInput = this.element.querySelector('[data-input="radius"]') as HTMLInputElement | null;
+      if (radiusInput) radiusInput.value = '0';
+    } else {
+      // Inactive → set all 4 to same value (from radius input or 0) and activate
+      const radiusInput = this.element.querySelector('[data-input="radius"]') as HTMLInputElement | null;
+      const value = radiusInput ? parseInt(radiusInput.value, 10) || 0 : 0;
+      this.radiusAllLinked = true;
+      this.blockStyle.borderRadiusTopLeft = value;
+      this.blockStyle.borderRadiusTopRight = value;
+      this.blockStyle.borderRadiusBottomRight = value;
+      this.blockStyle.borderRadiusBottomLeft = value;
+      if (radiusInput) radiusInput.value = String(value);
+    }
+    this.applyBlockStyles();
+    this.updateRadiusLinkAllButton();
+  }
+
+  /** Updates the radius "ALL" button: active state, icon, and value readout. */
+  private updateRadiusLinkAllButton(): void {
+    const btn = this.element.querySelector('[data-action="toggleRadiusAll"]') as HTMLElement | null;
+    if (!btn) return;
+    const radiusInput = this.element.querySelector('[data-input="radius"]') as HTMLInputElement | null;
+    const value = radiusInput ? parseInt(radiusInput.value, 10) || 0 : this.blockStyle.borderRadiusTopLeft;
+    const icon = this.radiusAllLinked ? icons.linkSm : icons.linkBroken;
+    btn.classList.toggle('active', this.radiusAllLinked);
+    btn.innerHTML = `${icon}<span class="bp-link-all-label">ALL</span><span class="bp-link-all-value" aria-hidden="true">${value} px</span>`;
+  }
+
+  /** Updates the padding "ALL" button: active state, icon, and value readout. */
+  private updatePaddingLinkAllButton(): void {
+    const btn = this.element.querySelector('[data-action="togglePaddingAll"]') as HTMLElement | null;
+    if (!btn) return;
+    const topInput = this.element.querySelector('[data-padding="top"]') as HTMLInputElement | null;
+    const value = topInput ? parseInt(topInput.value, 10) || 0 : this.blockStyle.paddingTop;
+    const icon = this.paddingAllLinked ? icons.linkSm : icons.linkBroken;
+    btn.classList.toggle('active', this.paddingAllLinked);
+    btn.innerHTML = `${icon}<span class="bp-link-all-label">ALL</span><span class="bp-link-all-value" aria-hidden="true">${value} px</span>`;
   }
 
   private selectParentContainer(): void {
@@ -1037,14 +1102,24 @@ export class Sidebar {
     if (paddingInputs.bottom) paddingInputs.bottom.value = String(this.blockStyle.paddingBottom);
     if (paddingInputs.left) paddingInputs.left.value = String(this.blockStyle.paddingLeft);
     
-    // Determine if ALL borders are linked (all equal and > 0, or all 0)
-    const allBordersEqual = 
+    // Linked = active when all 4 values are equal (for border, radius, padding)
+    const allBordersEqual =
       this.blockStyle.borderTop === this.blockStyle.borderRight &&
       this.blockStyle.borderRight === this.blockStyle.borderBottom &&
       this.blockStyle.borderBottom === this.blockStyle.borderLeft;
-    
-    // Update the ALL button state based on whether borders are uniform
-    this.borderAllLinked = allBordersEqual && this.blockStyle.borderTop > 0;
+    this.borderAllLinked = allBordersEqual;
+
+    const allRadiiEqual =
+      this.blockStyle.borderRadiusTopLeft === this.blockStyle.borderRadiusTopRight &&
+      this.blockStyle.borderRadiusTopRight === this.blockStyle.borderRadiusBottomRight &&
+      this.blockStyle.borderRadiusBottomRight === this.blockStyle.borderRadiusBottomLeft;
+    this.radiusAllLinked = allRadiiEqual;
+
+    const allPaddingsEqual =
+      this.blockStyle.paddingTop === this.blockStyle.paddingRight &&
+      this.blockStyle.paddingRight === this.blockStyle.paddingBottom &&
+      this.blockStyle.paddingBottom === this.blockStyle.paddingLeft;
+    this.paddingAllLinked = allPaddingsEqual;
     
     // Update the ALL button visual
     const allBtn = this.element.querySelector('.bp-border-all');
@@ -1053,13 +1128,12 @@ export class Sidebar {
       allBtn.classList.toggle('active', this.borderAllLinked);
       borderVisual.classList.toggle('all-linked', this.borderAllLinked);
       
-      // Update link icon
-      if (this.borderAllLinked) {
-        allBtn.innerHTML = `${icons.linkSm}<span>ALL</span>`;
-      } else {
-        allBtn.innerHTML = `${icons.linkBroken}<span>ALL</span>`;
-      }
+      // Update link icon (preserve .bp-link-all-label structure)
+      const icon = this.borderAllLinked ? icons.linkSm : icons.linkBroken;
+      allBtn.innerHTML = `${icon}<span class="bp-link-all-label">ALL</span>`;
     }
+    this.updateRadiusLinkAllButton();
+    this.updatePaddingLinkAllButton();
   }
 
   private clearFormatting(): void {
