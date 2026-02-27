@@ -34381,9 +34381,10 @@ class N_ {
       else if (c)
         this.borderAllLinked = !0, o.forEach((d) => d.classList.add("active")), this.blockStyle.borderTop = a, this.blockStyle.borderRight = a, this.blockStyle.borderBottom = a, this.blockStyle.borderLeft = a;
       else {
-        this.borderAllLinked = !0, o.forEach((u) => u.classList.add("active")), this.blockStyle.borderTop = a, this.blockStyle.borderRight = a, this.blockStyle.borderBottom = a, this.blockStyle.borderLeft = a;
-        const d = this.element.querySelector('[data-input="borderWidth"]');
-        d && (d.value = String(a)), this.updateBorderWidthButtons(a);
+        const d = this.blockStyle.borderTop === 0 && this.blockStyle.borderRight === 0 && this.blockStyle.borderBottom === 0 && this.blockStyle.borderLeft === 0 ? 2 : a;
+        this.borderAllLinked = !0, o.forEach((h) => h.classList.add("active")), this.blockStyle.borderTop = d, this.blockStyle.borderRight = d, this.blockStyle.borderBottom = d, this.blockStyle.borderLeft = d;
+        const u = this.element.querySelector('[data-input="borderWidth"]');
+        u && (u.value = String(d)), this.updateBorderWidthButtons(d);
       }
       if (e.classList.toggle("active", this.borderAllLinked), i == null || i.classList.toggle("all-linked", this.borderAllLinked), r) {
         const d = this.borderAllLinked ? P.linkSm : P.linkBroken, u = r.querySelector("svg");
@@ -34489,9 +34490,9 @@ class N_ {
         e.value = "0";
       });
     else {
-      const e = this.element.querySelector('[data-padding="top"]'), t = e && parseInt(e.value, 10) || 0;
-      this.paddingAllLinked = !0, this.blockStyle.paddingTop = t, this.blockStyle.paddingRight = t, this.blockStyle.paddingBottom = t, this.blockStyle.paddingLeft = t, this.element.querySelectorAll(".bp-padding-input").forEach((r) => {
-        r.value = String(t);
+      const e = this.element.querySelector('[data-padding="top"]'), t = e && parseInt(e.value, 10) || 0, i = this.blockStyle.paddingTop === 0 && this.blockStyle.paddingRight === 0 && this.blockStyle.paddingBottom === 0 && this.blockStyle.paddingLeft === 0 ? 10 : t;
+      this.paddingAllLinked = !0, this.blockStyle.paddingTop = i, this.blockStyle.paddingRight = i, this.blockStyle.paddingBottom = i, this.blockStyle.paddingLeft = i, this.element.querySelectorAll(".bp-padding-input").forEach((o) => {
+        o.value = String(i);
       });
     }
     this.applyBlockStyles(), this.updatePaddingLinkAllButton();
@@ -34502,8 +34503,8 @@ class N_ {
       const e = this.element.querySelector('[data-input="radius"]');
       e && (e.value = "0");
     } else {
-      const e = this.element.querySelector('[data-input="radius"]'), t = e && parseInt(e.value, 10) || 0;
-      this.radiusAllLinked = !0, this.blockStyle.borderRadiusTopLeft = t, this.blockStyle.borderRadiusTopRight = t, this.blockStyle.borderRadiusBottomRight = t, this.blockStyle.borderRadiusBottomLeft = t, e && (e.value = String(t));
+      const e = this.element.querySelector('[data-input="radius"]'), t = e && parseInt(e.value, 10) || 0, i = this.blockStyle.borderRadiusTopLeft === 0 && this.blockStyle.borderRadiusTopRight === 0 && this.blockStyle.borderRadiusBottomRight === 0 && this.blockStyle.borderRadiusBottomLeft === 0 ? 10 : t;
+      this.radiusAllLinked = !0, this.blockStyle.borderRadiusTopLeft = i, this.blockStyle.borderRadiusTopRight = i, this.blockStyle.borderRadiusBottomRight = i, this.blockStyle.borderRadiusBottomLeft = i, e && (e.value = String(i));
     }
     this.applyBlockStyles(), this.updateRadiusLinkAllButton();
   }
@@ -34635,11 +34636,11 @@ class N_ {
     };
     r.top && (r.top.value = String(this.blockStyle.paddingTop)), r.right && (r.right.value = String(this.blockStyle.paddingRight)), r.bottom && (r.bottom.value = String(this.blockStyle.paddingBottom)), r.left && (r.left.value = String(this.blockStyle.paddingLeft));
     const i = this.blockStyle.borderTop === this.blockStyle.borderRight && this.blockStyle.borderRight === this.blockStyle.borderBottom && this.blockStyle.borderBottom === this.blockStyle.borderLeft;
-    this.borderAllLinked = i;
+    this.borderAllLinked = i && this.blockStyle.borderTop > 0;
     const o = this.blockStyle.borderRadiusTopLeft === this.blockStyle.borderRadiusTopRight && this.blockStyle.borderRadiusTopRight === this.blockStyle.borderRadiusBottomRight && this.blockStyle.borderRadiusBottomRight === this.blockStyle.borderRadiusBottomLeft;
-    this.radiusAllLinked = o;
+    this.radiusAllLinked = o && this.blockStyle.borderRadiusTopLeft > 0;
     const s = this.blockStyle.paddingTop === this.blockStyle.paddingRight && this.blockStyle.paddingRight === this.blockStyle.paddingBottom && this.blockStyle.paddingBottom === this.blockStyle.paddingLeft;
-    this.paddingAllLinked = s;
+    this.paddingAllLinked = s && this.blockStyle.paddingTop > 0;
     const a = this.element.querySelector(".bp-border-all"), l = this.element.querySelector(".bp-border-visual");
     if (a && l) {
       a.classList.toggle("active", this.borderAllLinked), l.classList.toggle("all-linked", this.borderAllLinked);

@@ -640,17 +640,23 @@ export class Sidebar {
         this.blockStyle.borderBottom = 0;
         this.blockStyle.borderLeft = 0;
       } else if (!anyActive) {
-        // ALL is OFF and no sides selected - turn ON all sides and link
+        // ALL is OFF (all 0 or no sides selected) - turn ON all sides with default 2px and link
+        const widthWhenOff =
+          this.blockStyle.borderTop === 0 &&
+          this.blockStyle.borderRight === 0 &&
+          this.blockStyle.borderBottom === 0 &&
+          this.blockStyle.borderLeft === 0
+            ? 2
+            : widthToApply;
         this.borderAllLinked = true;
         sides.forEach(s => s.classList.add('active'));
-        this.blockStyle.borderTop = widthToApply;
-        this.blockStyle.borderRight = widthToApply;
-        this.blockStyle.borderBottom = widthToApply;
-        this.blockStyle.borderLeft = widthToApply;
-        // Update input to reflect applied width
+        this.blockStyle.borderTop = widthWhenOff;
+        this.blockStyle.borderRight = widthWhenOff;
+        this.blockStyle.borderBottom = widthWhenOff;
+        this.blockStyle.borderLeft = widthWhenOff;
         const widthInput = this.element.querySelector('[data-input="borderWidth"]') as HTMLInputElement;
-        if (widthInput) widthInput.value = String(widthToApply);
-        this.updateBorderWidthButtons(widthToApply);
+        if (widthInput) widthInput.value = String(widthWhenOff);
+        this.updateBorderWidthButtons(widthWhenOff);
       } else {
         // ALL is OFF but some sides selected - just link them (activate ALL mode)
         this.borderAllLinked = true;
@@ -880,9 +886,15 @@ export class Sidebar {
         (el as HTMLInputElement).value = '0';
       });
     } else {
-      // Inactive → set all 4 to same value (from first input or 0) and activate
+      // Inactive → set all 4 to same value and activate. If all are 0 ("off"), use default 10px.
       const topInput = this.element.querySelector('[data-padding="top"]') as HTMLInputElement | null;
-      const value = topInput ? parseInt(topInput.value, 10) || 0 : 0;
+      const current = topInput ? parseInt(topInput.value, 10) || 0 : 0;
+      const allZero =
+        this.blockStyle.paddingTop === 0 &&
+        this.blockStyle.paddingRight === 0 &&
+        this.blockStyle.paddingBottom === 0 &&
+        this.blockStyle.paddingLeft === 0;
+      const value = allZero ? 10 : current; // default "on" is 10px when coming from off
       this.paddingAllLinked = true;
       this.blockStyle.paddingTop = value;
       this.blockStyle.paddingRight = value;
@@ -907,9 +919,15 @@ export class Sidebar {
       const radiusInput = this.element.querySelector('[data-input="radius"]') as HTMLInputElement | null;
       if (radiusInput) radiusInput.value = '0';
     } else {
-      // Inactive → set all 4 to same value (from radius input or 0) and activate
+      // Inactive → set all 4 to same value and activate. If all are 0 ("off"), use default 10px.
       const radiusInput = this.element.querySelector('[data-input="radius"]') as HTMLInputElement | null;
-      const value = radiusInput ? parseInt(radiusInput.value, 10) || 0 : 0;
+      const current = radiusInput ? parseInt(radiusInput.value, 10) || 0 : 0;
+      const allZero =
+        this.blockStyle.borderRadiusTopLeft === 0 &&
+        this.blockStyle.borderRadiusTopRight === 0 &&
+        this.blockStyle.borderRadiusBottomRight === 0 &&
+        this.blockStyle.borderRadiusBottomLeft === 0;
+      const value = allZero ? 10 : current;
       this.radiusAllLinked = true;
       this.blockStyle.borderRadiusTopLeft = value;
       this.blockStyle.borderRadiusTopRight = value;
@@ -1102,24 +1120,24 @@ export class Sidebar {
     if (paddingInputs.bottom) paddingInputs.bottom.value = String(this.blockStyle.paddingBottom);
     if (paddingInputs.left) paddingInputs.left.value = String(this.blockStyle.paddingLeft);
     
-    // Linked = active when all 4 values are equal (for border, radius, padding)
+    // Linked = active when all 4 values are equal and not "off" (0). All-0 is "off" for border and padding.
     const allBordersEqual =
       this.blockStyle.borderTop === this.blockStyle.borderRight &&
       this.blockStyle.borderRight === this.blockStyle.borderBottom &&
       this.blockStyle.borderBottom === this.blockStyle.borderLeft;
-    this.borderAllLinked = allBordersEqual;
+    this.borderAllLinked = allBordersEqual && this.blockStyle.borderTop > 0;
 
     const allRadiiEqual =
       this.blockStyle.borderRadiusTopLeft === this.blockStyle.borderRadiusTopRight &&
       this.blockStyle.borderRadiusTopRight === this.blockStyle.borderRadiusBottomRight &&
       this.blockStyle.borderRadiusBottomRight === this.blockStyle.borderRadiusBottomLeft;
-    this.radiusAllLinked = allRadiiEqual;
+    this.radiusAllLinked = allRadiiEqual && this.blockStyle.borderRadiusTopLeft > 0;
 
     const allPaddingsEqual =
       this.blockStyle.paddingTop === this.blockStyle.paddingRight &&
       this.blockStyle.paddingRight === this.blockStyle.paddingBottom &&
       this.blockStyle.paddingBottom === this.blockStyle.paddingLeft;
-    this.paddingAllLinked = allPaddingsEqual;
+    this.paddingAllLinked = allPaddingsEqual && this.blockStyle.paddingTop > 0;
     
     // Update the ALL button visual
     const allBtn = this.element.querySelector('.bp-border-all');
