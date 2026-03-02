@@ -19,12 +19,15 @@ import { icons } from '../utils/icons';
 import { DragDropManager, DragData } from '../utils/DragDropManager';
 import { createLinkAllControlHTML } from '../components/LinkAllControl';
 import { createRadiusCornerControlHTML, getCornerPathPx, type RadiusCorner } from '../components/RadiusCornerControl';
+import { createColorDropdownHTML, type ColorDropdownTarget } from '../components/ColorDropdown';
 import { parseLengthInput, lengthToPxForDemo } from '../utils/parseLength';
+import { normalizeColorPalette, type ColorOption, type BubbleColorThing } from '../utils/colorOptions';
 
 export interface SidebarConfig {
   editor: ContentEditor;
   container: HTMLElement;
-  colorPalette?: string[];
+  /** List of colors (Bubble option set or ColorOption[] or legacy string[]); normalized to ColorOption[] internally. */
+  colorPalette?: unknown;
   onCollapse?: () => void;
   /** Returns current theme variables for the link popup (text/input colors in light/dark). */
   getThemeForPopup?: () => Record<string, string>;
@@ -55,7 +58,7 @@ export class Sidebar {
   private editor: ContentEditor;
   private container: HTMLElement;
   private element: HTMLElement;
-  private colorPalette: string[];
+  private colorPalette: ColorOption[];
   private onCollapse?: () => void;
   private getThemeForPopup?: () => Record<string, string>;
   private dragDropManager: DragDropManager | null = null;
@@ -88,7 +91,9 @@ export class Sidebar {
   constructor(config: SidebarConfig) {
     this.editor = config.editor;
     this.container = config.container;
-    this.colorPalette = config.colorPalette || defaultColorPalette;
+    const raw = config.colorPalette as ColorOption[] | string[] | BubbleColorThing[] | undefined | null;
+    const normalized = normalizeColorPalette(raw);
+    this.colorPalette = normalized?.length ? normalized : defaultColorPalette;
     this.onCollapse = config.onCollapse;
     this.getThemeForPopup = config.getThemeForPopup;
     this.element = this.createSidebar();
@@ -238,15 +243,14 @@ export class Sidebar {
     return `
       <section class="bp-sidebar-section">
         <h3 class="bp-sidebar-title">Text color</h3>
-        <div class="bp-color-palette" data-target="textColor">
-          ${this.createColorPaletteHTML()}
-          <div class="bp-color-row">
-            <button class="bp-color-swatch bp-swatch-white" data-color="#ffffff" title="White"></button>
-            <button class="bp-color-swatch bp-swatch-transparent" data-color="transparent" title="Transparent">
-              ${icons.noColor}
-            </button>
-          </div>
-        </div>
+        ${createColorDropdownHTML({
+          target: 'textColor',
+          colors: this.colorPalette,
+          value: this.blockStyle.textColor,
+          label: '',
+          includeTransparent: true,
+          transparentLabel: 'Transparent',
+        })}
       </section>
     `;
   }
@@ -387,15 +391,14 @@ export class Sidebar {
             </button>
           </div>
         </div>
-        <div class="bp-color-palette" data-target="borderColor">
-          ${this.createColorPaletteHTML()}
-          <div class="bp-color-row">
-            <button class="bp-color-swatch bp-swatch-white" data-color="#ffffff" title="White"></button>
-            <button class="bp-color-swatch bp-swatch-transparent" data-color="transparent" title="No border">
-              ${icons.noColor}
-            </button>
-          </div>
-        </div>
+        ${createColorDropdownHTML({
+          target: 'borderColor',
+          colors: this.colorPalette,
+          value: this.blockStyle.borderColor,
+          label: 'Border color',
+          includeTransparent: true,
+          transparentLabel: 'No border',
+        })}
       </section>
     `;
   }
@@ -405,16 +408,15 @@ export class Sidebar {
       <section class="bp-sidebar-section">
         <h3 class="bp-sidebar-title">Backgrounds</h3>
         <div class="bp-control-group">
-          <label class="bp-control-label">Background colors</label>
-          <div class="bp-color-palette" data-target="backgroundColor">
-            ${this.createColorPaletteHTML()}
-            <div class="bp-color-row">
-              <button class="bp-color-swatch bp-swatch-white active" data-color="#ffffff" title="White"></button>
-              <button class="bp-color-swatch bp-swatch-transparent" data-color="transparent" title="Transparent">
-                ${icons.noColor}
-              </button>
-            </div>
-          </div>
+          ${createColorDropdownHTML({
+            target: 'backgroundColor',
+            colors: this.colorPalette,
+            value: this.blockStyle.backgroundColor,
+            label: 'Background colors',
+            includeTransparent: true,
+            includeWhite: true,
+            transparentLabel: 'Transparent',
+          })}
         </div>
       </section>
     `;
@@ -474,21 +476,6 @@ export class Sidebar {
     `;
   }
 
-  private createColorPaletteHTML(): string {
-    const rows: string[] = [];
-    const colorsPerRow = 12;
-    
-    for (let i = 0; i < this.colorPalette.length; i += colorsPerRow) {
-      const rowColors = this.colorPalette.slice(i, i + colorsPerRow);
-      const swatches = rowColors.map(color => 
-        `<button class="bp-color-swatch" data-color="${color}" style="background-color: ${color};" title="${color}"></button>`
-      ).join('');
-      rows.push(`<div class="bp-color-row">${swatches}</div>`);
-    }
-    
-    return rows.join('');
-  }
-
   private bindEvents(sidebar: HTMLElement): void {
     // Button clicks - stop propagation so parent/editor focus handlers don't run (keeps toolbar hidden)
     sidebar.addEventListener('click', (e) => {
@@ -497,12 +484,6 @@ export class Sidebar {
       const btn = target.closest('[data-action]') as HTMLElement;
       if (btn) {
         this.handleAction(btn);
-      }
-      
-      // Color swatch clicks
-      const swatch = target.closest('.bp-color-swatch') as HTMLElement;
-      if (swatch) {
-        this.handleColorSelect(swatch);
       }
       
       // Border side clicks
@@ -539,6 +520,52 @@ export class Sidebar {
         this.handleRadiusCornerInput(target);
       }
     }, true);
+
+    // Color dropdown: trigger toggles panel; option click selects and closes; outside click closes
+    sidebar.addEventListener('click', (e) => {
+      const targetEl = e.target as HTMLElement;
+      const trigger = targetEl.closest('.bp-color-dropdown-trigger') as HTMLElement;
+      const option = targetEl.closest('.bp-color-dropdown-option') as HTMLElement;
+      if (trigger?.dataset.target) {
+        e.preventDefault();
+        this.toggleColorDropdown(trigger);
+        return;
+      }
+      if (option?.dataset.value != null) {
+        const dropdown = option.closest('.bp-color-dropdown') as HTMLElement;
+        const target = dropdown?.dataset.target as ColorDropdownTarget;
+        if (target) {
+          e.preventDefault();
+          this.handleColorDropdownChange(target, option.dataset.value ?? '');
+          this.closeAllColorDropdowns();
+          this.updateColorDropdownValues();
+        }
+        return;
+      }
+      // Click outside any dropdown → close all
+      if (!targetEl.closest('.bp-color-dropdown')) {
+        this.closeAllColorDropdowns();
+      }
+    });
+  }
+
+  private toggleColorDropdown(trigger: HTMLElement): void {
+    const dropdown = trigger.closest('.bp-color-dropdown') as HTMLElement;
+    if (!dropdown) return;
+    const isOpen = dropdown.classList.contains('bp-color-dropdown-open');
+    this.closeAllColorDropdowns();
+    if (!isOpen) {
+      dropdown.classList.add('bp-color-dropdown-open');
+      trigger.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  private closeAllColorDropdowns(): void {
+    this.element.querySelectorAll('.bp-color-dropdown.bp-color-dropdown-open').forEach((el) => {
+      el.classList.remove('bp-color-dropdown-open');
+      const t = el.querySelector('.bp-color-dropdown-trigger');
+      if (t) t.setAttribute('aria-expanded', 'false');
+    });
   }
 
   /** Format for display; number-only values show as "Npx" (default unit). */
@@ -686,15 +713,47 @@ export class Sidebar {
     this.updateButtonStates();
   }
 
-  private handleColorSelect(swatch: HTMLElement): void {
-    const color = swatch.dataset.color || '#000000';
-    const palette = swatch.closest('.bp-color-palette') as HTMLElement;
-    const target = palette?.dataset.target;
-    
-    // Update active state
-    palette?.querySelectorAll('.bp-color-swatch').forEach(s => s.classList.remove('active'));
-    swatch.classList.add('active');
-    
+  private getColorDisplayName(target: ColorDropdownTarget, value: string): string {
+    const v = (value || '').trim().toLowerCase();
+    if (v === 'transparent' || v === '') {
+      return target === 'borderColor' ? 'No border' : 'Transparent';
+    }
+    if (v === '#ffffff' || v === 'ffffff') return 'White';
+    const found = this.colorPalette.find((o) => o.value.trim().toLowerCase() === v);
+    return found ? found.name : value;
+  }
+
+  private updateColorDropdownValues(): void {
+    const targets: { target: ColorDropdownTarget; value: string }[] = [
+      { target: 'textColor', value: this.blockStyle.textColor },
+      { target: 'borderColor', value: this.blockStyle.borderColor },
+      { target: 'backgroundColor', value: this.blockStyle.backgroundColor },
+    ];
+    targets.forEach(({ target, value }) => {
+      const dropdown = this.element.querySelector(`.bp-color-dropdown[data-target="${target}"]`) as HTMLElement;
+      if (!dropdown) return;
+      const trigger = dropdown.querySelector('.bp-color-dropdown-trigger') as HTMLElement;
+      const swatch = dropdown.querySelector('.bp-color-dropdown-trigger-swatch') as HTMLElement;
+      const nameEl = dropdown.querySelector('.bp-color-dropdown-trigger-name') as HTMLElement;
+      if (!trigger || !swatch || !nameEl) return;
+      const val = (value || '').trim();
+      const displayName = this.getColorDisplayName(target, val);
+      if (val === 'transparent' || val === '') {
+        swatch.style.cssText = 'background: linear-gradient(45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%), linear-gradient(-45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%); background-size: 6px 6px; background-color: var(--neutral-warm-grey-1, #f5f5f2);';
+      } else {
+        swatch.style.cssText = `background-color: ${val};`;
+      }
+      nameEl.textContent = displayName;
+      // Update selected state in panel
+      dropdown.querySelectorAll('.bp-color-dropdown-option').forEach((opt) => {
+        const optVal = (opt.getAttribute('data-value') || '').trim().toLowerCase();
+        opt.classList.toggle('bp-color-dropdown-option-selected', optVal === (val || 'transparent').toLowerCase());
+      });
+    });
+  }
+
+  private handleColorDropdownChange(target: ColorDropdownTarget, value: string): void {
+    const color = value || '#000000';
     switch (target) {
       case 'textColor':
         this.setTextColor(color);
@@ -1271,6 +1330,9 @@ export class Sidebar {
     if (paddingInputs.right) paddingInputs.right.value = String(this.blockStyle.paddingRight);
     if (paddingInputs.bottom) paddingInputs.bottom.value = String(this.blockStyle.paddingBottom);
     if (paddingInputs.left) paddingInputs.left.value = String(this.blockStyle.paddingLeft);
+    
+    // Update color dropdowns to match current block style
+    this.updateColorDropdownValues();
     
     // Linked = active when all 4 values are equal and not "off" (0). All-0 is "off" for border and padding.
     const allBordersEqual =

@@ -34,8 +34,8 @@ export interface BubbleProperties {
   font_family: string;
   font_size: number;
   border_radius: number;
-  // Color palette (optional custom colors for pickers)
-  color_palette?: string[];
+  // Color palette: list of option set (e.g. Brand Color with Display + Hex code) or legacy string[]
+  color_palette?: unknown[];
 }
 
 export interface BubbleStates {

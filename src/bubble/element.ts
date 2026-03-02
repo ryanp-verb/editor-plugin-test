@@ -4,7 +4,7 @@ import { Sidebar } from '../editor/Sidebar';
 import { BubbleMock, BubbleProperties } from '../mock/BubbleMock';
 import { EventBridge } from './events';
 import { ActionHandler } from './actions';
-import { applyTheme, watchSystemTheme, ThemeProperties, getThemeVariablesForPopup } from '../utils/themeApplier';
+import { applyTheme, watchSystemTheme, ThemeProperties, getThemeVariablesForPopup, defaultColorPalette } from '../utils/themeApplier';
 
 export interface BubbleElementConfig {
   container: HTMLElement;
@@ -99,6 +99,7 @@ export class BubbleElement {
     this.sidebar = new Sidebar({
       editor: this.editor,
       container: this.container, // Sidebar sits next to editor, not inside
+      colorPalette: props.color_palette ?? defaultColorPalette,
       onCollapse: () => this.toggleSidebar(),
       getThemeForPopup: () => getThemeVariablesForPopup(this.bubble.getProperties()),
     });

@@ -7,6 +7,8 @@
  * Design tokens based on BP brand Figma export.
  */
 
+import type { ColorOption } from './colorOptions';
+
 export interface ThemeProperties {
   theme: 'light' | 'dark' | 'auto';
   // Brand colors (configurable per-app)
@@ -29,8 +31,8 @@ export interface ThemeProperties {
   font_size: number;
   // Spacing
   border_radius: number;
-  // Color palette (optional custom colors)
-  color_palette?: string[];
+  // Color palette: list of Bubble option set (e.g. Brand Color) or legacy string[]; normalized to ColorOption[] in plugin.
+  color_palette?: unknown[];
 }
 
 // BP Brand colors (from Figma tokens)
@@ -48,18 +50,17 @@ export const bpBrandColors = {
   warmGrey6: '#121000',    // Body text
 };
 
-// Default color palette (from Figma design)
-export const defaultColorPalette = [
-  // Row 1: Dark/base colors
-  '#121000', '#004f00', '#007f00', '#8edf00', '#ccff00', '#ffd700', 
+// Default color palette (from Figma design) as ColorOption[]; name = hex for display.
+const DEFAULT_HEX_LIST = [
+  '#121000', '#004f00', '#007f00', '#8edf00', '#ccff00', '#ffd700',
   '#ff9500', '#800080', '#0066cc', '#ff6b9d', '#ff4444', '#88cc44',
-  // Row 2: Medium colors
   '#494736', '#006600', '#33cc33', '#b3ff00', '#e6ff66', '#ffe066',
   '#ffb366', '#cc66cc', '#66aaff', '#ffb3cc', '#ff8888', '#c4e896',
-  // Row 3: Light/muted colors  
   '#7a7a6c', '#339933', '#66dd66', '#d4ff66', '#ffff99', '#996633',
   '#cc6600', '#663366', '#003366', '#999999', '#cccccc', '#e1e3d6',
 ];
+
+export const defaultColorPalette: ColorOption[] = DEFAULT_HEX_LIST.map((value) => ({ name: value, value }));
 
 // Light theme preset (BP brand style)
 export const lightThemePreset: Partial<ThemeProperties> = {
