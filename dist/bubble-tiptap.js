@@ -34045,12 +34045,22 @@ function Un(n, e) {
   return "";
 }
 function aT(n) {
-  if (!n || !Array.isArray(n) || n.length === 0) return [];
-  const e = n[0];
-  return typeof e == "string" ? n.map((t) => ({ name: t, value: t.trim() })).filter((t) => t.value) : typeof e == "object" && e !== null ? n.map((t) => {
-    const r = t, i = Zc(r, "name", "Name", "Display", "display", "Label", "label", "title", "Title", "text", "Text") || Un(r, "display") || Un(r, "name") || Un(r, "label"), o = Zc(r, "value", "Value", "Hex", "hex", "hex_code", "Hex_code", "Hex code", "color", "Color") || Un(r, "hex") || Un(r, "color") || Un(r, "value"), s = typeof i == "string" ? String(i).trim() : "", a = typeof o == "string" ? String(o).trim() : "";
-    return { name: s || a || "Color", value: a || "#000000" };
-  }).filter((t) => t.value) : [];
+  if (n == null) return null;
+  if (Array.isArray(n)) return n;
+  if (typeof n == "object") {
+    const e = n, t = e.list ?? e.results ?? e.items ?? e.data ?? e.value ?? e.options ?? e.choices;
+    if (Array.isArray(t)) return t;
+  }
+  return null;
+}
+function lT(n) {
+  const e = aT(n);
+  if (!e || e.length === 0) return [];
+  const t = e[0];
+  return typeof t == "string" ? e.map((r) => ({ name: r, value: r.trim() })).filter((r) => r.value) : typeof t == "object" && t !== null ? e.map((r) => {
+    const i = r, o = Zc(i, "name", "Name", "Display", "display", "Label", "label", "title", "Title", "text", "Text") || Un(i, "display") || Un(i, "name") || Un(i, "label"), s = Zc(i, "value", "Value", "Hex", "hex", "hex_code", "Hex_code", "Hex code", "Hex Code", "color", "Color") || Un(i, "hex") || Un(i, "color") || Un(i, "value"), a = typeof o == "string" ? String(o).trim() : "", l = typeof s == "string" ? String(s).trim() : "";
+    return { name: a || l || "Color", value: l || "#000000" };
+  }).filter((r) => r.value) : [];
 }
 const ve = { focus: !1 }, pn = class pn {
   constructor(e) {
@@ -34086,7 +34096,7 @@ const ve = { focus: !1 }, pn = class pn {
     q(this, "radiusAllLinked", !0);
     q(this, "paddingAllLinked", !0);
     this.editor = e.editor, this.container = e.container;
-    const t = e.colorPalette, r = aT(t);
+    const t = e.colorPalette, r = lT(t);
     this.colorPalette = r != null && r.length ? r : Zh, this.onCollapse = e.onCollapse, this.getThemeForPopup = e.getThemeForPopup, this.element = this.createSidebar(), this.container.appendChild(this.element), this.setupUpdateListener(), this.setupDraggableButtons(), this.initDragDrop();
   }
   initDragDrop() {
@@ -35108,7 +35118,7 @@ const ve = { focus: !1 }, pn = class pn {
 q(pn, "CORNER_CONTROL_RADIUS_OFFSET", 6), /** Max radius the demo stroke displays (matches RadiusCornerControl cap). Keeps outer radius concentric. */
 q(pn, "MAX_DEMO_RADIUS_PX", 20);
 let Qs = pn;
-class lT {
+class cT {
   constructor(e) {
     q(this, "bubble");
     q(this, "debounceTimers", /* @__PURE__ */ new Map());
@@ -35148,7 +35158,7 @@ class lT {
     this.cancelAllPending();
   }
 }
-class cT {
+class dT {
   constructor(e, t) {
     q(this, "editor");
     q(this, "bubble");
@@ -35214,7 +35224,7 @@ const mo = class mo {
     q(this, "lastInitialContentApplyAt", 0);
     /** Last HTML we synced to Bubble; only sync when content actually changes (avoids spurious updates from setEditable etc.). */
     q(this, "lastSyncedHtml", null);
-    this.container = e.container, this.bubble = e.bubble, this.eventBridge = new lT(this.bubble);
+    this.container = e.container, this.bubble = e.bubble, this.eventBridge = new cT(this.bubble);
   }
   /**
    * Initialize the editor element
@@ -35246,10 +35256,10 @@ const mo = class mo {
       editor: this.editor,
       container: this.container,
       // Sidebar sits next to editor, not inside
-      colorPalette: e.color_palette ?? Zh,
+      colorPalette: e.color_palette ?? e.colorPalette ?? Zh,
       onCollapse: () => this.toggleSidebar(),
       getThemeForPopup: () => go(this.bubble.getProperties())
-    }), this.sidebar.hide(), this.actionHandler = new cT(this.editor, this.bubble), this.unsubscribeProps = this.bubble.onPropertyChange((i) => {
+    }), this.sidebar.hide(), this.actionHandler = new dT(this.editor, this.bubble), this.unsubscribeProps = this.bubble.onPropertyChange((i) => {
       this.handlePropertyChanges(i);
     }), queueMicrotask(() => {
       var i;
@@ -35372,7 +35382,7 @@ const mo = class mo {
 };
 q(mo, "INITIAL_CONTENT_APPLY_COOLDOWN_MS", 1500);
 let ea = mo;
-class dT {
+class uT {
   constructor() {
     q(this, "properties");
     q(this, "states");
@@ -35492,11 +35502,11 @@ class dT {
     console.group("🫧 Bubble Mock State"), console.log("Properties:", this.properties), console.log("States:", this.states), console.log("Event Log:", this.eventLog), console.groupEnd();
   }
 }
-const Ee = new dT();
+const Ee = new uT();
 document.addEventListener("DOMContentLoaded", () => {
-  uT();
+  hT();
 });
-function uT() {
+function hT() {
   var V, re, ye, Te, le, Oe;
   const n = document.getElementById("editor-mount"), e = document.getElementById("word-count"), t = document.getElementById("char-count"), r = document.getElementById("modal-settings"), i = document.getElementById("btn-settings"), o = document.getElementById("btn-close-settings");
   if (!n) {
@@ -35810,11 +35820,11 @@ greet('World');</code></pre>
   setInterval(H, 200), H(), console.log("🚀 TipTap Editor Demo initialized"), console.log("📝 Click the sidebar toggle in the toolbar to expand tools"), console.log("🔍 Access bubble mock via: window.bubbleMock"), window.bubbleMock = Ee, window.bubbleElement = l;
 }
 export {
-  cT as ActionHandler,
+  dT as ActionHandler,
   ea as BubbleElement,
-  dT as BubbleMock,
+  uT as BubbleMock,
   U_ as ContentEditor,
-  lT as EventBridge,
+  cT as EventBridge,
   Qs as Sidebar,
   J_ as Toolbar,
   G_ as applyTheme,

@@ -99,7 +99,7 @@ export class BubbleElement {
     this.sidebar = new Sidebar({
       editor: this.editor,
       container: this.container, // Sidebar sits next to editor, not inside
-      colorPalette: props.color_palette ?? defaultColorPalette,
+      colorPalette: props.color_palette ?? (props as unknown as { colorPalette?: unknown }).colorPalette ?? defaultColorPalette,
       onCollapse: () => this.toggleSidebar(),
       getThemeForPopup: () => getThemeVariablesForPopup(this.bubble.getProperties()),
     });
