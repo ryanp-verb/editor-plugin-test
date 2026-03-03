@@ -84,13 +84,18 @@ export function normalizeColorPalette(
         getStrByKeyContains(obj, 'display') ||
         getStrByKeyContains(obj, 'name') ||
         getStrByKeyContains(obj, 'label');
+      // Prefer hex/color keys so we get actual hex, not the option slug (e.g. "brand_green")
       const value =
-        getStr(obj, 'value', 'Value', 'Hex', 'hex', 'hex_code', 'Hex_code', 'Hex code', 'Hex Code', 'color', 'Color') ||
         getStrByKeyContains(obj, 'hex') ||
         getStrByKeyContains(obj, 'color') ||
-        getStrByKeyContains(obj, 'value');
+        getStr(obj, 'Hex', 'hex', 'hex_code', 'Hex_code', 'Hex code', 'Hex Code', 'color', 'Color', 'value', 'Value');
       const nameStr = typeof name === 'string' ? String(name).trim() : '';
-      const valueStr = typeof value === 'string' ? String(value).trim() : '';
+      let valueStr = typeof value === 'string' ? String(value).trim() : '';
+      if (!valueStr && nameStr) {
+        const n = nameStr.toLowerCase();
+        if (n === 'black') valueStr = '#000000';
+        else if (n === 'white') valueStr = '#ffffff';
+      }
       return { name: nameStr || valueStr || 'Color', value: valueStr || '#000000' };
     }).filter((o) => o.value);
   }

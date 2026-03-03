@@ -30,11 +30,25 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-/** Swatch style for a color value (transparent = checkered). */
+/** True if the value looks like a CSS color the browser can use for background. */
+function isLikelyCssColor(value: string): boolean {
+  const v = (value || '').trim();
+  if (!v) return false;
+  if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(v)) return true;
+  if (/^rgb\(|^rgba\(|^hsl\(|^hsla\(/.test(v)) return true;
+  const lower = v.toLowerCase();
+  if (lower === 'transparent' || lower === 'black' || lower === 'white') return true;
+  return false;
+}
+
+/** Swatch style for a color value (transparent = checkered). Non-CSS values use brand primary as fallback so swatch always shows. */
 function swatchStyle(value: string): string {
   const v = (value || '').trim().toLowerCase();
   if (v === 'transparent' || v === '') {
     return 'background: linear-gradient(45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%), linear-gradient(-45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%); background-size: 6px 6px; background-color: var(--neutral-warm-grey-1, #f5f5f2);';
+  }
+  if (!isLikelyCssColor(value)) {
+    return 'background-color: var(--brand-primary, #007f00);';
   }
   return `background-color: ${escapeAttr(value)};`;
 }
