@@ -4,7 +4,7 @@ import { Sidebar } from '../editor/Sidebar';
 import { BubbleMock, BubbleProperties } from '../mock/BubbleMock';
 import { EventBridge } from './events';
 import { ActionHandler } from './actions';
-import { applyTheme, watchSystemTheme, ThemeProperties, getThemeVariablesForPopup, defaultColorPalette } from '../utils/themeApplier';
+import { applyTheme, watchSystemTheme, ThemeProperties, getThemeVariablesForPopup } from '../utils/themeApplier';
 
 export interface BubbleElementConfig {
   container: HTMLElement;
@@ -48,6 +48,17 @@ export class BubbleElement {
    */
   initialize(): void {
     const props = this.bubble.getProperties();
+
+    // Debug: how color_palette is coming in from Bubble (remove when done)
+    const colorPaletteRaw = props.color_palette ?? (props as unknown as { colorPalette?: unknown }).colorPalette;
+    console.warn('[TipTap] initialize() called – color_palette debug below');
+    console.group('[TipTap color_palette]');
+    console.log('raw value:', colorPaletteRaw);
+    console.log('type:', typeof colorPaletteRaw, Array.isArray(colorPaletteRaw) ? '(array length ' + (colorPaletteRaw as unknown[]).length + ')' : '');
+    if (Array.isArray(colorPaletteRaw) && (colorPaletteRaw as unknown[]).length > 0) {
+      console.log('first item:', (colorPaletteRaw as unknown[])[0]);
+    }
+    console.groupEnd();
 
     // Make container a flex layout for editor + sidebar
     this.container.style.display = 'flex';
@@ -99,7 +110,10 @@ export class BubbleElement {
     this.sidebar = new Sidebar({
       editor: this.editor,
       container: this.container, // Sidebar sits next to editor, not inside
-      colorPalette: props.color_palette ?? (props as unknown as { colorPalette?: unknown }).colorPalette ?? defaultColorPalette,
+      colorPalette:
+        props.color_palette ??
+        (props as unknown as { colorPalette?: unknown }).colorPalette ??
+        (props as unknown as { 'Color palette'?: unknown })['Color palette'],
       onCollapse: () => this.toggleSidebar(),
       getThemeForPopup: () => getThemeVariablesForPopup(this.bubble.getProperties()),
     });

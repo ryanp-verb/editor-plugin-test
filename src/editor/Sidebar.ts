@@ -95,9 +95,24 @@ export class Sidebar {
     const normalized = normalizeColorPalette(raw);
     this.colorPalette = normalized?.length ? normalized : defaultColorPalette;
     // Debug: see how color_palette is coming in from Bubble (remove when done)
+    const isUsingDefault = !normalized?.length;
     console.group('[TipTap color_palette]');
-    console.log('raw (from Bubble):', raw);
-    console.log('normalized (used in dropdowns):', this.colorPalette);
+    if (raw === undefined || raw === null) {
+      console.warn('Bubble did not send color_palette (undefined). Using default 36-item palette.');
+    } else if (Array.isArray(raw)) {
+      console.log('Bubble sent', raw.length, 'items. raw:', raw);
+      if (raw.length > 0 && typeof raw[0] === 'object' && raw[0] !== null) {
+        const first = raw[0] as Record<string, unknown>;
+        console.log('first raw item keys:', Object.keys(first));
+        console.log('first raw item (full):', first);
+      }
+    } else {
+      console.log('raw (object?):', raw);
+    }
+    console.log('normalized (used in dropdowns):', this.colorPalette.length, 'items', isUsingDefault ? '(default palette)' : '');
+    if (this.colorPalette.length > 0) {
+      console.log('first normalized option:', this.colorPalette[0]);
+    }
     console.groupEnd();
     this.onCollapse = config.onCollapse;
     this.getThemeForPopup = config.getThemeForPopup;

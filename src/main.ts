@@ -4,6 +4,9 @@
  * Local development entry point
  */
 
+/* Debug: confirms plugin script loaded (remove when done) */
+console.log('[TipTap] Plugin script loaded');
+
 import './styles/design-tokens.css';
 import './styles/editor.css';
 import './styles/sidebar.css';
