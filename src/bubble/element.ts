@@ -49,14 +49,26 @@ export class BubbleElement {
   initialize(): void {
     const props = this.bubble.getProperties();
 
-    // Debug: how color_palette is coming in from Bubble (remove when done)
-    const colorPaletteRaw = props.color_palette ?? (props as unknown as { colorPalette?: unknown }).colorPalette;
-    console.warn('[TipTap] initialize() called – color_palette debug below');
+    // Debug: what keys did Bubble send? (so we can find the right property for color list)
+    const allKeys = Object.keys(props);
+    console.warn('[TipTap] initialize() called – checking for color_palette');
     console.group('[TipTap color_palette]');
-    console.log('raw value:', colorPaletteRaw);
-    console.log('type:', typeof colorPaletteRaw, Array.isArray(colorPaletteRaw) ? '(array length ' + (colorPaletteRaw as unknown[]).length + ')' : '');
-    if (Array.isArray(colorPaletteRaw) && (colorPaletteRaw as unknown[]).length > 0) {
-      console.log('first item:', (colorPaletteRaw as unknown[])[0]);
+    console.log('All property keys from Bubble:', allKeys);
+    const propsAny = props as unknown as Record<string, unknown>;
+    let colorPaletteRaw =
+      props.color_palette ??
+      (props as unknown as { colorPalette?: unknown }).colorPalette ??
+      propsAny['Color palette'];
+    if (colorPaletteRaw === undefined) {
+      const paletteKey = allKeys.find((k) => /palette/i.test(k));
+      if (paletteKey) colorPaletteRaw = propsAny[paletteKey];
+    }
+    console.log('raw value (color_palette / colorPalette / "Color palette"):', colorPaletteRaw);
+    if (colorPaletteRaw === undefined) {
+      const maybe = allKeys.filter((k) => /color|palette/i.test(k));
+      console.warn('color_palette is undefined. Keys that might be the list:', maybe.length ? maybe : '(none – check plugin field "Name" in Bubble)');
+    } else if (Array.isArray(colorPaletteRaw)) {
+      console.log('Bubble sent', colorPaletteRaw.length, 'items. first:', colorPaletteRaw[0]);
     }
     console.groupEnd();
 
@@ -110,10 +122,7 @@ export class BubbleElement {
     this.sidebar = new Sidebar({
       editor: this.editor,
       container: this.container, // Sidebar sits next to editor, not inside
-      colorPalette:
-        props.color_palette ??
-        (props as unknown as { colorPalette?: unknown }).colorPalette ??
-        (props as unknown as { 'Color palette'?: unknown })['Color palette'],
+      colorPalette: colorPaletteRaw,
       onCollapse: () => this.toggleSidebar(),
       getThemeForPopup: () => getThemeVariablesForPopup(this.bubble.getProperties()),
     });

@@ -35241,18 +35241,29 @@ const mo = class mo {
    * Initialize the editor element
    */
   initialize() {
-    const e = this.bubble.getProperties(), t = e.color_palette ?? e.colorPalette;
-    console.warn("[TipTap] initialize() called – color_palette debug below"), console.group("[TipTap color_palette]"), console.log("raw value:", t), console.log("type:", typeof t, Array.isArray(t) ? "(array length " + t.length + ")" : ""), Array.isArray(t) && t.length > 0 && console.log("first item:", t[0]), console.groupEnd(), this.container.style.display = "flex", this.container.style.flexDirection = "row", this.container.style.height = "100%", this.container.style.overflow = "hidden", this.editorWrapper = document.createElement("div"), this.editorWrapper.className = "bubble-editor-wrapper", this.editorWrapper.style.flex = "1", this.editorWrapper.style.minWidth = "0", this.editorWrapper.style.overflow = "hidden", this.container.appendChild(this.editorWrapper);
-    const r = document.createElement("div");
-    r.className = "editor-content", this.editorWrapper.appendChild(r);
-    const i = e.initial_content || "";
+    const e = this.bubble.getProperties(), t = Object.keys(e);
+    console.warn("[TipTap] initialize() called – checking for color_palette"), console.group("[TipTap color_palette]"), console.log("All property keys from Bubble:", t);
+    const r = e;
+    let i = e.color_palette ?? e.colorPalette ?? r["Color palette"];
+    if (i === void 0) {
+      const a = t.find((l) => /palette/i.test(l));
+      a && (i = r[a]);
+    }
+    if (console.log('raw value (color_palette / colorPalette / "Color palette"):', i), i === void 0) {
+      const a = t.filter((l) => /color|palette/i.test(l));
+      console.warn("color_palette is undefined. Keys that might be the list:", a.length ? a : '(none – check plugin field "Name" in Bubble)');
+    } else Array.isArray(i) && console.log("Bubble sent", i.length, "items. first:", i[0]);
+    console.groupEnd(), this.container.style.display = "flex", this.container.style.flexDirection = "row", this.container.style.height = "100%", this.container.style.overflow = "hidden", this.editorWrapper = document.createElement("div"), this.editorWrapper.className = "bubble-editor-wrapper", this.editorWrapper.style.flex = "1", this.editorWrapper.style.minWidth = "0", this.editorWrapper.style.overflow = "hidden", this.container.appendChild(this.editorWrapper);
+    const o = document.createElement("div");
+    o.className = "editor-content", this.editorWrapper.appendChild(o);
+    const s = e.initial_content || "";
     this.editor = new H_({
-      element: r,
+      element: o,
       getPlaceholder: () => {
-        const o = this.bubble.getProperties();
-        return o.placeholder && String(o.placeholder).trim() || "Start writing...";
+        const a = this.bubble.getProperties();
+        return a.placeholder && String(a.placeholder).trim() || "Start writing...";
       },
-      content: i,
+      content: s,
       editable: e.editable,
       onUpdate: () => this.handleEditorUpdate(),
       onFocus: () => this.handleEditorFocus(),
@@ -35267,14 +35278,14 @@ const mo = class mo {
       editor: this.editor,
       container: this.container,
       // Sidebar sits next to editor, not inside
-      colorPalette: e.color_palette ?? e.colorPalette ?? e["Color palette"],
+      colorPalette: i,
       onCollapse: () => this.toggleSidebar(),
       getThemeForPopup: () => go(this.bubble.getProperties())
-    }), this.sidebar.hide(), this.actionHandler = new dT(this.editor, this.bubble), this.unsubscribeProps = this.bubble.onPropertyChange((o) => {
-      this.handlePropertyChanges(o);
+    }), this.sidebar.hide(), this.actionHandler = new dT(this.editor, this.bubble), this.unsubscribeProps = this.bubble.onPropertyChange((a) => {
+      this.handlePropertyChanges(a);
     }), queueMicrotask(() => {
-      var o;
-      (o = this.editor) == null || o.refreshPlaceholder();
+      var a;
+      (a = this.editor) == null || a.refreshPlaceholder();
     }), this.applyDimensionStyles(e), this.applyThemeFromProps(e), e.theme === "auto" && (this.unsubscribeSystemTheme = Jc(() => {
       this.applyThemeFromProps(this.bubble.getProperties());
     }));
