@@ -19,7 +19,7 @@ import { icons } from '../utils/icons';
 import { DragDropManager, DragData } from '../utils/DragDropManager';
 import { createLinkAllControlHTML } from '../components/LinkAllControl';
 import { createRadiusCornerControlHTML, getCornerPathPx, type RadiusCorner } from '../components/RadiusCornerControl';
-import { createColorDropdownHTML, type ColorDropdownTarget } from '../components/ColorDropdown';
+import { createColorDropdownHTML, createColorDropdownPanelOptionsHTML, type ColorDropdownTarget } from '../components/ColorDropdown';
 import { parseLengthInput, lengthToPxForDemo } from '../utils/parseLength';
 import { normalizeColorPalette, type ColorOption, type BubbleColorThing } from '../utils/colorOptions';
 
@@ -1612,5 +1612,28 @@ export class Sidebar {
 
   getElement(): HTMLElement {
     return this.element;
+  }
+
+  /** Call when Bubble sends color_palette in update() so dropdowns use the app's list. */
+  refreshColorPalette(raw: unknown): void {
+    const normalized = normalizeColorPalette(raw as ColorOption[] | string[] | BubbleColorThing[] | undefined | null);
+    if (!normalized.length) return;
+    this.colorPalette = normalized;
+    const targets: { target: ColorDropdownTarget; value: string; transparentLabel: string }[] = [
+      { target: 'textColor', value: this.blockStyle.textColor, transparentLabel: 'Transparent' },
+      { target: 'borderColor', value: this.blockStyle.borderColor, transparentLabel: 'No border' },
+      { target: 'backgroundColor', value: this.blockStyle.backgroundColor, transparentLabel: 'Transparent' },
+    ];
+    targets.forEach(({ target, value, transparentLabel }) => {
+      const panel = this.element.querySelector(`.bp-color-dropdown[data-target="${target}"] .bp-color-dropdown-panel`) as HTMLElement;
+      if (panel) {
+        panel.innerHTML = createColorDropdownPanelOptionsHTML(this.colorPalette, value, {
+          includeTransparent: true,
+          includeWhite: target === 'backgroundColor',
+          transparentLabel,
+        });
+      }
+    });
+    this.updateColorDropdownValues();
   }
 }

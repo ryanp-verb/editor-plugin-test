@@ -100,3 +100,29 @@ export function createColorDropdownHTML(options: ColorDropdownOptions): string {
   if (!label) return wrapper;
   return `<div class="bp-color-dropdown-wrap"><label class="bp-control-label">${escapeAttr(label)}</label>${wrapper}</div>`;
 }
+
+/** Returns only the panel option buttons HTML (for refreshing when color_palette changes). */
+export function createColorDropdownPanelOptionsHTML(
+  colors: ColorOption[],
+  currentValue: string,
+  options: { includeTransparent?: boolean; includeWhite?: boolean; transparentLabel?: string }
+): string {
+  const { includeTransparent = false, includeWhite = false, transparentLabel = 'Transparent' } = options;
+  const normalizedValue = (currentValue || '').trim().toLowerCase();
+  const optionList: ColorOption[] = [];
+  if (includeTransparent) optionList.push({ name: transparentLabel, value: 'transparent' });
+  if (includeWhite) optionList.push({ name: 'White', value: '#ffffff' });
+  colors.forEach((o) => {
+    const key = o.value.trim().toLowerCase();
+    if (key === 'transparent') return;
+    if (includeWhite && (key === '#ffffff' || key === 'ffffff')) return;
+    optionList.push(o);
+  });
+  return optionList
+    .map((opt) => {
+      const selected = normalizedValue === opt.value.trim().toLowerCase();
+      const style = swatchStyle(opt.value);
+      return `<button type="button" class="bp-color-dropdown-option${selected ? ' bp-color-dropdown-option-selected' : ''}" data-value="${escapeAttr(opt.value)}" data-name="${escapeAttr(opt.name)}" title="${escapeAttr(opt.name)}"><span class="bp-color-dropdown-option-swatch" style="${style}"></span><span class="bp-color-dropdown-option-name">${escapeHtml(opt.name)}</span></button>`;
+    })
+    .join('');
+}

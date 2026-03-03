@@ -17,6 +17,7 @@ function(instance, properties, context) {
         : 'Start writing...';
 
     // Map Bubble properties to our internal format with defaults
+    // color_palette: list of option set (e.g. Brand Color). Bubble may pass a list handle with .get(0,n) - plugin normalizer supports that.
     const allProperties = {
         // Core properties
         initial_content: initialContent,
@@ -30,6 +31,8 @@ function(instance, properties, context) {
         accent_color: properties.accent_color || '#513EDF',
         background_color: properties.background_color || '#ffffff',
         text_color: properties.text_color || '#121000',
+        // Color palette: list of option set (Display + Hex code). Pass through so sidebar dropdowns use app branding.
+        color_palette: properties.color_palette,
     };
     
     // Store current properties for getProperties() calls
@@ -56,6 +59,7 @@ function(instance, properties, context) {
         accent_color: allProperties.accent_color,
         background_color: allProperties.background_color,
         text_color: allProperties.text_color,
+        color_palette: allProperties.color_palette,
     };
 
     callback(changes);

@@ -305,6 +305,12 @@ export class BubbleElement {
         }
       }
     }
+
+    if ('color_palette' in changes) {
+      const props = this.bubble.getProperties();
+      const raw = props.color_palette ?? (props as unknown as { colorPalette?: unknown }).colorPalette;
+      this.sidebar?.refreshColorPalette(raw);
+    }
   }
 
   private applyDimensionStyles(props: BubbleProperties): void {

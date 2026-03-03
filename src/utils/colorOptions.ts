@@ -30,10 +30,28 @@ function getStrByKeyContains(obj: Record<string, unknown>, substring: string): s
   return '';
 }
 
+/** Bubble list API: list properties expose .get(start, end) to load items (see Bubble "Loading Data" docs). */
+function isBubbleListHandle(value: unknown): value is { get: (start: number, end: number) => unknown[] } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as { get?: unknown }).get === 'function'
+  );
+}
+
 /** If raw is a wrapped list (e.g. Bubble repeating group shape), return the inner array; otherwise return raw. */
 function unwrapList(raw: unknown): unknown[] | null {
   if (raw == null) return null;
   if (Array.isArray(raw)) return raw;
+  if (isBubbleListHandle(raw)) {
+    try {
+      const arr = raw.get(0, 500);
+      return Array.isArray(arr) ? arr : null;
+    } catch (err) {
+      if ((err as Error).message === 'not ready') throw err;
+      return null;
+    }
+  }
   if (typeof raw === 'object') {
     const obj = raw as Record<string, unknown>;
     const arr = obj.list ?? obj.results ?? obj.items ?? obj.data ?? obj.value ?? obj.options ?? obj.choices;
