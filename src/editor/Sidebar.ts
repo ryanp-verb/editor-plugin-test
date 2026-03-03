@@ -94,6 +94,11 @@ export class Sidebar {
     const raw = config.colorPalette as ColorOption[] | string[] | BubbleColorThing[] | undefined | null;
     const normalized = normalizeColorPalette(raw);
     this.colorPalette = normalized?.length ? normalized : defaultColorPalette;
+    // Debug: see how color_palette is coming in from Bubble (remove when done)
+    console.group('[TipTap color_palette]');
+    console.log('raw (from Bubble):', raw);
+    console.log('normalized (used in dropdowns):', this.colorPalette);
+    console.groupEnd();
     this.onCollapse = config.onCollapse;
     this.getThemeForPopup = config.getThemeForPopup;
     this.element = this.createSidebar();

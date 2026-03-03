@@ -34097,7 +34097,7 @@ const ve = { focus: !1 }, pn = class pn {
     q(this, "paddingAllLinked", !0);
     this.editor = e.editor, this.container = e.container;
     const t = e.colorPalette, r = lT(t);
-    this.colorPalette = r != null && r.length ? r : Zh, this.onCollapse = e.onCollapse, this.getThemeForPopup = e.getThemeForPopup, this.element = this.createSidebar(), this.container.appendChild(this.element), this.setupUpdateListener(), this.setupDraggableButtons(), this.initDragDrop();
+    this.colorPalette = r != null && r.length ? r : Zh, console.group("[TipTap color_palette]"), console.log("raw (from Bubble):", t), console.log("normalized (used in dropdowns):", this.colorPalette), console.groupEnd(), this.onCollapse = e.onCollapse, this.getThemeForPopup = e.getThemeForPopup, this.element = this.createSidebar(), this.container.appendChild(this.element), this.setupUpdateListener(), this.setupDraggableButtons(), this.initDragDrop();
   }
   initDragDrop() {
     setTimeout(() => {
