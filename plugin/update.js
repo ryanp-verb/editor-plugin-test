@@ -6,6 +6,13 @@
  */
 
 function(instance, properties, context) {
+    // Debug: see what Bubble sends (remove after confirming)
+    var keys = properties ? Object.keys(properties) : [];
+    if (typeof console !== 'undefined' && console.log) {
+        console.log('[TipTap] update() property keys:', keys);
+        if (keys.length === 0) console.warn('[TipTap] update() got empty properties – set data sources on the element in the Bubble editor.');
+    }
+
     // Bubble may send initial_content from a dynamic expression (e.g. Thing's draft field).
     // Accept either properties.initial_content (field name) or properties.AAA (element.json field id).
     var initialContent = properties.initial_content != null ? properties.initial_content : (properties.AAA != null ? properties.AAA : '');
@@ -16,32 +23,33 @@ function(instance, properties, context) {
         ? String(properties.placeholder)
         : 'Start writing...';
 
-    // Map Bubble properties to our internal format with defaults
-    // color_palette: list of option set. Option set custom attributes (e.g. Hex code) may not be sent by Bubble.
-    // color_names + color_hex_codes: alternative two list-of-strings; when both are set they take precedence.
+    // Resolve color list fields: Bubble may use field name, caption, or id (e.g. color_names, "Color names", AAS)
+    var colorNames = properties.color_names != null ? properties.color_names : (properties['Color names'] != null ? properties['Color names'] : properties.AAS);
+    var colorHexCodes = properties.color_hex_codes != null ? properties.color_hex_codes : (properties['Color hex codes'] != null ? properties['Color hex codes'] : properties.AAT);
+
+    // Map Bubble properties to our internal format; merge with previous so partial updates don't drop list data
+    var prev = instance.data._currentProperties || {};
     const allProperties = {
-        // Core properties
         initial_content: initialContent,
         placeholder: placeholderValue,
         editable: properties.editable !== false,
         toolbar_visible: properties.toolbar_visible !== false,
-        min_height: properties.min_height || 200,
-        max_height: properties.max_height || 0,
-        // Theme properties (Bubble may send by field id e.g. AAG for Theme dropdown)
-        theme: (properties.theme != null ? properties.theme : (properties.AAG != null ? properties.AAG : 'light')),
-        accent_color: properties.accent_color || '#513EDF',
-        background_color: properties.background_color || '#ffffff',
-        text_color: properties.text_color || '#121000',
-        // Color palette: list of option set (Display + Hex code). Pass through so sidebar dropdowns use app branding.
-        color_palette: properties.color_palette,
-        // Two list-of-strings: Bubble may send by field name (color_names) or caption ("Color names") or id (AAS).
-        color_names: properties.color_names != null ? properties.color_names : (properties['Color names'] != null ? properties['Color names'] : properties.AAS),
-        color_hex_codes: properties.color_hex_codes != null ? properties.color_hex_codes : (properties['Color hex codes'] != null ? properties['Color hex codes'] : properties.AAT),
+        min_height: properties.min_height != null ? properties.min_height : (prev.min_height != null ? prev.min_height : 200),
+        max_height: properties.max_height != null ? properties.max_height : (prev.max_height != null ? prev.max_height : 0),
+        theme: (properties.theme != null ? properties.theme : (properties.AAG != null ? properties.AAG : (prev.theme != null ? prev.theme : 'light'))),
+        accent_color: properties.accent_color || prev.accent_color || '#513EDF',
+        background_color: properties.background_color || prev.background_color || '#ffffff',
+        text_color: properties.text_color || prev.text_color || '#121000',
+        color_palette: properties.color_palette != null ? properties.color_palette : prev.color_palette,
+        color_names: colorNames != null ? colorNames : prev.color_names,
+        color_hex_codes: colorHexCodes != null ? colorHexCodes : prev.color_hex_codes,
     };
     
-    // Store current properties for getProperties() calls
     instance.data._currentProperties = allProperties;
-    
+    if (typeof console !== 'undefined' && console.log && (colorNames != null || colorHexCodes != null)) {
+        console.log('[TipTap] color lists received – names:', colorNames != null, 'hexes:', colorHexCodes != null);
+    }
+
     // Wait for initialization before sending changes
     if (!instance.data._initialized) {
         return;

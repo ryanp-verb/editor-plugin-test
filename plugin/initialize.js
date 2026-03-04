@@ -23,8 +23,8 @@ function(instance, context) {
         return;
     }
     
-    // Store current properties (will be populated by update.js)
-    instance.data._currentProperties = {};
+    // Properties come from update.js; keep existing if update() ran before us, else start empty
+    instance.data._currentProperties = instance.data._currentProperties || {};
     
     // Create a bridge to Bubble's API
     const bubbleApi = {
