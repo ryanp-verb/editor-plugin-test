@@ -1266,8 +1266,10 @@ export class Sidebar {
   }
 
   private syncStylesFromContainer(containerNode: any): void {
-    // Reset to defaults if no container
+    // Reset to defaults if no container; preserve text color/align so dropdown stays in sync after applying color
     if (!containerNode) {
+      const prevTextColor = this.blockStyle.textColor;
+      const prevTextAlign = this.blockStyle.textAlign;
       this.blockStyle = {
         textAlign: 'left',
         textColor: '#121000',
@@ -1286,6 +1288,8 @@ export class Sidebar {
         paddingBottom: 0,
         paddingLeft: 0,
       };
+      this.blockStyle.textColor = prevTextColor;
+      this.blockStyle.textAlign = prevTextAlign;
     } else {
       // Read styles from the container's attributes
       const attrs = containerNode.attrs || {};

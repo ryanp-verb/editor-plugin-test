@@ -34974,26 +34974,7 @@ const ve = { focus: !1 }, pn = class pn {
     l && (l.textContent = i), this.syncStylesFromContainer(o);
   }
   syncStylesFromContainer(e) {
-    if (!e)
-      this.blockStyle = {
-        textAlign: "left",
-        textColor: "#121000",
-        backgroundColor: "transparent",
-        borderTop: 0,
-        borderRight: 0,
-        borderBottom: 0,
-        borderLeft: 0,
-        borderColor: "#000000",
-        borderRadiusTopLeft: 0,
-        borderRadiusTopRight: 0,
-        borderRadiusBottomRight: 0,
-        borderRadiusBottomLeft: 0,
-        paddingTop: 0,
-        paddingRight: 0,
-        paddingBottom: 0,
-        paddingLeft: 0
-      };
-    else {
+    if (e) {
       const t = e.attrs || {};
       this.blockStyle = {
         textAlign: this.blockStyle.textAlign,
@@ -35015,6 +34996,26 @@ const ve = { focus: !1 }, pn = class pn {
         paddingBottom: t.paddingBottom || 0,
         paddingLeft: t.paddingLeft || 0
       };
+    } else {
+      const t = this.blockStyle.textColor, r = this.blockStyle.textAlign;
+      this.blockStyle = {
+        textAlign: "left",
+        textColor: "#121000",
+        backgroundColor: "transparent",
+        borderTop: 0,
+        borderRight: 0,
+        borderBottom: 0,
+        borderLeft: 0,
+        borderColor: "#000000",
+        borderRadiusTopLeft: 0,
+        borderRadiusTopRight: 0,
+        borderRadiusBottomRight: 0,
+        borderRadiusBottomLeft: 0,
+        paddingTop: 0,
+        paddingRight: 0,
+        paddingBottom: 0,
+        paddingLeft: 0
+      }, this.blockStyle.textColor = t, this.blockStyle.textAlign = r;
     }
     this.updateSidebarUIFromStyles();
   }
