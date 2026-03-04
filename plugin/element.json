@@ -93,6 +93,18 @@
       "display": "Border radius (px)",
       "type": "number",
       "default_val": 14
+    },
+    "AAS": {
+      "display": "Color names",
+      "type": "text",
+      "default_val": "",
+      "list": true
+    },
+    "AAT": {
+      "display": "Color hex codes",
+      "type": "text",
+      "default_val": "",
+      "list": true
     }
   },
   "states": {

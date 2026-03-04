@@ -5,6 +5,7 @@ import { BubbleMock, BubbleProperties } from '../mock/BubbleMock';
 import { EventBridge } from './events';
 import { ActionHandler } from './actions';
 import { applyTheme, watchSystemTheme, ThemeProperties, getThemeVariablesForPopup } from '../utils/themeApplier';
+import { buildPaletteFromTwoLists } from '../utils/colorOptions';
 
 export interface BubbleElementConfig {
   container: HTMLElement;
@@ -55,18 +56,11 @@ export class BubbleElement {
     console.group('[TipTap color_palette]');
     console.log('All property keys from Bubble:', allKeys);
     const propsAny = props as unknown as Record<string, unknown>;
-    let colorPaletteRaw =
-      props.color_palette ??
-      (props as unknown as { colorPalette?: unknown }).colorPalette ??
-      propsAny['Color palette'];
+    const colorPaletteRaw = this.getEffectiveColorPaletteRaw(props, propsAny);
+    console.log('effective color palette raw (two-list or color_palette):', colorPaletteRaw);
     if (colorPaletteRaw === undefined) {
-      const paletteKey = allKeys.find((k) => /palette/i.test(k));
-      if (paletteKey) colorPaletteRaw = propsAny[paletteKey];
-    }
-    console.log('raw value (color_palette / colorPalette / "Color palette"):', colorPaletteRaw);
-    if (colorPaletteRaw === undefined) {
-      const maybe = allKeys.filter((k) => /color|palette/i.test(k));
-      console.warn('color_palette is undefined. Keys that might be the list:', maybe.length ? maybe : '(none – check plugin field "Name" in Bubble)');
+      const maybe = allKeys.filter((k) => /color|palette|names|hex/i.test(k));
+      console.warn('No color palette. Keys that might be relevant:', maybe.length ? maybe : '(none – add Color palette or Color names + Color hex codes)');
     } else if (Array.isArray(colorPaletteRaw)) {
       console.log('Bubble sent', colorPaletteRaw.length, 'items. first:', colorPaletteRaw[0]);
     }
@@ -306,11 +300,41 @@ export class BubbleElement {
       }
     }
 
-    if ('color_palette' in changes) {
+    if ('color_palette' in changes || 'color_names' in changes || 'color_hex_codes' in changes) {
       const props = this.bubble.getProperties();
-      const raw = props.color_palette ?? (props as unknown as { colorPalette?: unknown }).colorPalette;
+      const propsAny = props as unknown as Record<string, unknown>;
+      const raw = this.getEffectiveColorPaletteRaw(props, propsAny);
       this.sidebar?.refreshColorPalette(raw);
     }
+  }
+
+  /**
+   * Prefer two list-of-strings (color_names + color_hex_codes) when both set; otherwise use color_palette.
+   * Bubble often does not send option set custom attributes (e.g. "Hex code") for "list of option set".
+   */
+  private getEffectiveColorPaletteRaw(
+    props: BubbleProperties & { color_names?: unknown; color_hex_codes?: unknown },
+    propsAny: Record<string, unknown>
+  ): unknown {
+    const namesRaw =
+      props.color_names ??
+      propsAny['Color names'] ??
+      propsAny['Color display names'] ??
+      (props as unknown as Record<string, unknown>)['AAS'];
+    const hexesRaw =
+      props.color_hex_codes ??
+      propsAny['Color hex codes'] ??
+      (props as unknown as Record<string, unknown>)['AAT'];
+    if (namesRaw != null && hexesRaw != null) {
+      const fromTwo = buildPaletteFromTwoLists(namesRaw, hexesRaw);
+      if (fromTwo.length > 0) return fromTwo;
+    }
+    return (
+      props.color_palette ??
+      (props as unknown as { colorPalette?: unknown }).colorPalette ??
+      propsAny['Color palette'] ??
+      propsAny['color_palette']
+    );
   }
 
   private applyDimensionStyles(props: BubbleProperties): void {

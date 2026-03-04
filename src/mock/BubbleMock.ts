@@ -36,6 +36,9 @@ export interface BubbleProperties {
   border_radius: number;
   // Color palette: list of option set (e.g. Brand Color with Display + Hex code) or legacy string[]
   color_palette?: unknown[];
+  // Alternative: two list-of-strings (more reliable when option set attributes don't come through)
+  color_names?: unknown;
+  color_hex_codes?: unknown;
 }
 
 export interface BubbleStates {

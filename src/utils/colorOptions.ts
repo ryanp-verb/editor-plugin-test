@@ -1,7 +1,16 @@
 /**
  * Color options for sidebar dropdowns.
- * Matches Bubble option set "Brand Color" with attributes "Display" and "Hex code".
- * Bubble may serialize option set items with different key names (e.g. Display vs display, "Hex code" vs hex_code).
+ *
+ * Two ways to supply colors from Bubble:
+ *
+ * 1. **List of option set** (e.g. "Brand Color" with attributes "Display" and "Hex code"):
+ *    Set the element property "Color palette" to a list of that option set. Bubble often sends
+ *    only the choice values (slugs like "brand_green"), not the custom attributes; we fall back
+ *    to a small slug→hex map and to scanning object values for any hex.
+ *
+ * 2. **Two list-of-strings** (recommended if option set attributes don't come through):
+ *    Add element properties "Color names" and "Color hex codes" (each list of text). Same order:
+ *    names[0] with hexes[0]. Use buildPaletteFromTwoLists(); when both are set we prefer this.
  */
 
 export interface ColorOption {
@@ -28,6 +37,36 @@ function getStrByKeyContains(obj: Record<string, unknown>, substring: string): s
     if (typeof v === 'string' && k.toLowerCase().includes(lower)) return v;
   }
   return '';
+}
+
+/** If Bubble only sends option slugs (no Hex code on list items), map known slugs to hex so swatches and apply work. */
+const SLUG_TO_HEX: Record<string, string> = {
+  brand_green: '#007F00',
+  dark_green: '#004F00',
+};
+
+/** Get first string in obj that looks like a hex code (e.g. #007F00). */
+function getAnyHexFromObject(obj: Record<string, unknown>): string {
+  const hexRe = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+  for (const v of Object.values(obj)) {
+    if (typeof v === 'string' && hexRe.test(v.trim())) return v.trim();
+  }
+  return '';
+}
+
+function resolveValueToHex(valueStr: string, nameStr: string, obj?: Record<string, unknown>): string {
+  const v = valueStr.trim();
+  if (obj) {
+    const hexFromObj = getAnyHexFromObject(obj);
+    if (hexFromObj) return hexFromObj;
+  }
+  if (!v) return '';
+  if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(v) || /^rgb\(|^rgba\(|^hsl\(|^hsla\(/.test(v)) return v;
+  const slug = v.toLowerCase().replace(/\s+/g, '_');
+  if (SLUG_TO_HEX[slug]) return SLUG_TO_HEX[slug];
+  const nameSlug = nameStr.trim().toLowerCase().replace(/\s+/g, '_');
+  if (SLUG_TO_HEX[nameSlug]) return SLUG_TO_HEX[nameSlug];
+  return v;
 }
 
 /** Bubble list API: list properties expose .get(start, end) to load items (see Bubble "Loading Data" docs). */
@@ -58,6 +97,32 @@ function unwrapList(raw: unknown): unknown[] | null {
     if (Array.isArray(arr)) return arr;
   }
   return null;
+}
+
+/** Turn a single list value (Bubble list or array) into string[]. */
+function toStringArray(raw: unknown): string[] {
+  const arr = unwrapList(raw);
+  if (!arr) return [];
+  return arr.map((x) => (typeof x === 'string' ? x : String(x ?? '').trim())).filter(Boolean);
+}
+
+/**
+ * Build palette from two list-of-strings fields (e.g. "Color display names" + "Color hex codes").
+ * Uses same order: names[i] with hexes[i]. Handles Bubble list API (.get(0, n)).
+ * Use this when "list of option set" does not send custom attributes (Hex code) from Bubble.
+ */
+export function buildPaletteFromTwoLists(namesRaw: unknown, hexesRaw: unknown): ColorOption[] {
+  const names = toStringArray(namesRaw);
+  const hexes = toStringArray(hexesRaw);
+  const len = Math.min(names.length, hexes.length);
+  if (len === 0) return [];
+  const out: ColorOption[] = [];
+  for (let i = 0; i < len; i++) {
+    const name = names[i].trim();
+    const value = hexes[i].trim();
+    if (value) out.push({ name: name || value, value });
+  }
+  return out;
 }
 
 /**
@@ -96,7 +161,9 @@ export function normalizeColorPalette(
         if (n === 'black') valueStr = '#000000';
         else if (n === 'white') valueStr = '#ffffff';
       }
-      return { name: nameStr || valueStr || 'Color', value: valueStr || '#000000' };
+      // Resolve to hex: use value from object if it's already hex; else resolve slug via map (e.g. brand_green → #007F00)
+      const resolved = resolveValueToHex(valueStr || '', nameStr, obj);
+      return { name: nameStr || valueStr || 'Color', value: resolved || valueStr || '#000000' };
     }).filter((o) => o.value);
   }
   return [];
