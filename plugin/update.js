@@ -34,9 +34,9 @@ function(instance, properties, context) {
         text_color: properties.text_color || '#121000',
         // Color palette: list of option set (Display + Hex code). Pass through so sidebar dropdowns use app branding.
         color_palette: properties.color_palette,
-        // Alternative: two list-of-strings (Color names + Color hex codes). Use when option set attributes don't come through.
-        color_names: properties.color_names != null ? properties.color_names : properties.AAS,
-        color_hex_codes: properties.color_hex_codes != null ? properties.color_hex_codes : properties.AAT,
+        // Two list-of-strings: Bubble may send by field name (color_names) or caption ("Color names") or id (AAS).
+        color_names: properties.color_names != null ? properties.color_names : (properties['Color names'] != null ? properties['Color names'] : properties.AAS),
+        color_hex_codes: properties.color_hex_codes != null ? properties.color_hex_codes : (properties['Color hex codes'] != null ? properties['Color hex codes'] : properties.AAT),
     };
     
     // Store current properties for getProperties() calls
