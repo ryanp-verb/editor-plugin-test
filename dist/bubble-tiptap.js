@@ -34053,6 +34053,18 @@ function hT(n, e = uT) {
       return 0;
   }
 }
+function fT(n) {
+  const e = (n || "").trim();
+  if (!e) return "";
+  if (e.toLowerCase() === "transparent") return "transparent";
+  if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(e)) return e.length === 4 ? `#${e[1]}${e[1]}${e[2]}${e[2]}${e[3]}${e[3]}` : e;
+  const r = e.match(/^rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*[\d.]+)?\s*\)$/);
+  if (r) {
+    const i = Math.max(0, Math.min(255, parseInt(r[1], 10))), o = Math.max(0, Math.min(255, parseInt(r[2], 10))), s = Math.max(0, Math.min(255, parseInt(r[3], 10)));
+    return "#" + [i, o, s].map((a) => a.toString(16).padStart(2, "0")).join("");
+  }
+  return e;
+}
 function Qc(n, ...e) {
   for (const t of e) {
     const r = n[t];
@@ -34070,16 +34082,16 @@ const mi = {
   brand_green: "#007F00",
   dark_green: "#004F00"
 };
-function fT(n) {
+function pT(n) {
   const e = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
   for (const t of Object.values(n))
     if (typeof t == "string" && e.test(t.trim())) return t.trim();
   return "";
 }
-function pT(n, e, t) {
+function gT(n, e, t) {
   const r = n.trim();
   if (t) {
-    const s = fT(t);
+    const s = pT(t);
     if (s) return s;
   }
   if (!r) return "";
@@ -34089,13 +34101,13 @@ function pT(n, e, t) {
   const o = e.trim().toLowerCase().replace(/\s+/g, "_");
   return mi[o] ? mi[o] : r;
 }
-function gT(n) {
+function mT(n) {
   return typeof n == "object" && n !== null && typeof n.get == "function";
 }
 function uf(n) {
   if (n == null) return null;
   if (Array.isArray(n)) return n;
-  if (gT(n))
+  if (mT(n))
     try {
       const e = n.get(0, 500);
       return Array.isArray(e) ? e : null;
@@ -34113,7 +34125,7 @@ function ed(n) {
   const e = uf(n);
   return e ? e.map((t) => typeof t == "string" ? t : String(t ?? "").trim()).filter(Boolean) : [];
 }
-function mT(n, e) {
+function bT(n, e) {
   const t = ed(n), r = ed(e), i = Math.min(t.length, r.length);
   if (i === 0) return [];
   const o = [];
@@ -34134,7 +34146,7 @@ function td(n) {
       const d = a.toLowerCase();
       d === "black" ? l = "#000000" : d === "white" && (l = "#ffffff");
     }
-    const c = pT(l || "", a, i);
+    const c = gT(l || "", a, i);
     return { name: a || l || "Color", value: c || l || "#000000" };
   }).filter((r) => r.value) : [];
 }
@@ -34718,19 +34730,20 @@ const ve = { focus: !1 }, pn = class pn {
     return i ? i.name : t;
   }
   updateColorDropdownValues() {
+    const t = this.editor.getCurrentTextColor() || this.blockStyle.textColor;
     [
-      { target: "textColor", value: this.editor.getCurrentTextColor() || this.blockStyle.textColor },
+      { target: "textColor", value: fT(t) || t },
       { target: "borderColor", value: this.blockStyle.borderColor },
       { target: "backgroundColor", value: this.blockStyle.backgroundColor }
-    ].forEach(({ target: i, value: o }) => {
-      const s = this.element.querySelector(`.bp-color-dropdown[data-target="${i}"]`);
-      if (!s) return;
-      const a = s.querySelector(".bp-color-dropdown-trigger"), l = s.querySelector(".bp-color-dropdown-trigger-swatch"), c = s.querySelector(".bp-color-dropdown-trigger-name");
-      if (!a || !l || !c) return;
-      const d = (o || "").trim(), u = this.getColorDisplayName(i, d);
-      d === "transparent" || d === "" ? l.style.cssText = "background: linear-gradient(45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%), linear-gradient(-45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%); background-size: 6px 6px; background-color: var(--neutral-warm-grey-1, #f5f5f2);" : l.style.cssText = `background-color: ${d};`, c.textContent = u, s.querySelectorAll(".bp-color-dropdown-option").forEach((h) => {
-        const f = (h.getAttribute("data-value") || "").trim().toLowerCase();
-        h.classList.toggle("bp-color-dropdown-option-selected", f === (d || "transparent").toLowerCase());
+    ].forEach(({ target: o, value: s }) => {
+      const a = this.element.querySelector(`.bp-color-dropdown[data-target="${o}"]`);
+      if (!a) return;
+      const l = a.querySelector(".bp-color-dropdown-trigger"), c = a.querySelector(".bp-color-dropdown-trigger-swatch"), d = a.querySelector(".bp-color-dropdown-trigger-name");
+      if (!l || !c || !d) return;
+      const u = (s || "").trim(), h = this.getColorDisplayName(o, u);
+      u === "transparent" || u === "" ? c.style.cssText = "background: linear-gradient(45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%), linear-gradient(-45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%); background-size: 6px 6px; background-color: var(--neutral-warm-grey-1, #f5f5f2);" : c.style.cssText = `background-color: ${u};`, d.textContent = h, a.querySelectorAll(".bp-color-dropdown-option").forEach((f) => {
+        const p = (f.getAttribute("data-value") || "").trim().toLowerCase();
+        f.classList.toggle("bp-color-dropdown-option-selected", p === (u || "transparent").toLowerCase());
       });
     });
   }
@@ -35223,7 +35236,7 @@ const ve = { focus: !1 }, pn = class pn {
 q(pn, "CORNER_CONTROL_RADIUS_OFFSET", 6), /** Max radius the demo stroke displays (matches RadiusCornerControl cap). Keeps outer radius concentric. */
 q(pn, "MAX_DEMO_RADIUS_PX", 20);
 let na = pn;
-class bT {
+class yT {
   constructor(e) {
     q(this, "bubble");
     q(this, "debounceTimers", /* @__PURE__ */ new Map());
@@ -35263,7 +35276,7 @@ class bT {
     this.cancelAllPending();
   }
 }
-class yT {
+class ET {
   constructor(e, t) {
     q(this, "editor");
     q(this, "bubble");
@@ -35329,7 +35342,7 @@ const bo = class bo {
     q(this, "lastInitialContentApplyAt", 0);
     /** Last HTML we synced to Bubble; only sync when content actually changes (avoids spurious updates from setEditable etc.). */
     q(this, "lastSyncedHtml", null);
-    this.container = e.container, this.bubble = e.bubble, this.eventBridge = new bT(this.bubble);
+    this.container = e.container, this.bubble = e.bubble, this.eventBridge = new yT(this.bubble);
   }
   /**
    * Initialize the editor element
@@ -35370,7 +35383,7 @@ const bo = class bo {
       colorPalette: i,
       onCollapse: () => this.toggleSidebar(),
       getThemeForPopup: () => mo(this.bubble.getProperties())
-    }), this.sidebar.hide(), this.actionHandler = new yT(this.editor, this.bubble), this.unsubscribeProps = this.bubble.onPropertyChange((a) => {
+    }), this.sidebar.hide(), this.actionHandler = new ET(this.editor, this.bubble), this.unsubscribeProps = this.bubble.onPropertyChange((a) => {
       this.handlePropertyChanges(a);
     }), queueMicrotask(() => {
       var a;
@@ -35465,7 +35478,7 @@ const bo = class bo {
   getEffectiveColorPaletteRaw(e, t) {
     const r = e.color_names ?? t["Color names"] ?? t["Color display names"] ?? e.AAS, i = e.color_hex_codes ?? t["Color hex codes"] ?? e.AAT;
     if (r != null && i != null) {
-      const o = mT(r, i);
+      const o = bT(r, i);
       if (o.length > 0) return o;
     }
     return e.color_palette ?? e.colorPalette ?? t["Color palette"] ?? t.color_palette;
@@ -35508,7 +35521,7 @@ const bo = class bo {
 };
 q(bo, "INITIAL_CONTENT_APPLY_COOLDOWN_MS", 1500);
 let ra = bo;
-class ET {
+class kT {
   constructor() {
     q(this, "properties");
     q(this, "states");
@@ -35628,12 +35641,12 @@ class ET {
     console.group("🫧 Bubble Mock State"), console.log("Properties:", this.properties), console.log("States:", this.states), console.log("Event Log:", this.eventLog), console.groupEnd();
   }
 }
-const Ee = new ET();
+const Ee = new kT();
 console.log("[TipTap] Plugin script loaded");
 document.addEventListener("DOMContentLoaded", () => {
-  kT();
+  ST();
 });
-function kT() {
+function ST() {
   var V, re, ye, Te, le, Oe;
   const n = document.getElementById("editor-mount"), e = document.getElementById("word-count"), t = document.getElementById("char-count"), r = document.getElementById("modal-settings"), i = document.getElementById("btn-settings"), o = document.getElementById("btn-close-settings");
   if (!n) {
@@ -35947,11 +35960,11 @@ greet('World');</code></pre>
   setInterval(H, 200), H(), console.log("🚀 TipTap Editor Demo initialized"), console.log("📝 Click the sidebar toggle in the toolbar to expand tools"), console.log("🔍 Access bubble mock via: window.bubbleMock"), window.bubbleMock = Ee, window.bubbleElement = l;
 }
 export {
-  yT as ActionHandler,
+  ET as ActionHandler,
   ra as BubbleElement,
-  ET as BubbleMock,
+  kT as BubbleMock,
   q_ as ContentEditor,
-  bT as EventBridge,
+  yT as EventBridge,
   na as Sidebar,
   Q_ as Toolbar,
   X_ as applyTheme,

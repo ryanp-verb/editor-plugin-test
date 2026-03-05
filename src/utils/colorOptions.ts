@@ -18,6 +18,26 @@ export interface ColorOption {
   value: string;
 }
 
+/**
+ * Normalize a CSS color to hex so it can be matched against palette options (which use hex).
+ * Handles rgb(r,g,b), rgba(r,g,b,a), and leaves hex/transparent as-is.
+ */
+export function normalizeColorToHex(color: string): string {
+  const s = (color || '').trim();
+  if (!s) return '';
+  if (s.toLowerCase() === 'transparent') return 'transparent';
+  const hexRe = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+  if (hexRe.test(s)) return s.length === 4 ? `#${s[1]}${s[1]}${s[2]}${s[2]}${s[3]}${s[3]}` : s;
+  const rgbMatch = s.match(/^rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*[\d.]+)?\s*\)$/);
+  if (rgbMatch) {
+    const r = Math.max(0, Math.min(255, parseInt(rgbMatch[1], 10)));
+    const g = Math.max(0, Math.min(255, parseInt(rgbMatch[2], 10)));
+    const b = Math.max(0, Math.min(255, parseInt(rgbMatch[3], 10)));
+    return '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
+  }
+  return s;
+}
+
 /** Raw item from Bubble (list of option set values); attribute names may vary. */
 export type BubbleColorThing = Record<string, unknown>;
 

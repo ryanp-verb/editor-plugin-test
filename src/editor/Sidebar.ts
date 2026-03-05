@@ -21,7 +21,7 @@ import { createLinkAllControlHTML } from '../components/LinkAllControl';
 import { createRadiusCornerControlHTML, getCornerPathPx, type RadiusCorner } from '../components/RadiusCornerControl';
 import { createColorDropdownHTML, createColorDropdownPanelOptionsHTML, type ColorDropdownTarget } from '../components/ColorDropdown';
 import { parseLengthInput, lengthToPxForDemo } from '../utils/parseLength';
-import { normalizeColorPalette, type ColorOption, type BubbleColorThing } from '../utils/colorOptions';
+import { normalizeColorPalette, normalizeColorToHex, type ColorOption, type BubbleColorThing } from '../utils/colorOptions';
 
 export interface SidebarConfig {
   editor: ContentEditor;
@@ -744,9 +744,10 @@ export class Sidebar {
   }
 
   private updateColorDropdownValues(): void {
-    // Text color: use TipTap selection/cursor value so dropdown reflects actual styled color
+    // Text color: use TipTap selection/cursor value; normalize rgb/rgba to hex so we match palette and show swatch name
     const textColorFromEditor = this.editor.getCurrentTextColor();
-    const textColorValue = textColorFromEditor || this.blockStyle.textColor;
+    const rawTextColor = textColorFromEditor || this.blockStyle.textColor;
+    const textColorValue = normalizeColorToHex(rawTextColor) || rawTextColor;
     const targets: { target: ColorDropdownTarget; value: string }[] = [
       { target: 'textColor', value: textColorValue },
       { target: 'borderColor', value: this.blockStyle.borderColor },
