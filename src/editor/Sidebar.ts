@@ -744,8 +744,11 @@ export class Sidebar {
   }
 
   private updateColorDropdownValues(): void {
+    // Text color: use TipTap selection/cursor value so dropdown reflects actual styled color
+    const textColorFromEditor = this.editor.getCurrentTextColor();
+    const textColorValue = textColorFromEditor || this.blockStyle.textColor;
     const targets: { target: ColorDropdownTarget; value: string }[] = [
-      { target: 'textColor', value: this.blockStyle.textColor },
+      { target: 'textColor', value: textColorValue },
       { target: 'borderColor', value: this.blockStyle.borderColor },
       { target: 'backgroundColor', value: this.blockStyle.backgroundColor },
     ];

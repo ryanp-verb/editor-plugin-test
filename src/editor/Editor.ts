@@ -197,6 +197,13 @@ export class ContentEditor {
     return this.editor.getAttributes('link') as { href?: string; target?: string };
   }
 
+  /** Current text color at cursor/selection from TipTap's textStyle mark (Color extension). */
+  getCurrentTextColor(): string {
+    const attrs = this.editor.getAttributes('textStyle') as { color?: string };
+    const c = attrs?.color;
+    return typeof c === 'string' && c.trim() ? c.trim() : '';
+  }
+
   unsetLink(opts?: EditorCommandOptions): void {
     const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
     chain.unsetLink().run();

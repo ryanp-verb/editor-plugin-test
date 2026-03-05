@@ -32887,6 +32887,11 @@ class q_ {
   getLinkAttributes() {
     return this.editor.isActive("link") ? this.editor.getAttributes("link") : null;
   }
+  /** Current text color at cursor/selection from TipTap's textStyle mark (Color extension). */
+  getCurrentTextColor() {
+    const e = this.editor.getAttributes("textStyle"), t = e == null ? void 0 : e.color;
+    return typeof t == "string" && t.trim() ? t.trim() : "";
+  }
   unsetLink(e) {
     ((e == null ? void 0 : e.focus) !== !1 ? this.editor.chain().focus() : this.editor.chain()).unsetLink().run();
   }
@@ -34714,18 +34719,18 @@ const ve = { focus: !1 }, pn = class pn {
   }
   updateColorDropdownValues() {
     [
-      { target: "textColor", value: this.blockStyle.textColor },
+      { target: "textColor", value: this.editor.getCurrentTextColor() || this.blockStyle.textColor },
       { target: "borderColor", value: this.blockStyle.borderColor },
       { target: "backgroundColor", value: this.blockStyle.backgroundColor }
-    ].forEach(({ target: t, value: r }) => {
-      const i = this.element.querySelector(`.bp-color-dropdown[data-target="${t}"]`);
-      if (!i) return;
-      const o = i.querySelector(".bp-color-dropdown-trigger"), s = i.querySelector(".bp-color-dropdown-trigger-swatch"), a = i.querySelector(".bp-color-dropdown-trigger-name");
-      if (!o || !s || !a) return;
-      const l = (r || "").trim(), c = this.getColorDisplayName(t, l);
-      l === "transparent" || l === "" ? s.style.cssText = "background: linear-gradient(45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%), linear-gradient(-45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%); background-size: 6px 6px; background-color: var(--neutral-warm-grey-1, #f5f5f2);" : s.style.cssText = `background-color: ${l};`, a.textContent = c, i.querySelectorAll(".bp-color-dropdown-option").forEach((d) => {
-        const u = (d.getAttribute("data-value") || "").trim().toLowerCase();
-        d.classList.toggle("bp-color-dropdown-option-selected", u === (l || "transparent").toLowerCase());
+    ].forEach(({ target: i, value: o }) => {
+      const s = this.element.querySelector(`.bp-color-dropdown[data-target="${i}"]`);
+      if (!s) return;
+      const a = s.querySelector(".bp-color-dropdown-trigger"), l = s.querySelector(".bp-color-dropdown-trigger-swatch"), c = s.querySelector(".bp-color-dropdown-trigger-name");
+      if (!a || !l || !c) return;
+      const d = (o || "").trim(), u = this.getColorDisplayName(i, d);
+      d === "transparent" || d === "" ? l.style.cssText = "background: linear-gradient(45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%), linear-gradient(-45deg, var(--editor-border, #c9cbbe) 25%, transparent 25%); background-size: 6px 6px; background-color: var(--neutral-warm-grey-1, #f5f5f2);" : l.style.cssText = `background-color: ${d};`, c.textContent = u, s.querySelectorAll(".bp-color-dropdown-option").forEach((h) => {
+        const f = (h.getAttribute("data-value") || "").trim().toLowerCase();
+        h.classList.toggle("bp-color-dropdown-option-selected", f === (d || "transparent").toLowerCase());
       });
     });
   }
