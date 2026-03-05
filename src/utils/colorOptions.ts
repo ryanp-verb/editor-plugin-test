@@ -26,6 +26,9 @@ export function normalizeColorToHex(color: string): string {
   const s = (color || '').trim();
   if (!s) return '';
   if (s.toLowerCase() === 'transparent') return 'transparent';
+  const lower = s.toLowerCase();
+  if (lower === 'black') return '#000000';
+  if (lower === 'white') return '#ffffff';
   const hexRe = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
   if (hexRe.test(s)) return s.length === 4 ? `#${s[1]}${s[1]}${s[2]}${s[2]}${s[3]}${s[3]}` : s;
   const rgbMatch = s.match(/^rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*[\d.]+)?\s*\)$/);

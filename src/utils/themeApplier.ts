@@ -250,8 +250,12 @@ export function applyTheme(element: HTMLElement, properties: Partial<ThemeProper
   style.setProperty('--editor-bg-elevated', bgElevated);
   
   // Text colors (--editor-default-text-color: unstyled text in editor; use palette value when set)
-  const defaultTextColor =
-    (properties.default_text_color && normalizeColorToHex(properties.default_text_color)) || theme.text_color;
+  const rawDefault = typeof properties.default_text_color === 'string'
+    ? properties.default_text_color
+    : (properties.default_text_color != null ? String(properties.default_text_color).trim() : '');
+  const normalizedDefault = rawDefault ? normalizeColorToHex(rawDefault) : '';
+  const isValidColor = (c: string) => /^#([0-9A-Fa-f]{3}){1,2}$/.test(c) || c === 'transparent' || /^rgb/.test(c);
+  const defaultTextColor = (normalizedDefault && isValidColor(normalizedDefault)) ? normalizedDefault : theme.text_color;
   style.setProperty('--editor-text', theme.text_color);
   style.setProperty('--editor-default-text-color', defaultTextColor);
   style.setProperty('--editor-text-muted', theme.text_muted_color);
