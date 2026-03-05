@@ -26,7 +26,6 @@ export interface BubbleProperties {
   accent_color: string;
   background_color: string;
   toolbar_background: string;
-  text_color: string;
   text_muted_color: string;
   border_color: string;
   icon_color: string;
@@ -104,7 +103,6 @@ export class BubbleMock {
       accent_color: '#007f00',
       background_color: '#ffffff',
       toolbar_background: '#f5f5f2',
-      text_color: '#121000',
       text_muted_color: '#494736',
       border_color: '#c9cbbe',
       icon_color: '#494736',

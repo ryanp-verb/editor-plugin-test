@@ -54,11 +54,6 @@
       "type": "color",
       "default_val": "#1e2230"
     },
-    "AAK": {
-      "display": "Text color",
-      "type": "color",
-      "default_val": "#e4e6ed"
-    },
     "AAL": {
       "display": "Text muted color",
       "type": "color",

@@ -161,7 +161,6 @@ export class BubbleElement {
       accent_color: props.accent_color,
       background_color: props.background_color,
       toolbar_background: props.toolbar_background,
-      text_color: props.text_color,
       text_muted_color: props.text_muted_color,
       border_color: props.border_color,
       icon_color: props.icon_color,
@@ -281,7 +280,7 @@ export class BubbleElement {
     // Handle theme property changes
     const themeProps = [
       'theme', 'accent_color', 'background_color', 'toolbar_background',
-      'text_color', 'text_muted_color', 'border_color', 'icon_color',
+      'text_muted_color', 'border_color', 'icon_color',
       'icon_active_color', 'font_family', 'font_size', 'border_radius',
       'default_text_color',
     ];
