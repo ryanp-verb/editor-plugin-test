@@ -149,6 +149,13 @@ export class BubbleElement {
     }
   }
   
+  private getDefaultTextColorFromProps(props: BubbleProperties): string | undefined {
+    const raw = props.default_text_color
+      ?? (props as unknown as Record<string, unknown>)['Default text color']
+      ?? (props as unknown as Record<string, unknown>)['AAU'];
+    return typeof raw === 'string' ? raw : undefined;
+  }
+
   private applyThemeFromProps(props: BubbleProperties): void {
     if (!this.editorWrapper) return;
 
@@ -168,10 +175,7 @@ export class BubbleElement {
       font_family: props.font_family,
       font_size: props.font_size,
       border_radius: props.border_radius,
-      default_text_color:
-        (props as Record<string, unknown>).default_text_color ??
-        (props as Record<string, unknown>)['Default text color'] ??
-        (props as Record<string, unknown>)['AAU'],
+      default_text_color: this.getDefaultTextColorFromProps(props),
     };
 
     // Apply theme to container so both editor and sidebar inherit accent/brand variables
