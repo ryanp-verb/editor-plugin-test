@@ -105,6 +105,11 @@
       "type": "text",
       "default_val": "",
       "list": true
+    },
+    "AAU": {
+      "display": "Default text color",
+      "type": "text",
+      "default_val": ""
     }
   },
   "states": {

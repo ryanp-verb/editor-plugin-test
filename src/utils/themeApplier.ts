@@ -8,6 +8,7 @@
  */
 
 import type { ColorOption } from './colorOptions';
+import { normalizeColorToHex } from './colorOptions';
 
 export interface ThemeProperties {
   theme: 'light' | 'dark' | 'auto';
@@ -33,6 +34,8 @@ export interface ThemeProperties {
   border_radius: number;
   // Color palette: list of Bubble option set (e.g. Brand Color) or legacy string[]; normalized to ColorOption[] in plugin.
   color_palette?: unknown[];
+  // Default text color for unstyled editor text (hex or palette value; e.g. from Color hex codes list)
+  default_text_color?: string;
 }
 
 // BP Brand colors (from Figma tokens)
@@ -246,8 +249,11 @@ export function applyTheme(element: HTMLElement, properties: Partial<ThemeProper
   const bgElevated = adjustBrightness(theme.background_color, effectiveTheme === 'dark' ? 15 : -3);
   style.setProperty('--editor-bg-elevated', bgElevated);
   
-  // Text colors
+  // Text colors (--editor-default-text-color: unstyled text in editor; use palette value when set)
+  const defaultTextColor =
+    (properties.default_text_color && normalizeColorToHex(properties.default_text_color)) || theme.text_color;
   style.setProperty('--editor-text', theme.text_color);
+  style.setProperty('--editor-default-text-color', defaultTextColor);
   style.setProperty('--editor-text-muted', theme.text_muted_color);
   
   // Icon colors

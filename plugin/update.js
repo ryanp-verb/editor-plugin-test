@@ -43,6 +43,7 @@ function(instance, properties, context) {
         color_palette: properties.color_palette != null ? properties.color_palette : prev.color_palette,
         color_names: colorNames != null ? colorNames : prev.color_names,
         color_hex_codes: colorHexCodes != null ? colorHexCodes : prev.color_hex_codes,
+        default_text_color: (properties.default_text_color != null ? properties.default_text_color : (properties['Default text color'] != null ? properties['Default text color'] : properties.AAU)) ?? prev.default_text_color,
     };
     
     instance.data._currentProperties = allProperties;
@@ -74,6 +75,7 @@ function(instance, properties, context) {
         color_palette: allProperties.color_palette,
         color_names: allProperties.color_names,
         color_hex_codes: allProperties.color_hex_codes,
+        default_text_color: allProperties.default_text_color,
     };
 
     callback(changes);

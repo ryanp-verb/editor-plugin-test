@@ -219,7 +219,7 @@
   font-family: var(--font-sans);
   font-size: var(--editor-font-size, 16px);
   line-height: 1.7;
-  color: var(--editor-text);
+  color: var(--editor-default-text-color, var(--editor-text));
 }
 
 .editor-content .tiptap:focus {

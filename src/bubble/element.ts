@@ -169,6 +169,7 @@ export class BubbleElement {
       font_family: props.font_family,
       font_size: props.font_size,
       border_radius: props.border_radius,
+      default_text_color: props.default_text_color,
     };
 
     // Apply theme to container so both editor and sidebar inherit accent/brand variables
@@ -281,7 +282,8 @@ export class BubbleElement {
     const themeProps = [
       'theme', 'accent_color', 'background_color', 'toolbar_background',
       'text_color', 'text_muted_color', 'border_color', 'icon_color',
-      'icon_active_color', 'font_family', 'font_size', 'border_radius'
+      'icon_active_color', 'font_family', 'font_size', 'border_radius',
+      'default_text_color',
     ];
     
     if (themeProps.some(prop => prop in changes)) {

@@ -39,6 +39,8 @@ export interface BubbleProperties {
   // Alternative: two list-of-strings (more reliable when option set attributes don't come through)
   color_names?: unknown;
   color_hex_codes?: unknown;
+  // Default text color for unstyled text (hex or palette value; applied via --editor-default-text-color)
+  default_text_color?: string;
 }
 
 export interface BubbleStates {
