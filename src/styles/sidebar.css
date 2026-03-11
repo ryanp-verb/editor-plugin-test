@@ -131,12 +131,7 @@
    ============================================ */
 .bp-sidebar-section {
   padding: 16px;
-  border-bottom: 1px solid var(--sidebar-border, #c9cbbe);
   box-sizing: border-box;
-}
-
-.bp-sidebar-section:last-child {
-  border-bottom: none;
 }
 
 .bp-sidebar-title {
@@ -146,6 +141,57 @@
   margin: 0 0 12px 0;
   text-transform: none;
   letter-spacing: 0;
+}
+
+/* Collapsible section header (button: title + caret); line under header only */
+.bp-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 0 10px 0;
+  margin: 0 0 12px 0;
+  border: none;
+  border-bottom: 1px solid var(--sidebar-section-title, #494736);
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sidebar-section-title, #494736);
+  text-transform: none;
+  letter-spacing: 0;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  border-radius: 0;
+}
+
+.bp-section-header:hover {
+  color: var(--brand-primary, #007f00);
+}
+
+.bp-section-title {
+  flex: 1;
+}
+
+.bp-section-caret {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 8px;
+  color: inherit;
+}
+
+.bp-section-caret svg {
+  width: 18px;
+  height: 18px;
+}
+
+.bp-section-collapsed .bp-section-body {
+  display: none;
 }
 
 /* ============================================
@@ -201,6 +247,15 @@
   flex-wrap: wrap;
   max-width: 100%;
 }
+
+/* Same size as Formatting (icon) buttons: 36×36 */
+.bp-btn-row-uniform .bp-btn {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+}
+
 
 .bp-btn {
   display: flex;
@@ -1228,75 +1283,322 @@
 }
 
 /* ============================================
-   Padding Control
+   Padding Control (same layout/styling pattern as Border Radius)
    ============================================ */
 .bp-padding-control {
   position: relative;
 }
 
-.bp-padding-visual {
+/* Larger than radius so T/R/B/L arms don’t overlap the center ALL control */
+.bp-padding-group {
   position: relative;
-  width: 100%;
-  max-width: 200px;
-  height: 120px;
-  border: 2px dashed var(--editor-border, #c9cbbe);
-  border-radius: 8px;
+  width: 230px;
+  height: 168px;
   margin: 0 auto;
+  border: 2px solid var(--editor-border, #c9cbbe);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.bp-padding-input {
+/* Background preview: four bands (sizes set from JS); all same light gray */
+.bp-padding-preview {
   position: absolute;
-  width: var(--padding-input-width, 48px);
-  height: 28px;
-  padding: 4px;
-  text-align: center;
-  background: var(--brand-light-1, #8edf00);
-  border: none;
-  border-radius: 14px;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--neutral-warm-grey-6, #121000);
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
-.bp-padding-input:focus {
-  outline: 2px solid var(--brand-primary, #007f00);
-  outline-offset: 1px;
+.bp-padding-preview [data-padding-preview-side="top"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: var(--neutral-warm-grey-2, #e1e3d6);
+  transition: height 0.15s ease;
 }
 
-.bp-padding-top {
-  top: 8px;
+.bp-padding-preview [data-padding-preview-side="right"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--neutral-warm-grey-2, #e1e3d6);
+  transition: width 0.15s ease;
+}
+
+.bp-padding-preview [data-padding-preview-side="bottom"] {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: var(--neutral-warm-grey-2, #e1e3d6);
+  transition: height 0.15s ease;
+}
+
+.bp-padding-preview [data-padding-preview-side="left"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--neutral-warm-grey-2, #e1e3d6);
+  transition: width 0.15s ease;
+}
+
+/* Inset so side controls sit inward from the container border */
+.bp-padding-side-controls {
+  position: absolute;
+  inset: 10px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.bp-padding-side-controls > * {
+  pointer-events: auto;
+}
+
+.bp-padding-side-controls .bp-padding-side-control[data-padding-side="top"] {
+  position: absolute;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
 }
 
-.bp-padding-right {
+.bp-padding-side-controls .bp-padding-side-control[data-padding-side="right"] {
+  position: absolute;
   top: 50%;
-  right: 8px;
+  right: 0;
   transform: translateY(-50%);
 }
 
-.bp-padding-bottom {
-  bottom: 8px;
+.bp-padding-side-controls .bp-padding-side-control[data-padding-side="bottom"] {
+  position: absolute;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
 }
 
-.bp-padding-left {
+.bp-padding-side-controls .bp-padding-side-control[data-padding-side="left"] {
+  position: absolute;
   top: 50%;
-  left: 8px;
+  left: 0;
   transform: translateY(-50%);
 }
 
-/* Wrapper to center the padding ALL control (control carries its own styles, same as radius) */
-.bp-padding-center {
+.bp-padding-all-center {
   position: absolute;
-  top: 50%;
   left: 50%;
+  top: 50%;
   transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
+  z-index: 3;
+}
+
+/* Single side control: same size and base style as radius corner control */
+.bp-padding-side-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 42px;
+  padding: 0;
+  border: none;
+  border-radius: var(--control-btn-radius, 8px);
+  background: var(--neutral-warm-grey-2, #e1e3d6);
+  color: var(--neutral-warm-grey-5, #494736);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.bp-padding-side-control-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+}
+
+.bp-padding-side-control-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.bp-padding-side-control-input {
+  width: 26px;
+  padding: 1px 2px;
+  border: none;
+  border-radius: 2px;
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-family-primary);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.bp-padding-side-control-input:focus {
+  outline: none;
+  background: transparent;
+}
+
+.bp-padding-side-control-input::placeholder {
+  opacity: 0.7;
+}
+
+/* Default hover */
+.bp-padding-side-control:hover {
+  background: var(--brand-light-1, #8edf00);
+  color: var(--brand-primary, #007f00);
+}
+
+.bp-padding-side-control:hover .bp-padding-side-control-input {
+  color: var(--neutral-warm-grey-6, #121000);
+}
+
+/* Active (non-zero), ALL inactive */
+.bp-padding-side-control.active {
+  background: var(--brand-dark-1, #004f00);
+  color: var(--brand-light-2, #ccff00);
+}
+
+.bp-padding-side-control.active .bp-padding-side-control-input {
+  color: var(--brand-light-2, #ccff00);
+}
+
+/* Active + hovered */
+.bp-padding-side-control.active:hover {
+  background: var(--brand-light-1, #8edf00);
+  color: var(--brand-primary, #007f00);
+}
+
+.bp-padding-side-control.active:hover .bp-padding-side-control-input {
+  color: var(--neutral-warm-grey-6, #121000);
+}
+
+/* When ALL is linked: hide individual side inputs (only T/R/B/L labels show); transparent control bg */
+.bp-padding-side-controls.all-linked .bp-padding-side-control .bp-padding-side-control-input {
+  display: none;
+}
+
+.bp-padding-side-controls.all-linked .bp-padding-side-control {
+  background: transparent;
+  color: var(--brand-primary, #007f00);
+}
+
+.bp-padding-side-controls.all-linked .bp-padding-side-control .bp-padding-side-control-label {
+  color: inherit;
+}
+
+.bp-padding-side-controls.all-linked .bp-padding-side-control:hover {
+  background: var(--brand-light-1, #8edf00);
+}
+
+.bp-padding-side-controls.all-linked .bp-padding-side-control.active {
+  background: transparent;
+}
+
+.bp-padding-side-controls.all-linked .bp-padding-side-control.active .bp-padding-side-control-input {
+  color: var(--neutral-warm-grey-6, #121000);
+}
+
+.bp-padding-side-controls.all-linked .bp-padding-side-control.active:hover {
+  background: var(--brand-light-1, #8edf00);
+  color: var(--brand-primary, #007f00);
+}
+
+/* Vertical ALL layout (padding): when inactive, icon on top and label below; when active, icon+label side-by-side with input underneath */
+.bp-link-all-vertical.bp-link-all-with-input {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 10px;
+  min-width: 64px;
+  height: auto;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Inactive: stacked icon and label */
+.bp-link-all-vertical .bp-link-all-toggle {
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+}
+
+/* Active: icon and "ALL" side-by-side, input will sit below */
+.bp-link-all-vertical.active .bp-link-all-toggle {
+  flex-direction: row;
+  gap: 4px;
+}
+
+.bp-link-all-vertical .bp-link-all-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  overflow: hidden;
+}
+
+.bp-link-all-vertical .bp-link-all-icon-wrap svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.bp-link-all-vertical .bp-link-all-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Show ALL value input only when linked (active) */
+.bp-link-all-vertical.bp-link-all-with-input:not(.active) .bp-link-all-value-input {
+  display: none;
+}
+
+/* Active: input underneath icon+label, inside the same background; container height fits all */
+.bp-link-all-vertical.bp-link-all-with-input.active {
+  padding: 8px 12px 10px;
+  gap: 6px;
+}
+
+.bp-link-all-vertical.bp-link-all-with-input.active .bp-link-all-value-input {
+  width: 44px;
+  min-width: 44px;
+  padding: 4px 6px;
+  text-align: center;
+  font-size: 12px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  box-sizing: border-box;
+}
+
+.bp-link-all-vertical.bp-link-all-with-input.active .bp-link-all-value-input::placeholder {
+  opacity: 0.7;
+}
+
+.bp-link-all-vertical.bp-link-all-with-input.active .bp-link-all-value-input:focus {
+  background: transparent;
+  outline: none;
 }
 
 /* ============================================
@@ -1328,8 +1630,7 @@
 }
 
 [data-theme="dark"] .bp-border-visual,
-[data-theme="dark"] .bp-radius-visual,
-[data-theme="dark"] .bp-padding-visual {
+[data-theme="dark"] .bp-radius-visual {
   border-color: var(--editor-border);
 }
 

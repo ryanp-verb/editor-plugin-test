@@ -39,15 +39,6 @@ function initializeDemo() {
   // The demo's external sidebar container is no longer used
   void 0; // Placeholder to avoid empty block
 
-  // --- Collapsible Sections (for new sidebar) ---
-  document.addEventListener('click', (e) => {
-    const header = (e.target as HTMLElement).closest('.bp-sidebar-title');
-    if (header) {
-      const section = header.closest('.bp-sidebar-section');
-      section?.classList.toggle('collapsed');
-    }
-  });
-
   // --- Modal Controls ---
   function openModal() {
     modalOverlay?.classList.add('open');
@@ -531,7 +522,8 @@ greet('World');</code></pre>
 // Export for library usage
 export { ContentEditor } from './editor/Editor';
 export { Toolbar } from './editor/Toolbar';
-export { Sidebar } from './editor/Sidebar';
+export { Sidebar, SIDEBAR_SECTION_IDS } from './editor/Sidebar';
+export type { SidebarConfig, SidebarSectionId } from './editor/Sidebar';
 export { BubbleElement } from './bubble/element';
 export { BubbleMock, bubbleMock } from './mock/BubbleMock';
 export { EventBridge } from './bubble/events';

@@ -36,6 +36,8 @@ export interface LinkAllControlOptions {
   unit?: string;
   /** Extra CSS classes (e.g. bp-border-center bp-border-all for border). */
   className?: string;
+  /** When "vertical", icon and label stack above; with valueAsInput, input only visible when linked. */
+  layout?: 'horizontal' | 'vertical';
 }
 
 /**
@@ -55,6 +57,7 @@ export function createLinkAllControlHTML(options: LinkAllControlOptions): string
     label = 'ALL',
     unit = 'px',
     className = '',
+    layout = 'horizontal',
   } = options;
 
   const icon = linked ? icons.linkSm : icons.linkBroken;
@@ -66,7 +69,8 @@ export function createLinkAllControlHTML(options: LinkAllControlOptions): string
 
   if (showValue && valueAsInput && valueInputData) {
     // One rectangle: container with toggle button + input inside
-    const containerClasses = ['bp-link-all-control', 'bp-link-all-with-input', linked ? 'active' : '', className].filter(Boolean).join(' ');
+    const layoutClass = layout === 'vertical' ? ' bp-link-all-vertical' : '';
+    const containerClasses = ['bp-link-all-control', 'bp-link-all-with-input', layoutClass, linked ? 'active' : '', className].filter(Boolean).join(' ');
     const buttonAttrs = [
       'type="button"',
       'class="bp-link-all-toggle"',
@@ -83,8 +87,11 @@ export function createLinkAllControlHTML(options: LinkAllControlOptions): string
       'placeholder="0"',
       'aria-label="Value"',
     ].join(' ');
+    const toggleContent = layout === 'vertical'
+      ? `<span class="bp-link-all-icon-wrap" aria-hidden="true">${icon}</span><span class="bp-link-all-label">${label}</span>`
+      : `${icon}<span class="bp-link-all-label">${label}</span>`;
     return `<div class="${containerClasses}">
-  <button ${buttonAttrs}>${icon}<span class="bp-link-all-label">${label}</span></button>
+  <button ${buttonAttrs}>${toggleContent}</button>
   <input ${inputAttrs}>
 </div>`;
   }

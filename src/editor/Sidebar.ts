@@ -19,7 +19,12 @@ import { icons } from '../utils/icons';
 import { DragDropManager, DragData } from '../utils/DragDropManager';
 import { createLinkAllControlHTML } from '../components/LinkAllControl';
 import { createRadiusCornerControlHTML, getCornerPathPx, type RadiusCorner } from '../components/RadiusCornerControl';
+import { createPaddingSideControlHTML } from '../components/PaddingSideControl';
 import { createColorDropdownHTML, createColorDropdownPanelOptionsHTML, type ColorDropdownTarget } from '../components/ColorDropdown';
+import { createCollapsibleSectionHTML, SIDEBAR_SECTION_IDS, type SidebarSectionId } from '../components/CollapsibleSection';
+
+export type { SidebarSectionId } from '../components/CollapsibleSection';
+export { SIDEBAR_SECTION_IDS } from '../components/CollapsibleSection';
 import { parseLengthInput, lengthToPxForDemo } from '../utils/parseLength';
 import { normalizeColorPalette, normalizeColorToHex, type ColorOption, type BubbleColorThing } from '../utils/colorOptions';
 
@@ -31,6 +36,10 @@ export interface SidebarConfig {
   onCollapse?: () => void;
   /** Returns current theme variables for the link popup (text/input colors in light/dark). */
   getThemeForPopup?: () => Record<string, string>;
+  /** Section ids to show; when undefined, all sections are visible. */
+  visibleSections?: SidebarSectionId[];
+  /** Section ids that start collapsed; others start expanded. */
+  defaultCollapsed?: SidebarSectionId[];
 }
 
 interface BlockStyleState {
@@ -88,12 +97,17 @@ export class Sidebar {
   private radiusAllLinked = true;
   private paddingAllLinked = true;
 
+  private visibleSections: SidebarSectionId[];
+  private defaultCollapsedSet: Set<SidebarSectionId>;
+
   constructor(config: SidebarConfig) {
     this.editor = config.editor;
     this.container = config.container;
     const raw = config.colorPalette as ColorOption[] | string[] | BubbleColorThing[] | undefined | null;
     const normalized = normalizeColorPalette(raw);
     this.colorPalette = normalized?.length ? normalized : defaultColorPalette;
+    this.visibleSections = config.visibleSections ?? [...SIDEBAR_SECTION_IDS];
+    this.defaultCollapsedSet = new Set(config.defaultCollapsed ?? []);
     // Debug: see how color_palette is coming in from Bubble (remove when done)
     const isUsingDefault = !normalized?.length;
     console.group('[TipTap color_palette]');
@@ -144,18 +158,46 @@ export class Sidebar {
     sidebar.innerHTML = `
       ${this.createHeader()}
       <div class="bp-sidebar-scroll">
-        ${this.createTextSection()}
-        ${this.createFormattingSection()}
-        ${this.createTextColorSection()}
-        ${this.createElementsSection()}
-        ${this.createBordersSection()}
-        ${this.createBackgroundsSection()}
-        ${this.createLayoutSection()}
+        ${this.buildSectionsHTML()}
       </div>
     `;
     
     this.bindEvents(sidebar);
     return sidebar;
+  }
+
+  private static readonly SECTION_TITLES: Record<SidebarSectionId, string> = {
+    text: 'Text',
+    formatting: 'Formatting',
+    textColor: 'Text color',
+    elements: 'Elements',
+    borders: 'Borders & corners',
+    backgrounds: 'Backgrounds',
+    layout: 'Layout',
+  };
+
+  private buildSectionsHTML(): string {
+    return this.visibleSections
+      .map((id) => {
+        const title = Sidebar.SECTION_TITLES[id];
+        const bodyHTML = this.getSectionBody(id);
+        const collapsed = this.defaultCollapsedSet.has(id);
+        return createCollapsibleSectionHTML({ id, title, bodyHTML, collapsed });
+      })
+      .join('');
+  }
+
+  private getSectionBody(id: SidebarSectionId): string {
+    switch (id) {
+      case 'text': return this.getTextBody();
+      case 'formatting': return this.getFormattingBody();
+      case 'textColor': return this.getTextColorBody();
+      case 'elements': return this.getElementsBody();
+      case 'borders': return this.getBordersBody();
+      case 'backgrounds': return this.getBackgroundsBody();
+      case 'layout': return this.getLayoutBody();
+      default: return '';
+    }
   }
 
   private createHeader(): string {
@@ -176,39 +218,34 @@ export class Sidebar {
     `;
   }
 
-  private createTextSection(): string {
+  private getTextBody(): string {
     return `
-      <section class="bp-sidebar-section">
-        <h3 class="bp-sidebar-title">Text</h3>
         <div class="bp-control-group">
           <label class="bp-control-label">Heading</label>
-          <div class="bp-btn-row">
+          <div class="bp-btn-row bp-btn-row-uniform">
             <button class="bp-btn" data-action="heading" data-level="1" title="Heading 1">H1</button>
             <button class="bp-btn" data-action="heading" data-level="2" title="Heading 2">H2</button>
             <button class="bp-btn" data-action="heading" data-level="3" title="Heading 3">H3</button>
             <button class="bp-btn" data-action="heading" data-level="4" title="Heading 4">H4</button>
             <button class="bp-btn" data-action="heading" data-level="5" title="Heading 5">H5</button>
             <button class="bp-btn" data-action="heading" data-level="6" title="Heading 6">H6</button>
-            <button class="bp-btn bp-btn-wide active" data-action="paragraph" title="Paragraph">P</button>
+            <button class="bp-btn active" data-action="paragraph" title="Paragraph">P</button>
           </div>
         </div>
         <div class="bp-control-group">
           <label class="bp-control-label">Text size</label>
-          <div class="bp-btn-row">
+          <div class="bp-btn-row bp-btn-row-uniform">
             <button class="bp-btn" data-action="textSize" data-size="small" title="Small">S</button>
             <button class="bp-btn active" data-action="textSize" data-size="medium" title="Medium">M</button>
             <button class="bp-btn" data-action="textSize" data-size="large" title="Large">L</button>
             <button class="bp-btn" data-action="textSize" data-size="xlarge" title="Extra Large">XL</button>
           </div>
         </div>
-      </section>
     `;
   }
 
-  private createFormattingSection(): string {
+  private getFormattingBody(): string {
     return `
-      <section class="bp-sidebar-section">
-        <h3 class="bp-sidebar-title">Formatting</h3>
         <div class="bp-btn-row">
           <button class="bp-btn bp-btn-icon active" data-action="align" data-align="left" title="Align Left">
             ${icons.alignLeft}
@@ -231,8 +268,6 @@ export class Sidebar {
           <button class="bp-btn bp-btn-icon" data-action="strike" title="Strikethrough">
             ${icons.strike}
           </button>
-        </div>
-        <div class="bp-btn-row" style="margin-top: 8px;">
           <button class="bp-btn bp-btn-icon" data-action="blockquote" title="Quote">
             ${icons.quote}
           </button>
@@ -255,14 +290,11 @@ export class Sidebar {
             ${icons.clearFormat}
           </button>
         </div>
-      </section>
     `;
   }
 
-  private createTextColorSection(): string {
+  private getTextColorBody(): string {
     return `
-      <section class="bp-sidebar-section">
-        <h3 class="bp-sidebar-title">Text color</h3>
         ${createColorDropdownHTML({
           target: 'textColor',
           colors: this.colorPalette,
@@ -271,14 +303,11 @@ export class Sidebar {
           includeTransparent: true,
           transparentLabel: 'Transparent',
         })}
-      </section>
     `;
   }
 
-  private createElementsSection(): string {
+  private getElementsBody(): string {
     return `
-      <section class="bp-sidebar-section">
-        <h3 class="bp-sidebar-title">Elements</h3>
         <div class="bp-btn-row">
           <button class="bp-btn bp-btn-icon draggable" data-action="table" data-drag-type="table" title="Insert Table (drag or click)">
             ${icons.table}
@@ -305,14 +334,11 @@ export class Sidebar {
             ${icons.quote}
           </button>
         </div>
-      </section>
     `;
   }
 
-  private createBordersSection(): string {
+  private getBordersBody(): string {
     return `
-      <section class="bp-sidebar-section bp-section-expanded">
-        <h3 class="bp-sidebar-title">Borders & corners</h3>
         <div class="bp-container-target">
           <span class="bp-target-label">Target:</span>
           <span class="bp-target-name">Parent container</span>
@@ -419,14 +445,11 @@ export class Sidebar {
           includeTransparent: true,
           transparentLabel: 'No border',
         })}
-      </section>
     `;
   }
 
-  private createBackgroundsSection(): string {
+  private getBackgroundsBody(): string {
     return `
-      <section class="bp-sidebar-section">
-        <h3 class="bp-sidebar-title">Backgrounds</h3>
         <div class="bp-control-group">
           ${createColorDropdownHTML({
             target: 'backgroundColor',
@@ -438,14 +461,11 @@ export class Sidebar {
             transparentLabel: 'Transparent',
           })}
         </div>
-      </section>
     `;
   }
 
-  private createLayoutSection(): string {
+  private getLayoutBody(): string {
     return `
-      <section class="bp-sidebar-section">
-        <h3 class="bp-sidebar-title">Layout</h3>
         <div class="bp-control-group">
           <label class="bp-control-label">Columns & rows</label>
           <div class="bp-btn-row">
@@ -471,13 +491,31 @@ export class Sidebar {
         </div>
         <div class="bp-control-group">
           <label class="bp-control-label">Padding</label>
-          <div class="bp-padding-control">
-            <div class="bp-padding-visual">
-              <input type="number" class="bp-input bp-padding-input bp-padding-top" data-padding="top" value="0" min="0" placeholder="0">
-              <input type="number" class="bp-input bp-padding-input bp-padding-right" data-padding="right" value="0" min="0" placeholder="0">
-              <input type="number" class="bp-input bp-padding-input bp-padding-bottom" data-padding="bottom" value="0" min="0" placeholder="0">
-              <input type="number" class="bp-input bp-padding-input bp-padding-left" data-padding="left" value="0" min="0" placeholder="0">
-              <div class="bp-padding-center">
+          <div class="bp-padding-control" data-control="padding">
+            <div class="bp-padding-group">
+              <div class="bp-padding-side-controls${this.paddingAllLinked ? ' all-linked' : ''}" data-padding-side-controls>
+                ${createPaddingSideControlHTML({
+                  side: 'top',
+                  valueDisplay: String(this.blockStyle.paddingTop),
+                  active: this.blockStyle.paddingTop > 0,
+                })}
+                ${createPaddingSideControlHTML({
+                  side: 'right',
+                  valueDisplay: String(this.blockStyle.paddingRight),
+                  active: this.blockStyle.paddingRight > 0,
+                })}
+                ${createPaddingSideControlHTML({
+                  side: 'bottom',
+                  valueDisplay: String(this.blockStyle.paddingBottom),
+                  active: this.blockStyle.paddingBottom > 0,
+                })}
+                ${createPaddingSideControlHTML({
+                  side: 'left',
+                  valueDisplay: String(this.blockStyle.paddingLeft),
+                  active: this.blockStyle.paddingLeft > 0,
+                })}
+              </div>
+              <div class="bp-padding-all-center">
                 ${createLinkAllControlHTML({
                   dataAction: 'togglePaddingAll',
                   linked: this.paddingAllLinked,
@@ -487,12 +525,18 @@ export class Sidebar {
                   valueAsInput: true,
                   valueInputData: 'padding',
                   className: 'bp-btn-link-all',
+                  layout: 'vertical',
                 })}
+              </div>
+              <div class="bp-padding-preview" aria-hidden="true" data-padding-preview>
+                <span class="bp-padding-preview-top" data-padding-preview-side="top"></span>
+                <span class="bp-padding-preview-right" data-padding-preview-side="right"></span>
+                <span class="bp-padding-preview-bottom" data-padding-preview-side="bottom"></span>
+                <span class="bp-padding-preview-left" data-padding-preview-side="left"></span>
               </div>
             </div>
           </div>
         </div>
-      </section>
     `;
   }
 
@@ -501,11 +545,25 @@ export class Sidebar {
     sidebar.addEventListener('click', (e) => {
       e.stopPropagation();
       const target = e.target as HTMLElement;
+
+      // Collapsible section header: toggle expand/collapse
+      const sectionHeader = target.closest('.bp-section-header') as HTMLButtonElement | null;
+      if (sectionHeader) {
+        const section = sectionHeader.closest('.bp-sidebar-section');
+        if (section) {
+          const collapsed = section.classList.toggle('bp-section-collapsed');
+          sectionHeader.setAttribute('aria-expanded', String(!collapsed));
+          const caret = sectionHeader.querySelector('.bp-section-caret');
+          if (caret) caret.innerHTML = collapsed ? icons.chevronDown : icons.chevronUp;
+        }
+        return;
+      }
+
       const btn = target.closest('[data-action]') as HTMLElement;
       if (btn) {
         this.handleAction(btn);
       }
-      
+
       // Border side clicks
       const borderSide = target.closest('.bp-border-side, .bp-border-all') as HTMLElement;
       if (borderSide) {
@@ -518,6 +576,13 @@ export class Sidebar {
         if (radiusCorner) {
           this.handleRadiusCornerClick(radiusCorner);
         }
+      }
+
+      // Padding side control click when ALL is linked: unlink, keep values, focus that side's input
+      const paddingSideControl = target.closest('.bp-padding-side-control') as HTMLElement | null;
+      if (paddingSideControl?.dataset.paddingSide && this.paddingAllLinked) {
+        const side = paddingSideControl.dataset.paddingSide as 'top' | 'right' | 'bottom' | 'left';
+        this.handlePaddingSideControlClick(side);
       }
     });
     
@@ -630,11 +695,13 @@ export class Sidebar {
       this.blockStyle.paddingRight = num;
       this.blockStyle.paddingBottom = num;
       this.blockStyle.paddingLeft = num;
-      this.element.querySelectorAll('.bp-padding-input').forEach((el) => {
-        (el as HTMLInputElement).value = String(num);
+      this.element.querySelectorAll('[data-padding]').forEach((el) => {
+        const input = el as HTMLInputElement;
+        if (input.dataset.padding) input.value = String(num);
       });
       this.applyBlockStyles();
       this.updatePaddingLinkAllButton();
+      this.updatePaddingSideControls();
     }
   }
 
@@ -950,6 +1017,21 @@ export class Sidebar {
     this.updateRadiusCornerControls();
   }
 
+  /** When ALL is linked and user clicks a side control: unlink, keep current value on all sides, focus that side's input. */
+  private handlePaddingSideControlClick(side: 'top' | 'right' | 'bottom' | 'left'): void {
+    if (!this.paddingAllLinked) return;
+    this.paddingAllLinked = false;
+    this.updatePaddingLinkAllButton();
+    this.updatePaddingSideControls();
+    const input = this.element.querySelector(`[data-padding="${side}"]`) as HTMLInputElement | null;
+    if (input) {
+      requestAnimationFrame(() => {
+        input.focus();
+        input.select();
+      });
+    }
+  }
+
   private handlePaddingChange(input: HTMLInputElement): void {
     const side = input.dataset.padding as 'top' | 'right' | 'bottom' | 'left';
     const value = parseInt(input.value, 10) || 0;
@@ -964,6 +1046,7 @@ export class Sidebar {
     }
     this.applyBlockStyles();
     this.updatePaddingLinkAllButton();
+    this.updatePaddingSideControls();
   }
 
   private handleInputChange(input: HTMLInputElement): void {
@@ -1064,7 +1147,7 @@ export class Sidebar {
       this.blockStyle.paddingRight = 0;
       this.blockStyle.paddingBottom = 0;
       this.blockStyle.paddingLeft = 0;
-      this.element.querySelectorAll('.bp-padding-input').forEach((el) => {
+      this.element.querySelectorAll('.bp-padding-side-control-input').forEach((el) => {
         (el as HTMLInputElement).value = '0';
       });
     } else {
@@ -1082,7 +1165,7 @@ export class Sidebar {
       this.blockStyle.paddingRight = value;
       this.blockStyle.paddingBottom = value;
       this.blockStyle.paddingLeft = value;
-      this.element.querySelectorAll('.bp-padding-input').forEach((el) => {
+      this.element.querySelectorAll('.bp-padding-side-control-input').forEach((el) => {
         (el as HTMLInputElement).value = String(value);
       });
     }
@@ -1205,7 +1288,56 @@ export class Sidebar {
     if (valueInput) valueInput.value = String(this.blockStyle.paddingTop);
     const icon = this.paddingAllLinked ? icons.linkSm : icons.linkBroken;
     container.classList.toggle('active', this.paddingAllLinked);
-    btn.innerHTML = `${icon}<span class="bp-link-all-label">ALL</span>`;
+    const isVertical = container.classList.contains('bp-link-all-vertical');
+    btn.innerHTML = isVertical
+      ? `<span class="bp-link-all-icon-wrap" aria-hidden="true">${icon}</span><span class="bp-link-all-label">ALL</span>`
+      : `${icon}<span class="bp-link-all-label">ALL</span>`;
+  }
+
+  /** Updates each padding side control: .all-linked on wrapper, .active, input value; updates preview band sizes. */
+  private updatePaddingSideControls(): void {
+    const wrapper = this.element.querySelector('[data-padding-side-controls]') as HTMLElement | null;
+    if (!wrapper) return;
+    wrapper.classList.toggle('all-linked', this.paddingAllLinked);
+    const sides: Array<{ side: 'top' | 'right' | 'bottom' | 'left'; key: keyof BlockStyleState }> = [
+      { side: 'top', key: 'paddingTop' },
+      { side: 'right', key: 'paddingRight' },
+      { side: 'bottom', key: 'paddingBottom' },
+      { side: 'left', key: 'paddingLeft' },
+    ];
+    sides.forEach(({ side, key }) => {
+      const control = wrapper.querySelector(`.bp-padding-side-control[data-padding-side="${side}"]`) as HTMLElement | null;
+      if (!control) return;
+      const value = this.blockStyle[key];
+      control.classList.toggle('active', Number(value) > 0);
+      const inputEl = control.querySelector('.bp-padding-side-control-input') as HTMLInputElement | null;
+      if (inputEl) inputEl.value = String(value);
+    });
+    this.updatePaddingPreview();
+  }
+
+  /** Updates the padding preview band sizes from current blockStyle padding values. */
+  private updatePaddingPreview(): void {
+    const preview = this.element.querySelector('[data-padding-preview]') as HTMLElement | null;
+    if (!preview) return;
+    const maxPreviewPx = 24;
+    const scale = (v: number) => Math.min(v, 40) * (maxPreviewPx / 40);
+    const top = scale(this.blockStyle.paddingTop);
+    const right = scale(this.blockStyle.paddingRight);
+    const bottom = scale(this.blockStyle.paddingBottom);
+    const left = scale(this.blockStyle.paddingLeft);
+    const set = (sel: string, size: number) => {
+      const el = preview.querySelector(`[data-padding-preview-side="${sel}"]`) as HTMLElement | null;
+      if (el) {
+        if (sel === 'top' || sel === 'bottom') el.style.height = `${size}px`;
+        else el.style.width = `${size}px`;
+        el.classList.toggle('has-padding', size > 0);
+      }
+    };
+    set('top', top);
+    set('right', right);
+    set('bottom', bottom);
+    set('left', left);
   }
 
   private selectParentContainer(): void {
@@ -1395,6 +1527,7 @@ export class Sidebar {
     this.updateRadiusLinkAllButton();
     this.updateRadiusCornerControls();
     this.updatePaddingLinkAllButton();
+    this.updatePaddingSideControls();
   }
 
   private clearFormatting(): void {
