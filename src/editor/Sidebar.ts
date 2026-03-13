@@ -413,16 +413,10 @@ export class Sidebar {
               </div>
             </div>
           </div>
-          <div class="bp-border-inputs">
-            <div class="bp-input-row">
-              <input type="number" class="bp-input bp-input-sm" data-input="borderWidth" value="0" min="0" max="50">
-              <span class="bp-input-unit">px</span>
-            </div>
-          </div>
         </div>
         <div class="bp-control-group">
           <label class="bp-control-label">Border width</label>
-          <div class="bp-btn-row">
+          <div class="bp-btn-row bp-border-width-row">
             <button class="bp-btn bp-btn-icon active" data-action="borderWidth" data-width="0" title="No border">
               ${icons.borderNone}
             </button>
@@ -435,6 +429,10 @@ export class Sidebar {
             <button class="bp-btn bp-btn-icon" data-action="borderWidth" data-width="6" title="Thick border">
               ${icons.borderThick}
             </button>
+            <span class="bp-border-width-custom">
+              <input type="text" inputmode="decimal" class="bp-border-width-input" data-input="borderWidth" value="0" placeholder="0" aria-label="Border width (px)">
+              <span class="bp-border-width-unit">px</span>
+            </span>
           </div>
         </div>
         ${createColorDropdownHTML({
@@ -865,9 +863,8 @@ export class Sidebar {
     const sides = this.element.querySelectorAll('.bp-border-side:not(.bp-border-all)');
     
     // Get current width from input, but use minimum of 2 when turning ON borders
-    const inputWidth = parseInt(
-      (this.element.querySelector('[data-input="borderWidth"]') as HTMLInputElement)?.value || '2'
-    , 10);
+    const widthInputEl = this.element.querySelector('[data-input="borderWidth"]') as HTMLInputElement | null;
+    const inputWidth = widthInputEl ? this.parseBorderWidthInput(widthInputEl.value) : 2;
     const widthToApply = inputWidth > 0 ? inputWidth : 2; // Default to 2px if 0
     
     if (side === 'all') {
@@ -975,7 +972,7 @@ export class Sidebar {
           // Update input to reflect applied width when turning on
           if (isActive) {
             const widthInput = this.element.querySelector('[data-input="borderWidth"]') as HTMLInputElement;
-            if (widthInput && parseInt(widthInput.value, 10) === 0) {
+            if (widthInput && this.parseBorderWidthInput(widthInput.value) === 0) {
               widthInput.value = String(widthToApply);
               this.updateBorderWidthButtons(widthToApply);
             }
@@ -1051,11 +1048,19 @@ export class Sidebar {
 
   private handleInputChange(input: HTMLInputElement): void {
     const inputType = input.dataset.input;
-    const value = parseInt(input.value, 10) || 0;
-    
     if (inputType === 'borderWidth') {
+      const value = this.parseBorderWidthInput(input.value);
       this.setBorderWidth(value);
+      return;
     }
+  }
+
+  /** Parse border width from text: "0", "2", "2.5", "2px", "2.5px" → number (px only). */
+  private parseBorderWidthInput(raw: string): number {
+    const s = String(raw).trim().toLowerCase().replace(/px\s*$/, '');
+    const n = parseFloat(s);
+    if (Number.isNaN(n) || n < 0) return 0;
+    return Math.min(Math.round(n * 10) / 10, 50);
   }
 
   private setTextSize(size: string): void {
@@ -1632,7 +1637,7 @@ export class Sidebar {
     
     // Sync the input field so it's used when activating sides
     const input = this.element.querySelector('[data-input="borderWidth"]') as HTMLInputElement;
-    if (input && width > 0) {
+    if (input) {
       input.value = String(width);
     }
   }

@@ -34016,7 +34016,7 @@ const l_ = 50, c_ = 28, d_ = 20;
 function hp(n) {
   return n <= 0 ? 0 : Math.min(n, d_);
 }
-const Za = 2.5, pp = Za / 2, Ge = Za;
+const Za = 2, pp = Za / 2, Ge = Za;
 function u_(n, e) {
   return fp(n, hp(e));
 }
@@ -34518,16 +34518,10 @@ const ve = { focus: !1 }, Pt = class Pt {
               </div>
             </div>
           </div>
-          <div class="bp-border-inputs">
-            <div class="bp-input-row">
-              <input type="number" class="bp-input bp-input-sm" data-input="borderWidth" value="0" min="0" max="50">
-              <span class="bp-input-unit">px</span>
-            </div>
-          </div>
         </div>
         <div class="bp-control-group">
           <label class="bp-control-label">Border width</label>
-          <div class="bp-btn-row">
+          <div class="bp-btn-row bp-border-width-row">
             <button class="bp-btn bp-btn-icon active" data-action="borderWidth" data-width="0" title="No border">
               ${P.borderNone}
             </button>
@@ -34540,6 +34534,10 @@ const ve = { focus: !1 }, Pt = class Pt {
             <button class="bp-btn bp-btn-icon" data-action="borderWidth" data-width="6" title="Thick border">
               ${P.borderThick}
             </button>
+            <span class="bp-border-width-custom">
+              <input type="text" inputmode="decimal" class="bp-border-width-input" data-input="borderWidth" value="0" placeholder="0" aria-label="Border width (px)">
+              <span class="bp-border-width-unit">px</span>
+            </span>
           </div>
         </div>
         ${ks({
@@ -34867,19 +34865,15 @@ const ve = { focus: !1 }, Pt = class Pt {
     }
   }
   handleBorderSideClick(e) {
-    var l;
-    const t = e.dataset.side, r = this.element.querySelector(".bp-border-all"), i = this.element.querySelector(".bp-border-visual"), o = this.element.querySelectorAll(".bp-border-side:not(.bp-border-all)"), s = parseInt(
-      ((l = this.element.querySelector('[data-input="borderWidth"]')) == null ? void 0 : l.value) || "2",
-      10
-    ), a = s > 0 ? s : 2;
+    const t = e.dataset.side, r = this.element.querySelector(".bp-border-all"), i = this.element.querySelector(".bp-border-visual"), o = this.element.querySelectorAll(".bp-border-side:not(.bp-border-all)"), s = this.element.querySelector('[data-input="borderWidth"]'), a = s ? this.parseBorderWidthInput(s.value) : 2, l = a > 0 ? a : 2;
     if (t === "all") {
       const c = Array.from(o).some((d) => d.classList.contains("active"));
       if (this.borderAllLinked)
         this.borderAllLinked = !1, o.forEach((d) => d.classList.remove("active")), this.blockStyle.borderTop = 0, this.blockStyle.borderRight = 0, this.blockStyle.borderBottom = 0, this.blockStyle.borderLeft = 0;
       else if (c)
-        this.borderAllLinked = !0, o.forEach((d) => d.classList.add("active")), this.blockStyle.borderTop = a, this.blockStyle.borderRight = a, this.blockStyle.borderBottom = a, this.blockStyle.borderLeft = a;
+        this.borderAllLinked = !0, o.forEach((d) => d.classList.add("active")), this.blockStyle.borderTop = l, this.blockStyle.borderRight = l, this.blockStyle.borderBottom = l, this.blockStyle.borderLeft = l;
       else {
-        const d = this.blockStyle.borderTop === 0 && this.blockStyle.borderRight === 0 && this.blockStyle.borderBottom === 0 && this.blockStyle.borderLeft === 0 ? 2 : a;
+        const d = this.blockStyle.borderTop === 0 && this.blockStyle.borderRight === 0 && this.blockStyle.borderBottom === 0 && this.blockStyle.borderLeft === 0 ? 2 : l;
         this.borderAllLinked = !0, o.forEach((h) => h.classList.add("active")), this.blockStyle.borderTop = d, this.blockStyle.borderRight = d, this.blockStyle.borderBottom = d, this.blockStyle.borderLeft = d;
         const u = this.element.querySelector('[data-input="borderWidth"]');
         u && (u.value = String(d)), this.updateBorderWidthButtons(d);
@@ -34909,14 +34903,14 @@ const ve = { focus: !1 }, Pt = class Pt {
           }
           e.classList.remove("active"), this.blockStyle[c[t]] = 0, o.forEach((d) => {
             const u = d.dataset.side;
-            u && u !== t && c[u] && (d.classList.add("active"), this.blockStyle[c[u]] = a);
+            u && u !== t && c[u] && (d.classList.add("active"), this.blockStyle[c[u]] = l);
           });
         } else {
           e.classList.toggle("active");
           const d = e.classList.contains("active");
-          if (this.blockStyle[c[t]] = d ? a : 0, d) {
+          if (this.blockStyle[c[t]] = d ? l : 0, d) {
             const u = this.element.querySelector('[data-input="borderWidth"]');
-            u && parseInt(u.value, 10) === 0 && (u.value = String(a), this.updateBorderWidthButtons(a));
+            u && this.parseBorderWidthInput(u.value) === 0 && (u.value = String(l), this.updateBorderWidthButtons(l));
           }
         }
     }
@@ -34950,8 +34944,16 @@ const ve = { focus: !1 }, Pt = class Pt {
     this.paddingAllLinked ? (this.paddingAllLinked = !1, this.blockStyle[i] = r) : this.blockStyle[i] = r, this.applyBlockStyles(), this.updatePaddingLinkAllButton(), this.updatePaddingSideControls();
   }
   handleInputChange(e) {
-    const t = e.dataset.input, r = parseInt(e.value, 10) || 0;
-    t === "borderWidth" && this.setBorderWidth(r);
+    if (e.dataset.input === "borderWidth") {
+      const r = this.parseBorderWidthInput(e.value);
+      this.setBorderWidth(r);
+      return;
+    }
+  }
+  /** Parse border width from text: "0", "2", "2.5", "2px", "2.5px" → number (px only). */
+  parseBorderWidthInput(e) {
+    const t = String(e).trim().toLowerCase().replace(/px\s*$/, ""), r = parseFloat(t);
+    return Number.isNaN(r) || r < 0 ? 0 : Math.min(Math.round(r * 10) / 10, 50);
   }
   setTextSize(e) {
     const t = this.editor.getTipTapEditor();
@@ -35295,7 +35297,7 @@ const ve = { focus: !1 }, Pt = class Pt {
       r.classList.toggle("active", i === e);
     });
     const t = this.element.querySelector('[data-input="borderWidth"]');
-    t && e > 0 && (t.value = String(e));
+    t && (t.value = String(e));
   }
   setupDraggableButtons() {
     this.element.querySelectorAll(".draggable[data-drag-type]").forEach((t) => {

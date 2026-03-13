@@ -31,8 +31,8 @@ function toSvgRadius(px: number): number {
   return Math.min(px, MAX_DEMO_RADIUS_PX);
 }
 
-/** Stroke width in viewBox units (~5px). Keep path inset from edges so stroke doesn't clip. */
-const STROKE_WIDTH = 2.5;
+/** Stroke width in viewBox units (~2px when rendered). Matches border side bar thickness. */
+const STROKE_WIDTH = 2;
 const HALF = STROKE_WIDTH / 2;
 const INSET = STROKE_WIDTH;
 
