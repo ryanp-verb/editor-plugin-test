@@ -15,7 +15,7 @@ import Color from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';
 import { common, createLowlight } from 'lowlight';
 import { DivBlock } from './DivBlock';
-import { Column, ColumnLayout, ColumnResize } from './Columns';
+import { Column, ColumnGrid, ColumnLayout, ColumnResize } from './Columns';
 import { TextSize } from './TextSize';
 import { BlockStyle } from './BlockStyle';
 
@@ -42,7 +42,8 @@ export function createExtensions(options: ExtensionOptions = {}) {
       types: ['heading', 'paragraph', 'divBlock'],
     }),
     BlockStyle.configure({
-      types: ['paragraph', 'heading', 'divBlock', 'blockquote'],
+      types: ['paragraph', 'heading', 'divBlock', 'blockquote', 'columnLayout', 'columnGrid', 'column'],
+      containerTypes: ['columnLayout', 'column', 'divBlock', 'columnGrid'],
     }),
     Link.configure({
       openOnClick: false,
@@ -94,6 +95,11 @@ export function createExtensions(options: ExtensionOptions = {}) {
       },
     }),
     Column,
+    ColumnGrid.configure({
+      HTMLAttributes: {
+        class: 'editor-column-grid',
+      },
+    }),
     ColumnLayout.configure({
       HTMLAttributes: {
         class: 'editor-column-layout',

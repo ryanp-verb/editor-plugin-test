@@ -467,8 +467,8 @@ export class Sidebar {
         <div class="bp-control-group">
           <label class="bp-control-label">Columns & rows</label>
           <div class="bp-btn-row">
-            <button class="bp-btn bp-btn-icon" data-action="columns" data-cols="1" title="1 Column">
-              ${icons.col1}
+            <button class="bp-btn bp-btn-icon" data-action="columns" data-cols="1" title="Remove column layout">
+              ${icons.col1Slash}
             </button>
             <button class="bp-btn bp-btn-icon draggable" data-action="columns" data-cols="2" data-drag-type="columnLayout" data-drag-columns="2" title="2 Columns (drag or click)">
               ${icons.col2}
@@ -484,6 +484,20 @@ export class Sidebar {
             </button>
             <button class="bp-btn bp-btn-icon draggable" data-action="columns" data-cols="4" data-drag-type="columnLayout" data-drag-columns="4" title="4 Columns (drag or click)">
               ${icons.col4}
+            </button>
+          </div>
+          <div class="bp-btn-row">
+            <button class="bp-btn bp-btn-icon" data-action="addRow" title="Add row">
+              ${icons.rowAdd}
+            </button>
+            <button class="bp-btn bp-btn-icon" data-action="removeRow" title="Remove row">
+              ${icons.rowRemove}
+            </button>
+            <button class="bp-btn bp-btn-icon" data-action="addColumn" title="Add column">
+              ${icons.columnAdd}
+            </button>
+            <button class="bp-btn bp-btn-icon" data-action="removeColumn" title="Remove column">
+              ${icons.columnRemove}
             </button>
           </div>
         </div>
@@ -774,6 +788,18 @@ export class Sidebar {
         break;
       case 'columns':
         this.insertColumns(btn.dataset.cols || '2');
+        break;
+      case 'addRow':
+        this.editor.addRow(NO_FOCUS);
+        break;
+      case 'removeRow':
+        this.editor.removeRow(NO_FOCUS);
+        break;
+      case 'addColumn':
+        this.editor.addColumn(NO_FOCUS);
+        break;
+      case 'removeColumn':
+        this.editor.removeColumn(NO_FOCUS);
         break;
       case 'divBlock':
         this.editor.toggleDivBlock(NO_FOCUS);
@@ -1354,7 +1380,7 @@ export class Sidebar {
   private updateContainerTargetLabel(): void {
     const tipTap = this.editor.getTipTapEditor();
     const { selection } = tipTap.state;
-    const containerTypes = ['columnLayout', 'column', 'divBlock'];
+    const containerTypes = ['columnGrid', 'columnLayout', 'column', 'divBlock'];
     
     let containerName = 'None';
     let containerNode = null;
@@ -1369,22 +1395,36 @@ export class Sidebar {
       // Explicitly selected container block
       containerNode = (selection as any).node;
     } else {
-      // Text cursor or partial selection - traverse up to find nearest container
+      // Text cursor - find nearest container; when inside a columnGrid, prefer the grid so we style the whole block
       let depth = selection.$from.depth;
-      
+      let nearestNode: any = null;
+      let gridNode: any = null;
+
       while (depth > 0) {
         const node = selection.$from.node(depth);
         if (containerTypes.includes(node.type.name)) {
-          containerNode = node;
-          break;
+          if (node.type.name === 'columnGrid') {
+            gridNode = node;
+          } else if (!nearestNode) {
+            nearestNode = node;
+          }
+          depth--;
         }
         depth--;
+      }
+      if (gridNode) {
+        containerNode = gridNode;
+      } else if (nearestNode) {
+        containerNode = nearestNode;
       }
     }
     
     // Set the display name
     if (containerNode) {
       switch (containerNode.type.name) {
+        case 'columnGrid':
+          containerName = 'Columns';
+          break;
         case 'columnLayout':
           containerName = 'Column Layout';
           break;

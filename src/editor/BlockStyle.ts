@@ -345,18 +345,34 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
             wasNodeSelection = true;
           }
           
-          // SECOND: Otherwise traverse up to find the nearest container
+          // SECOND: Otherwise traverse up; when inside a columnGrid, prefer the grid so we style the whole block
           if (containerPos === null) {
             let depth = selection.$from.depth;
-            
+            let nearestPos: number | null = null;
+            let nearestNode = null;
+            let gridPos: number | null = null;
+            let gridNode = null;
+
             while (depth > 0) {
               const node = selection.$from.node(depth);
               if (containerTypes.includes(node.type.name)) {
-                containerPos = selection.$from.before(depth);
-                containerNode = node;
-                break;
+                if (node.type.name === 'columnGrid') {
+                  gridPos = selection.$from.before(depth);
+                  gridNode = node;
+                } else if (!nearestNode) {
+                  nearestPos = selection.$from.before(depth);
+                  nearestNode = node;
+                }
+                depth--;
               }
               depth--;
+            }
+            if (gridNode) {
+              containerPos = gridPos;
+              containerNode = gridNode;
+            } else if (nearestNode) {
+              containerPos = nearestPos;
+              containerNode = nearestNode;
             }
           }
           
@@ -472,6 +488,7 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
             
             // Check if click is on a container block itself (not its content)
             const isContainerClick = 
+              target.classList.contains('editor-column-grid') ||
               target.classList.contains('editor-column-layout') ||
               target.classList.contains('editor-column') ||
               target.classList.contains('editor-div-block') ||
@@ -479,16 +496,28 @@ export const BlockStyle = Extension.create<BlockStyleOptions>({
             
             // Also check for clicks on border/padding area (clicks near edge)
             if (!isContainerClick && direct && containerTypes.includes(node.type.name)) {
-              // This is a direct click on a container node
-              const nodeSelection = NodeSelection.create(view.state.doc, nodePos);
+              // When clicking on a columnLayout that's inside a columnGrid, select the grid so the whole block is one target
+              let pos = nodePos;
+              if (node.type.name === 'columnLayout') {
+                const $pos = view.state.doc.resolve(nodePos);
+                const parent = $pos.node($pos.depth - 1);
+                if (parent?.type.name === 'columnGrid') {
+                  pos = $pos.before($pos.depth - 1);
+                }
+              }
+              const nodeSelection = NodeSelection.create(view.state.doc, pos);
               view.dispatch(view.state.tr.setSelection(nodeSelection));
               return true;
             }
             
             // For clicks on container elements themselves
             if (isContainerClick) {
-              // Find the container node position
-              const domNode = target.closest('[data-type="column-layout"], [data-type="column"], [data-type="div-block"]') as HTMLElement;
+              let domNode = target.closest('[data-type="column-grid"], [data-type="column-layout"], [data-type="column"], [data-type="div-block"]') as HTMLElement;
+              // When clicking inside a column-layout that belongs to a grid, select the grid so the whole block is styled as one
+              if (domNode?.getAttribute('data-type') === 'column-layout') {
+                const grid = domNode.closest('[data-type="column-grid"]');
+                if (grid) domNode = grid as HTMLElement;
+              }
               if (domNode) {
                 const containerPos = view.posAtDOM(domNode, 0) - 1;
                 const containerNode = view.state.doc.nodeAt(containerPos);

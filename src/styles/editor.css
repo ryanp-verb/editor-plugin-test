@@ -515,7 +515,60 @@
 }
 
 /* ============================================
-   Column Layout
+   Column Grid (wrapper for multiple rows sharing one background)
+   ============================================ */
+.editor-content .tiptap .editor-column-grid {
+  position: relative;
+  padding: 8px;
+  outline: 1px dashed transparent;
+  outline-offset: -1px;
+  transition: outline-color 0.15s ease;
+}
+.editor-content .tiptap .editor-column-grid::before {
+  content: 'columns';
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: transparent;
+  background: transparent;
+  padding: 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color 0.15s ease, background 0.15s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.editor-content .tiptap .editor-column-grid:hover {
+  outline-color: color-mix(in srgb, var(--editor-accent) 40%, transparent);
+}
+.editor-content .tiptap .editor-column-grid:hover::before {
+  color: var(--editor-text-muted);
+  background: var(--editor-bg);
+}
+.editor-content .tiptap .editor-column-grid.ProseMirror-selectednode {
+  outline: 2px solid var(--editor-accent);
+  outline-offset: -2px;
+}
+.editor-content .tiptap .editor-column-grid.ProseMirror-selectednode::before {
+  color: var(--editor-accent);
+  background: var(--editor-bg);
+}
+.editor-content .tiptap .editor-column-grid > .editor-column-layout {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.editor-content .tiptap .editor-column-grid > .editor-column-layout + .editor-column-layout {
+  margin-top: 0;
+}
+/* Single "columns" label on the grid; hide per-row label when inside grid */
+.editor-content .tiptap .editor-column-grid .editor-column-layout::before {
+  display: none;
+}
+
+/* ============================================
+   Column Layout (single row of columns)
    ============================================ */
 .editor-content .tiptap .editor-column-layout {
   display: flex;
@@ -528,6 +581,7 @@
   outline-offset: -1px;
   transition: outline-color 0.15s ease;
 }
+/* When inside a grid, margin is overridden above so rows sit tight */
 
 /* Label hidden by default */
 .editor-content .tiptap .editor-column-layout::before {

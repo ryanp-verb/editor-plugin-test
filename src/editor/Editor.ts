@@ -324,6 +324,16 @@ export class ContentEditor {
     chain.removeColumnLayout().run();
   }
 
+  addRow(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.addRow().run();
+  }
+
+  removeRow(opts?: EditorCommandOptions): void {
+    const chain = opts?.focus !== false ? this.editor.chain().focus() : this.editor.chain();
+    chain.removeRow().run();
+  }
+
   // Email Export
   getEmailHTML(options?: EmailExportOptions): string {
     return convertToEmailHTML(this.getHTML(), options);

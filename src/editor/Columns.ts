@@ -31,6 +31,14 @@ declare module '@tiptap/core' {
        * Remove a column from the current layout
        */
       removeColumn: () => ReturnType;
+      /**
+       * Add a row below the current layout (inserts a new columnLayout with same column count)
+       */
+      addRow: () => ReturnType;
+      /**
+       * Remove the current row (current column layout)
+       */
+      removeRow: () => ReturnType;
     };
   }
 }
@@ -118,7 +126,57 @@ export const Column = Node.create({
 
 });
 
-// Column Layout Container
+// Column Grid – wraps one or more column layouts so they share one container (e.g. background)
+export const ColumnGrid = Node.create({
+  name: 'columnGrid',
+
+  group: 'block',
+
+  content: 'columnLayout+',
+
+  defining: true,
+
+  addAttributes() {
+    return {
+      // Block style attributes so the grid can have a shared background
+      backgroundColor: { default: null },
+      borderTopWidth: { default: null },
+      borderRightWidth: { default: null },
+      borderBottomWidth: { default: null },
+      borderLeftWidth: { default: null },
+      borderColor: { default: null },
+      borderTopLeftRadius: { default: null },
+      borderTopRightRadius: { default: null },
+      borderBottomRightRadius: { default: null },
+      borderBottomLeftRadius: { default: null },
+      paddingTop: { default: null },
+      paddingRight: { default: null },
+      paddingBottom: { default: null },
+      paddingLeft: { default: null },
+    };
+  },
+
+  parseHTML() {
+    return [{ tag: 'div[data-type="column-grid"]' }];
+  },
+
+  renderHTML({ node, HTMLAttributes }) {
+    const attrs = node.attrs;
+    const blockStyle = buildBlockStyleString(attrs as BlockStyleAttributes);
+    const styleAttr = blockStyle ? { style: blockStyle } : {};
+    return [
+      'div',
+      mergeAttributes(HTMLAttributes, {
+        'data-type': 'column-grid',
+        class: 'editor-column-grid',
+        ...styleAttr,
+      }),
+      0,
+    ];
+  },
+});
+
+// Column Layout Container (one row of columns; can be standalone or inside columnGrid)
 export const ColumnLayout = Node.create<ColumnLayoutOptions>({
   name: 'columnLayout',
 
@@ -208,11 +266,15 @@ export const ColumnLayout = Node.create<ColumnLayoutOptions>({
             });
           }
 
+          // Insert a columnGrid with one columnLayout so "add row" adds rows inside the same group
           return chain()
             .insertContentAt(pos, {
-              type: 'columnLayout',
-              attrs: { columns },
-              content: columnNodes,
+              type: 'columnGrid',
+              content: [{
+                type: 'columnLayout',
+                attrs: { columns },
+                content: columnNodes,
+              }],
             })
             .focus()
             .run();
@@ -222,18 +284,18 @@ export const ColumnLayout = Node.create<ColumnLayoutOptions>({
         () =>
         ({ commands, state }) => {
           const { selection } = state;
-          const node = selection.$from.node(-1);
-          
-          if (node?.type.name === 'columnLayout') {
-            return commands.deleteNode('columnLayout');
+          // If inside a columnGrid, remove the whole grid; otherwise remove the standalone columnLayout
+          let depth = selection.$from.depth;
+          while (depth > 0) {
+            const node = selection.$from.node(depth);
+            if (node.type.name === 'columnGrid') {
+              return commands.deleteNode('columnGrid');
+            }
+            if (node.type.name === 'columnLayout') {
+              return commands.deleteNode('columnLayout');
+            }
+            depth--;
           }
-          
-          // Check if we're inside a column
-          const columnLayout = selection.$from.node(-2);
-          if (columnLayout?.type.name === 'columnLayout') {
-            return commands.deleteNode('columnLayout');
-          }
-          
           return false;
         },
 
@@ -307,6 +369,117 @@ export const ColumnLayout = Node.create<ColumnLayoutOptions>({
           }
           
           return false;
+        },
+
+      addRow:
+        () =>
+        ({ state, chain, dispatch }) => {
+          const { selection } = state;
+          const { schema } = state;
+          let depth = selection.$from.depth;
+          let layoutPos = -1;
+          let layoutDepth = -1;
+
+          while (depth > 0) {
+            const node = selection.$from.node(depth);
+            if (node.type.name === 'columnLayout') {
+              layoutPos = selection.$from.before(depth);
+              layoutDepth = depth;
+              break;
+            }
+            depth--;
+          }
+
+          if (layoutPos === -1 || layoutDepth === -1) return false;
+
+          const layoutNode = state.doc.nodeAt(layoutPos) as import('@tiptap/pm/model').Node | undefined;
+          if (!layoutNode) return false;
+
+          const columns = layoutNode.attrs.columns ?? 2;
+          const columnNodes = [];
+          for (let i = 0; i < columns; i++) {
+            columnNodes.push({
+              type: 'column',
+              content: [{ type: 'paragraph' }],
+            });
+          }
+          const newLayoutNode = schema.nodeFromJSON({
+            type: 'columnLayout',
+            attrs: { columns },
+            content: columnNodes,
+          });
+
+          const parent = layoutDepth > 0 ? selection.$from.node(layoutDepth - 1) : null;
+
+          if (parent?.type.name === 'columnGrid') {
+            // Add new row inside the same grid (no gap)
+            const afterPos = layoutPos + layoutNode.nodeSize;
+            return chain()
+              .insertContentAt(afterPos, newLayoutNode)
+              .run();
+          }
+
+          // Standalone columnLayout: wrap in a grid and add the new row
+          const tr = state.tr;
+          const gridNode = schema.nodes.columnGrid.create(null, [
+            layoutNode.copy(layoutNode.content),
+            newLayoutNode,
+          ]);
+          tr.replaceWith(layoutPos, layoutPos + layoutNode.nodeSize, gridNode);
+          if (dispatch) dispatch(tr);
+          return true;
+        },
+
+      removeRow:
+        () =>
+        ({ state, dispatch }) => {
+          const { selection } = state;
+          let depth = selection.$from.depth;
+          let layoutPos = -1;
+          let layoutDepth = -1;
+
+          while (depth > 0) {
+            const node = selection.$from.node(depth);
+            if (node.type.name === 'columnLayout') {
+              layoutPos = selection.$from.before(depth);
+              layoutDepth = depth;
+              break;
+            }
+            depth--;
+          }
+
+          if (layoutPos === -1 || layoutDepth === -1) return false;
+
+          const layoutNode = state.doc.nodeAt(layoutPos) as import('@tiptap/pm/model').Node | undefined;
+          if (!layoutNode) return false;
+
+          const parent = layoutDepth > 0 ? selection.$from.node(layoutDepth - 1) : null;
+
+          if (parent?.type.name === 'columnGrid') {
+            const gridPos = selection.$from.before(layoutDepth - 1);
+            const gridNode = state.doc.nodeAt(gridPos) as import('@tiptap/pm/model').Node | undefined;
+            if (!gridNode || gridNode.childCount <= 1) {
+              // Only one row: remove the whole grid (caller can use removeColumnLayout)
+              return false;
+            }
+            const tr = state.tr;
+            tr.delete(layoutPos, layoutPos + layoutNode.nodeSize);
+            if (gridNode.childCount === 2) {
+              const remaining = tr.doc.nodeAt(gridPos + 1);
+              const newGrid = tr.doc.nodeAt(gridPos);
+              if (remaining && newGrid) {
+                tr.replaceWith(gridPos, gridPos + newGrid.nodeSize, remaining);
+              }
+            }
+            if (dispatch) dispatch(tr);
+            return true;
+          }
+
+          // Standalone columnLayout: remove the whole layout
+          const tr = state.tr;
+          tr.delete(layoutPos, layoutPos + layoutNode.nodeSize);
+          if (dispatch) dispatch(tr);
+          return true;
         },
     };
   },

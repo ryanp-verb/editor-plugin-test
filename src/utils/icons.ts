@@ -52,11 +52,21 @@ export const icons = {
 
   // === Columns ===
   col1: `<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`,
+  /** Single column / remove column layout – box with slash to indicate "remove" */
+  col1Slash: `<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="5" y1="19" x2="19" y2="5"/></svg>`,
   col2: `<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>`,
   col3: `<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`,
   col4: `<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7.5" y1="3" x2="7.5" y2="21"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="16.5" y1="3" x2="16.5" y2="21"/></svg>`,
   col1_2: `<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>`,
   col2_1: `<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`,
+  /** Add column (plus) */
+  columnAdd: `<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  /** Remove column (minus) */
+  columnRemove: `<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  /** Add row (horizontal bar + plus) */
+  rowAdd: `<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="1"/><line x1="12" y1="5" x2="12" y2="19"/><line x1="9" y1="12" x2="15" y2="12"/></svg>`,
+  /** Remove row (horizontal bar + minus) */
+  rowRemove: `<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="1"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`,
 
   // === Border Controls (small size) ===
   linkSm: `<svg width="${SIZE_SM}" height="${SIZE_SM}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
